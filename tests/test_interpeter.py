@@ -16,9 +16,9 @@ def test():
             lexer  = Lexer(line)
             tokens = lexer.scan_tokens()
             parser = Parser(tokens)
-            expression = parser.parse()
-            result = Interpreter().interpret(expression)
-            assert test == result
+            statements = parser.parse()
+            result = Interpreter().interpret(statements)
+            assert result[0] == test
 
 if __name__ == "__main__":
     test()

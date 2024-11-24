@@ -1,5 +1,6 @@
 from token_types import TokenType
 from expr import Binary, Unary, Literal, Grouping
+from statement import Print, Expression
 """
 Order of precedence  
 expression → equality ;                                     (Lowest precedence)
@@ -35,11 +36,28 @@ class Parser:
         """
             Kick Off parsing
         """
-        try:
-            return self.expression()
-        except Exception as e:
-            print(e)
-        return None
+        self.statements = []
+        while not self.is_at_end():
+            self.statements.append(
+                self.statement()
+            )
+        return self.statements 
+
+    def statement(self):
+        if self.match(TokenType.PRINT):
+            return self.print_statement()
+
+        return self.expression_statement()
+
+    def print_statement(self):
+        value = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expected ; after value")
+        return Print(value)
+
+    def expression_statement(self):
+        value = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expected ; after value")
+        return Expression(value)
 
     def expression(self):
         return self.equality()

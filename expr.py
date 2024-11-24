@@ -10,7 +10,7 @@ class Expr(ABC):
     def accept(self, visitor):
         pass
 
-class Visitor(ABC):
+class ExprVisitor(ABC):
     @abstractmethod
     def visit_binary_expression(self, expr) -> object:
         pass
@@ -27,7 +27,7 @@ class Visitor(ABC):
     def visit_unary_expression(self, expr) -> object:
         pass
 
-class AstPrinter(Visitor):
+class AstPrinter(ExprVisitor):
     def visit_binary_expression(self, expr):
         return f"({expr.op.lexeme} {expr.left.accept(self)} {expr.right.accept(self)})"
 

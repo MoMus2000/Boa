@@ -1,19 +1,40 @@
 from token_types import TokenType
 from expr import (
-    Visitor, 
+    ExprVisitor, 
 )
-class Interpreter(Visitor):
-    def __init__(self):
-        pass
+from statement import (
+    StmtVisitor
+)
 
-    def interpret(self, expression):
-        return self.evaluate(expression)
+class Interpreter(StmtVisitor, ExprVisitor):
+    def __init__(self):
+        self.statements = []
+
+    def interpret(self, statements):
+        result = []
+        for statement in statements:
+            print(statement)
+            r = self.execute_statement(statement)
+            print(r)
+            result.append(r)
+        return result
+
+    def execute_statement(self, stmt):
+        return stmt.accept(self)
 
     def parse_to_float(self, value):
         try:
             return float(value), True
         except ValueError:
             return value, False
+
+    def visit_expression_statement(self, stmt):
+        return self.evaluate(stmt.expression)
+
+    def visit_print_statement(self, stmt):
+        val = self.evaluate(stmt.expression)
+        print(val)
+        return None
 
     def visit_binary_expression(self, expr):
         left  = self.evaluate(expr.left)

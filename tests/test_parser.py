@@ -18,9 +18,10 @@ def test():
             lexer  = Lexer(line)
             tokens = lexer.scan_tokens()
             parser = Parser(tokens)
-            expression = parser.parse()
-            expression = printer.print(expression)
-            assert test == expression
+            statements = parser.parse()
+            for statement in statements:
+                expression = printer.print(statement.expression)
+                assert test == expression
 
 if __name__ == "__main__":
     test()

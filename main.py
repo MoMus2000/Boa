@@ -42,11 +42,8 @@ class Boa:
         scanner = Lexer(source_code)
         tokens = scanner.scan_tokens()
         parser = Parser(tokens)
-        expression = parser.parse()
-        interpret = Interpreter().interpret(expression)
-        print(self.printer.print(expression))
-        print(interpret)
-
+        statements = parser.parse()
+        Interpreter().interpret(statements)
 
     def error(self, line, message):
         self.report(line, " ", message)

@@ -22,7 +22,6 @@ class Boa:
         with open(path, "r") as source_file:
             print(f"Loaded: {path}")
             source_code = source_file.readlines()
-            print(source_code)
             self.run(source_code)
             if self.had_error:
                 sys.exit(65)

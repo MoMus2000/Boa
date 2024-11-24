@@ -13,9 +13,7 @@ class Interpreter(StmtVisitor, ExprVisitor):
     def interpret(self, statements):
         result = []
         for statement in statements:
-            print(statement)
             r = self.execute_statement(statement)
-            print(r)
             result.append(r)
         return result
 

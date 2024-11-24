@@ -15,13 +15,11 @@ def test():
     ]
     with open("./tests/test_parser.boa", "r") as source:
         for test, line in zip(tests, source.readlines()):
-            print(line)
             lexer  = Lexer(line)
             tokens = lexer.scan_tokens()
             parser = Parser(tokens)
             expression = parser.parse()
             expression = printer.print(expression)
-
             assert test == expression
 
 if __name__ == "__main__":

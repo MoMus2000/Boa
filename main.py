@@ -1,9 +1,12 @@
 import sys
 from lexer import Lexer
+from parser import Parser
+from expr import AstPrinter
 
 class Boa:
     def __init__(self):
         self.had_error = False
+        self.printer = AstPrinter()
 
     def main(self):
         args = sys.argv
@@ -37,8 +40,10 @@ class Boa:
     def run(self, source_code):
         scanner = Lexer(source_code)
         tokens = scanner.scan_tokens()
-        for token in tokens: 
-            print(token)
+        parser = Parser(tokens)
+        expression = parser.parse()
+        print(self.printer.print(expression))
+
 
     def error(self, line, message):
         self.report(line, " ", message)

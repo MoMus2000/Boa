@@ -74,6 +74,13 @@ class Unary(Expr):
     def accept(self, visitor):
         return visitor.visit_unary_expression(self)
 
+class Var(Expr):
+    def __init__(self, ident):
+        self.ident = ident
+
+    def accept(self, visitor):
+        return visitor.visit_var_expression(self)
+
 if __name__ == "__main__":
     expressions = [ 
         Binary(

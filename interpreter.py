@@ -5,10 +5,12 @@ from expr import (
 from statement import (
     StmtVisitor
 )
+from environment import Environment
 
 class Interpreter(StmtVisitor, ExprVisitor):
     def __init__(self):
         self.statements = []
+        self.env = Environment()
 
     def interpret(self, statements):
         result = []
@@ -27,12 +29,24 @@ class Interpreter(StmtVisitor, ExprVisitor):
             return value, False
 
     def visit_expression_statement(self, stmt):
+        # return None In reality expression statements produce no values 
+        # (We return for testing)
         return self.evaluate(stmt.expression)
 
     def visit_print_statement(self, stmt):
         val = self.evaluate(stmt.expression)
         print(val)
         return None
+
+    def visit_var_statement(self, stmt):
+        identifier = stmt.ident
+        print(self.env.map)
+        if stmt.expression != None:
+            val = self.evaluate(stmt.expression)
+            self.env.define(identifier.lexeme, val)
+        else:
+            self.env.define(identifier.lexeme, None)
+        print(self.env.map)
 
     def visit_binary_expression(self, expr):
         left  = self.evaluate(expr.left)
@@ -83,6 +97,9 @@ class Interpreter(StmtVisitor, ExprVisitor):
         if expr.op.type == TokenType.BANG:
             return not self.is_truthy(right)
         return None
+
+    def visit_var_expression(self, expr):
+        return self.env.get(expr.ident.lexeme)
 
     def is_truthy(self, expr):
         if expr == None:

@@ -1,4 +1,13 @@
 from abc import ABC, abstractmethod
+"""
+program        → declaration* EOF ;
+
+declaration    → varDecl
+               | statement ;
+
+statement      → exprStmt
+               | printStmt ;
+"""
 
 class Statement(ABC):
     def __init__(self):
@@ -30,4 +39,12 @@ class Print(Statement):
 
     def accept(self, visitor):
         return visitor.visit_print_statement(self)
+
+class Var(Statement):
+    def __init__(self, expression, ident):
+        self.expression = expression
+        self.ident = ident
+
+    def accept(self, visitor):
+        return visitor.visit_var_statement(self)
 

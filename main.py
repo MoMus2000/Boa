@@ -8,6 +8,7 @@ class Boa:
     def __init__(self):
         self.had_error = False
         self.printer = AstPrinter()
+        self.interpreter = Interpreter()
 
     def main(self):
         args = sys.argv
@@ -39,10 +40,9 @@ class Boa:
 
     def run(self, source_code):
         scanner = Lexer(source_code)
-        tokens = scanner.scan_tokens()
-        parser = Parser(tokens)
+        parser = Parser(scanner.scan_tokens())
         statements = parser.parse()
-        Interpreter().interpret(statements)
+        self.interpreter.interpret(statements)
 
     def error(self, line, message):
         self.report(line, " ", message)

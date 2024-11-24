@@ -2,6 +2,7 @@ import sys
 from lexer import Lexer
 from parser import Parser
 from expr import AstPrinter
+from interpreter import Interpreter
 
 class Boa:
     def __init__(self):
@@ -42,7 +43,9 @@ class Boa:
         tokens = scanner.scan_tokens()
         parser = Parser(tokens)
         expression = parser.parse()
+        interpret = Interpreter().interpret(expression)
         print(self.printer.print(expression))
+        print(interpret)
 
 
     def error(self, line, message):

@@ -12,19 +12,19 @@ class Expr(ABC):
 
 class Visitor(ABC):
     @abstractmethod
-    def visit_binary_expression(self, expr) -> str:
+    def visit_binary_expression(self, expr) -> object:
         pass
 
     @abstractmethod
-    def visit_literal_expression(self, expr) -> str:
+    def visit_literal_expression(self, expr) -> object:
         pass
 
     @abstractmethod
-    def visit_grouping_expression(self, expr) -> str:
+    def visit_grouping_expression(self, expr) -> object:
         pass
 
     @abstractmethod
-    def visit_unary_expression(self, expr) -> str:
+    def visit_unary_expression(self, expr) -> object:
         pass
 
 class AstPrinter(Visitor):

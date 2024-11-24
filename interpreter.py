@@ -30,9 +30,25 @@ class Interpreter(Visitor):
                 return left / right
             if expr.op.type == TokenType.STAR:
                 return left * right
+            if expr.op.type == TokenType.EQUAL_EQUAL:
+                return left == right
+            if expr.op.type == TokenType.BANG_EQUAL:
+                return left != right
+            if expr.op.type == TokenType.GREATER:
+                return left > right
+            if expr.op.type == TokenType.LESS:
+                return left < right
+            if expr.op.type == TokenType.LESS_EQUAL:
+                return left <= right
+            if expr.op.type == TokenType.GREATER_EQUAL:
+                return left >= right
         else:
             if expr.op.type == TokenType.PLUS:
                 return str(left).strip('"') + str(right).strip('"') 
+            if expr.op.type == TokenType.BANG_EQUAL:
+                return left != right
+            if expr.op.type == TokenType.EQUAL_EQUAL:
+                return left == right
         return None
 
     def visit_literal_expression(self, expr):
@@ -43,16 +59,13 @@ class Interpreter(Visitor):
 
     def visit_unary_expression(self, expr):
         right = self.evaluate(expr.right)
-
         if expr.op.type == TokenType.MINUS:
-            return float(right.lexeme) * -1
+            return float(right) * -1
         if expr.op.type == TokenType.BANG:
             return not self.is_truthy(right)
-
         return None
 
     def is_truthy(self, expr):
-        print("in truthy")
         if expr == None:
             return False
         if isinstance(expr, bool):

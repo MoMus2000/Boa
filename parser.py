@@ -99,7 +99,7 @@ class Parser:
         return expr
 
     def unary(self):
-        if self.match(TokenType.MINUS, TokenType.PLUS):
+        if self.match(TokenType.MINUS, TokenType.PLUS, TokenType.BANG):
             op = self.previous()
             right = self.unary()
             return Unary(

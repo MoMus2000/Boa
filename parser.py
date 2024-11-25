@@ -65,7 +65,6 @@ class Parser:
     def declaration(self):
         if self.match(TokenType.VAR):
             return self.var_statement()
-
         return self.statement()
 
     def expression_statement(self):

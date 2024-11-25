@@ -40,13 +40,12 @@ class Interpreter(StmtVisitor, ExprVisitor):
 
     def visit_var_statement(self, stmt):
         identifier = stmt.ident
-        print(self.env.map)
         if stmt.expression != None:
             val = self.evaluate(stmt.expression)
             self.env.define(identifier.lexeme, val)
         else:
             self.env.define(identifier.lexeme, None)
-        print(self.env.map)
+        return self.env.get(identifier.lexeme)
 
     def visit_binary_expression(self, expr):
         left  = self.evaluate(expr.left)

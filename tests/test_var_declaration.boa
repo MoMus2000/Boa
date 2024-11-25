@@ -1,0 +1,6 @@
+var five = 5;
+five;
+var six = 6969;
+var mustafa = "mustafa";
+mustafa;
+six;

@@ -1,0 +1,11 @@
+var a = "A";
+"Hello World, my name is Mustafa";
+var b = a;
+var x = "xxx";
+b;
+{
+  var x = "www";
+  a;
+}
+x;
+a;

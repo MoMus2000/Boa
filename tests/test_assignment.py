@@ -19,7 +19,6 @@ def test():
             parser = Parser(tokens)
             statements = parser.parse()
             result = interpreter.interpret(statements)        
-            print(result[0], test)
             assert result[0] == test
 
 if __name__ == "__main__":

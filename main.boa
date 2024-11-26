@@ -1,6 +1,17 @@
-()
+var a = "A";
+print "Hello World, my name is Mustafa";
+var b = a;
+var x = "xxx";
 
-+ - () >= <= !=
+{
+  var a = 2;
+  var b = "I am a b";
+  print a;
+  print b;
+  {
+    print x;
+  }
+}
 
-)( + - // something 123
-+
+print b;
+

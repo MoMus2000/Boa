@@ -48,9 +48,12 @@ class Interpreter(StmtVisitor, ExprVisitor):
         return self.env.get(identifier.lexeme)
 
     def visit_block_statement(self, block):
+        prev = self.env
+        self.env = Environment(self.env)
         res = []
         for statement in block.statements:
             res.append(self.evaluate(statement))
+        self.env = prev
         return res
 
     def visit_assign_expression(self, expr):

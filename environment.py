@@ -15,7 +15,7 @@ class Environment:
     def assign(self, name, value):
         if name.lexeme not in self.map:
             raise Exception(f'Error: undefined var "{name.lexeme}"')
-        if name in self.map:
+        if name.lexeme in self.map:
             self.map[name.lexeme] = value
             return
         if self.enclosing != None:

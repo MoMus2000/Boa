@@ -1,5 +1,5 @@
 from token_types import TokenType
-from expr import Binary, Unary, Literal, Grouping, Var as ExprVar
+from expr import Binary, Unary, Literal, Grouping, Var as ExprVar, Assign
 from statement import Print, Expression, Var
 """
 Order of precedence  
@@ -72,8 +72,21 @@ class Parser:
         self.consume(TokenType.SEMICOLON, "Expected ; after value")
         return Expression(value)
 
+    def assign(self):
+        expr = self.equality()
+
+        if self.match(TokenType.EQUAL):
+            equals = self.previous()
+            value  = self.assign()
+            if isinstance(expr, ExprVar):
+               return Assign(expr.ident, value)
+            else:
+                raise Exception("Invalid Expression Type")
+        return expr
+
+
     def expression(self):
-        return self.equality()
+        return self.assign()
 
     def equality(self):
         expr = self.comparision()

@@ -81,3 +81,11 @@ class Var(Expr):
     def accept(self, visitor):
         return visitor.visit_var_expression(self)
 
+class Assign(Expr):
+    def __init__(self, ident, value):
+        self.ident = ident
+        self.value = value
+
+    def accept(self, visitor):
+        return visitor.visit_assign_expression(self)
+

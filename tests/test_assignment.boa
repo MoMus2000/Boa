@@ -1,0 +1,5 @@
+var five = 5;
+five = 6;
+five = "mustafa";
+var six = 6;
+five = six;

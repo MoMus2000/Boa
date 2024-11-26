@@ -47,6 +47,10 @@ class Interpreter(StmtVisitor, ExprVisitor):
             self.env.define(identifier.lexeme, None)
         return self.env.get(identifier.lexeme)
 
+    def visit_assign_expression(self, expr):
+        self.env.assign(expr.ident, self.evaluate(expr.value))
+        return self.env.get(expr.ident.lexeme)
+
     def visit_binary_expression(self, expr):
         left  = self.evaluate(expr.left)
         right = self.evaluate(expr.right)

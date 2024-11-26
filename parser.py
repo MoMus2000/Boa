@@ -1,6 +1,6 @@
 from token_types import TokenType
 from expr import Binary, Unary, Literal, Grouping, Var as ExprVar, Assign
-from statement import Print, Expression, Var
+from statement import Print, Expression, Var, Block
 """
 Order of precedence  
 expression → equality ;                                     (Lowest precedence)
@@ -46,6 +46,8 @@ class Parser:
     def statement(self):
         if self.match(TokenType.PRINT):
             return self.print_statement()
+        if self.match(TokenType.LEFT_BRACE):
+            return self.block()
 
         return self.expression_statement()
 
@@ -53,6 +55,14 @@ class Parser:
         value = self.expression()
         self.consume(TokenType.SEMICOLON, "Expected ; after value")
         return Print(value)
+
+    def block(self):
+        statements = []
+        while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
+            statement = self.declaration()
+            statements.append(statement)
+        self.consume(TokenType.RIGHT_BRACE, "Expected '}' ")
+        return Block(statements)
     
     def var_statement(self):
         ident = self.consume(TokenType.IDENTIFIER, "Expected Variable Name");
@@ -76,14 +86,13 @@ class Parser:
         expr = self.equality()
 
         if self.match(TokenType.EQUAL):
-            equals = self.previous()
+            _ = self.previous()
             value  = self.assign()
             if isinstance(expr, ExprVar):
                return Assign(expr.ident, value)
             else:
                 raise Exception("Invalid Expression Type")
         return expr
-
 
     def expression(self):
         return self.assign()

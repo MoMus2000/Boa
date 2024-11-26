@@ -48,3 +48,9 @@ class Var(Statement):
     def accept(self, visitor):
         return visitor.visit_var_statement(self)
 
+class Block(Statement):
+    def __init__(self, statements):
+        self.statements = statements
+
+    def accept(self, visitor):
+        return visitor.visit_block_statement(self)

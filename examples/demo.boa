@@ -1,0 +1,10 @@
+var hello = "Hello";
+var world = "World";
+
+print hello + world;
+
+{
+    var boa = 1;
+    boa = boa + 1;
+    print boa;
+}

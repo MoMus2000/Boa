@@ -1,0 +1,11 @@
+var hello = "Hello";
+var world = "World";
+
+print hello + world;
+
+{
+    var boa_lang = 1;
+    boa_lang = boa_lang + 1;
+    print boa_lang;
+}
+

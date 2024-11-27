@@ -54,3 +54,12 @@ class Block(Statement):
 
     def accept(self, visitor):
         return visitor.visit_block_statement(self)
+
+class IfStmt(Statement):
+    def __init__(self, predicate, block, else_block = None):
+        self.predicate = predicate
+        self.block = block 
+        self.else_block = else_block
+
+    def accept(self, visitor):
+        return visitor.visit_if_statement(self)

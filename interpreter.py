@@ -38,6 +38,14 @@ class Interpreter(StmtVisitor, ExprVisitor):
         print(val)
         return None
 
+    def visit_if_statement(self, ifstmt):
+        pred = self.evaluate(ifstmt.predicate)
+        else_block = ifstmt.else_block
+        if pred:
+            self.visit_block_statement(ifstmt.block)
+        if else_block and not pred:
+            self.visit_block_statement(ifstmt.else_block)
+
     def visit_var_statement(self, stmt):
         identifier = stmt.ident
         if stmt.expression != None:

@@ -26,5 +26,11 @@ print hello + world;
     boa = boa + 1;
     print boa;
 }
+
+if ( 1 == 1 ) {
+    print "One is equal to One";
+} else {
+    print "Not expected to get to this point";
+}
 ```
 

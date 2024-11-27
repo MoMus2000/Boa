@@ -22,3 +22,4 @@ class Environment:
             return
         if name.lexeme not in self.map:
             raise Exception(f'Error: undefined var "{name.lexeme}"')
+

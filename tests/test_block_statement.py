@@ -12,7 +12,7 @@ def test():
         '"xxx"',
         '"A"',
         ['"www"', '"A"'],
-        '"xxx"',
+        '"www"',
         '"A"',
     ]
     with open("./tests/test_block_statement.boa", "r") as source:

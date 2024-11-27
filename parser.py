@@ -1,6 +1,6 @@
 from token_types import TokenType
-from expr import Binary, Unary, Literal, Grouping, Var as ExprVar, Assign
-from statement import Print, Expression, Var, Block, IfStmt, WhileStmt
+from expr import Binary, Unary, Literal, Grouping, Var as ExprVar, Assign, Logical
+from statement import Print, Expression, Var, Block, IfStmt, WhileStmt, ForLoopStmt
 """
 Order of precedence  
 expression → equality ;                                     (Lowest precedence)
@@ -26,6 +26,9 @@ The parser that we use is recursive descent
 |?	                if statement                      |
 |_____________________________________________________|
 """
+
+def todo(name):
+    raise Exception(f"Not Implemented {name}")
 
 class Parser:
     def __init__(self, tokens):
@@ -92,6 +95,8 @@ class Parser:
         block = self.block()
         return WhileStmt(predicate, block)
 
+    def for_loop_statement(self):
+        todo(ForLoopStmt)
 
     def declaration(self):
         if self.match(TokenType.VAR):
@@ -100,6 +105,8 @@ class Parser:
             return self.if_statement()
         if self.match(TokenType.WHILE):
             return self.while_statement()
+        if self.match(TokenType.FOR):
+            return self.for_loop_statement()
         return self.statement()
 
     def expression_statement(self):
@@ -107,8 +114,25 @@ class Parser:
         self.consume(TokenType.SEMICOLON, "Expected ; after value")
         return Expression(value)
 
-    def assign(self):
+    def and_expr(self):
         expr = self.equality()
+        while self.match(TokenType.AND):
+            op = self.previous()
+            right = self.equality()
+            expr = Logical(expr, op, right)
+
+        return expr
+
+    def or_expr(self):
+        expr = self.and_expr()
+        if self.match(TokenType.OR):
+            operator = self.previous()
+            right = self.and_expr()
+            expr = Logical(expr, operator, right)
+        return expr
+
+    def assign(self):
+        expr = self.or_expr()
 
         if self.match(TokenType.EQUAL):
             _ = self.previous()

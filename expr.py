@@ -87,3 +87,13 @@ class Assign(Expr):
     def accept(self, visitor):
         return visitor.visit_assign_expression(self)
 
+class Logical(Expr):
+    def __init__(self, left, op, right):
+        self.left  = left
+        self.op    = op
+        self.right = right
+
+    def accept(self, visitor):
+        return visitor.visit_logical_expression(self)
+
+

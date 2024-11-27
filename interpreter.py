@@ -1,16 +1,29 @@
-from token_types import TokenType
-from expr import (
-    ExprVisitor, 
-)
-from statement import (
-    StmtVisitor
-)
+import io
+import sys
 from environment import Environment
+from expr import ExprVisitor
+from statement import StmtVisitor
+from token_types import TokenType
 
 class Interpreter(StmtVisitor, ExprVisitor):
-    def __init__(self):
+    def __init__(self, debug_mode=False):
         self.statements = []
         self.env = Environment()
+        self.output = io.StringIO()
+        self.saved_stdout = sys.stdout
+        self.debug_mode = debug_mode
+
+    def __enter__(self):
+        if self.debug_mode:
+            sys.stdout = self.output
+        return self
+
+    def __exit__(self):
+        if self.debug_mode:
+            sys.stdout = self.saved_stdout
+
+    def get_output(self):
+        return self.output.getvalue()
 
     def interpret(self, statements):
         result = []
@@ -50,6 +63,10 @@ class Interpreter(StmtVisitor, ExprVisitor):
         while self.evaluate(whilestmt.predicate) == True:
             self.visit_block_statement(whilestmt.block)
 
+    def visit_for_loop_statement(self, forstmt):
+        print("Visiting for loop")
+        # self.evaluate(forstmt.start)
+
     def visit_var_statement(self, stmt):
         identifier = stmt.ident
         if stmt.expression != None:
@@ -61,6 +78,19 @@ class Interpreter(StmtVisitor, ExprVisitor):
 
     def visit_block_statement(self, block):
         return self.execute_block(block, Environment(self.env))
+
+    def visit_logical_expression(self, logicalexpr):
+        left = self.evaluate(logicalexpr.left)
+
+        if logicalexpr.op.type == TokenType.OR:
+            if self.is_truthy(left):
+                return left
+            elif not self.is_truthy(left):
+                return left
+
+        return self.evaluate(logicalexpr.right)
+
+
 
     def execute_block(self, block, env):
         prev = env

@@ -1,6 +1,6 @@
 # Boa
 
-Creating a language in Python.
+Creating a language.
 
 ```bash
 # Load source code

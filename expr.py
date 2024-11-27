@@ -1,6 +1,4 @@
 from abc import ABC, abstractmethod
-from token_types import TokenType
-from tokens import Token
 
 class Expr(ABC):
     def __init__(self):

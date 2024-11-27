@@ -14,7 +14,6 @@ def test():
             parser = Parser(tokens)
             statements = parser.parse()
             result = interpreter.interpret(statements)
-            print(result)
             # for test, r in zip(tests, result):
             #     assert r == test
 

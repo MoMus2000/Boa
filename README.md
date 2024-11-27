@@ -32,5 +32,12 @@ if ( 1 == 1 ) {
 } else {
     print "Not expected to get to this point";
 }
+
+var a = 1;
+while ( a <= 5 ) {
+    a = a + 1;
+}
+
+print a;
 ```
 

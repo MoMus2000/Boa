@@ -3,14 +3,14 @@ var b = "B";
 
 
 if (a == b) {
-  print "A is equal to B";
+  // print "A is equal to B";
 }
 else{
-  print "Inside the else block";
-  print "A is equal to B";
+  // print "Inside the else block";
+  // print "A is equal to B";
 }
 
 if (a != b) {
-  print "A is not equal to B";
+  // print "A is not equal to B";
 }
 

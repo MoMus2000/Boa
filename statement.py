@@ -63,3 +63,12 @@ class IfStmt(Statement):
 
     def accept(self, visitor):
         return visitor.visit_if_statement(self)
+
+class WhileStmt(Statement):
+    def __init__(self, predicate, block):
+        self.predicate = predicate
+        self.block = block 
+
+    def accept(self, visitor):
+        return visitor.visit_while_statement(self)
+

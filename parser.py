@@ -1,6 +1,6 @@
 from token_types import TokenType
 from expr import Binary, Unary, Literal, Grouping, Var as ExprVar, Assign
-from statement import Print, Expression, Var, Block, IfStmt
+from statement import Print, Expression, Var, Block, IfStmt, WhileStmt
 """
 Order of precedence  
 expression → equality ;                                     (Lowest precedence)
@@ -84,11 +84,22 @@ class Parser:
             else_block = self.block()
         return IfStmt(predicate, block, else_block)
 
+    def while_statement(self):
+        self.consume(TokenType.LEFT_PAREN, "Expected ( after if")
+        predicate = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expected ) after if")
+        self.consume(TokenType.LEFT_BRACE, "Expected { after )")
+        block = self.block()
+        return WhileStmt(predicate, block)
+
+
     def declaration(self):
         if self.match(TokenType.VAR):
             return self.var_statement()
         if self.match(TokenType.IF):
             return self.if_statement()
+        if self.match(TokenType.WHILE):
+            return self.while_statement()
         return self.statement()
 
     def expression_statement(self):

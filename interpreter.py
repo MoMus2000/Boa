@@ -46,6 +46,10 @@ class Interpreter(StmtVisitor, ExprVisitor):
         if else_block and not pred:
             self.visit_block_statement(ifstmt.else_block)
 
+    def visit_while_statement(self, whilestmt):
+        while self.evaluate(whilestmt.predicate) == True:
+            self.visit_block_statement(whilestmt.block)
+
     def visit_var_statement(self, stmt):
         identifier = stmt.ident
         if stmt.expression != None:
@@ -56,13 +60,17 @@ class Interpreter(StmtVisitor, ExprVisitor):
         return self.env.get(identifier.lexeme)
 
     def visit_block_statement(self, block):
-        prev = self.env
-        self.env = Environment(self.env)
+        return self.execute_block(block, Environment(self.env))
+
+    def execute_block(self, block, env):
+        prev = env
+        self.env = env
         res = []
         for statement in block.statements:
             res.append(self.evaluate(statement))
         self.env = prev
         return res
+
 
     def visit_assign_expression(self, expr):
         self.env.assign(expr.ident, self.evaluate(expr.value))

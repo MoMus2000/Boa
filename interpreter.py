@@ -63,9 +63,11 @@ class Interpreter(StmtVisitor, ExprVisitor):
         while self.evaluate(whilestmt.predicate) == True:
             self.visit_block_statement(whilestmt.block)
 
-    def visit_for_loop_statement(self, forstmt):
-        print("Visiting for loop")
-        # self.evaluate(forstmt.start)
+    def visit_loop_statement(self, forstmt):
+        self.visit_var_statement(forstmt.start)
+        while self.evaluate(forstmt.predicate) == True:
+            self.visit_block_statement(forstmt.block)
+            self.evaluate(forstmt.incrementer)
 
     def visit_var_statement(self, stmt):
         identifier = stmt.ident

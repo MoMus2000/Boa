@@ -96,17 +96,26 @@ class Parser:
         return WhileStmt(predicate, block)
 
     def for_loop_statement(self):
-        todo(ForLoopStmt)
+        self.consume(TokenType.LEFT_PAREN, "Expected ( after if")
+        start = None
+        if self.match(TokenType.VAR):
+            start = self.var_statement()
+        predi = self.expression_statement()
+        incre = self.expression_statement()
+        self.consume(TokenType.RIGHT_PAREN, "Expected ) after if")
+        self.consume(TokenType.LEFT_BRACE, "Expected { after )")
+        block = self.block()
+        return ForLoopStmt(start, predi, incre, block)
 
     def declaration(self):
         if self.match(TokenType.VAR):
             return self.var_statement()
+        if self.match(TokenType.FOR):
+            return self.for_loop_statement()
         if self.match(TokenType.IF):
             return self.if_statement()
         if self.match(TokenType.WHILE):
             return self.while_statement()
-        if self.match(TokenType.FOR):
-            return self.for_loop_statement()
         return self.statement()
 
     def expression_statement(self):

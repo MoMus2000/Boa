@@ -1,0 +1,20 @@
+var a = 0;
+var b = 0;
+
+while (a < 10) {
+  print "I am inside the for loop";
+  a = a + 2;
+  b = b - 2;
+}
+
+if(a != 11){
+  print a;
+}
+else{
+  print "Inside the else block " + a + " and concatting with 'a'";
+}
+
+if(a > b){
+  print "A "+ "(" + a + ")" + " is greater than B (" + b + ")";
+}
+

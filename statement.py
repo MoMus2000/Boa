@@ -69,8 +69,7 @@ class WhileStmt(Statement):
         self.predicate = predicate
         self.block = block 
 
-    def accept(self, visitor):
-        return visitor.visit_while_statement(self)
+    def accept(self, visitor): return visitor.visit_while_statement(self)
 
 class ForLoopStmt(Statement):
     def __init__(self, start, predicate, incrementer, block):
@@ -80,5 +79,5 @@ class ForLoopStmt(Statement):
         self.block = block
 
     def accept(self, visitor):
-        return visitor.visit_while_statement(self)
+        return visitor.visit_loop_statement(self)
 

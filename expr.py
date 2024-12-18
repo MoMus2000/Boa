@@ -97,3 +97,11 @@ class Logical(Expr):
         return visitor.visit_logical_expression(self)
 
 
+class Call(Expr):
+    def __init__(self, callee, paren, args):
+        self.callee = callee
+        self.paren  = paren
+        self.args   = args
+
+    def accept(self, visitor):
+        return visitor.visit_call_expression(self)

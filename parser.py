@@ -1,5 +1,5 @@
 from token_types import TokenType
-from expr import Binary, Unary, Literal, Grouping, Var as ExprVar, Assign, Logical
+from expr import Binary, Unary, Literal, Grouping, Var as ExprVar, Assign, Logical, Call
 from statement import Print, Expression, Var, Block, IfStmt, WhileStmt, ForLoopStmt
 """
 Order of precedence  
@@ -218,7 +218,26 @@ class Parser:
                     right = right
             )
 
-        return self.primary()
+        return self.call()
+
+    def call(self):
+        expr = self.primary()
+
+        while self.match(TokenType.LEFT_PAREN):
+            expr = self.finish_call(expr)
+
+        return expr
+
+    def finish_call(self, callee):
+        args = []
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                args.append(self.expression())
+                if self.match(TokenType.COMMA):
+                    break
+
+        paren = self.consume(TokenType.RIGHT_PAREN, "Expected ')' after args")
+        return Call(callee, paren, args)
 
     def primary(self):
         if self.match(TokenType.FALSE):

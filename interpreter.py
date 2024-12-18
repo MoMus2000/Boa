@@ -5,10 +5,15 @@ from expr import ExprVisitor
 from statement import StmtVisitor
 from token_types import TokenType
 
+def clock():
+    from datetime import datetime
+    return f"{datetime.now()}"
+
 class Interpreter(StmtVisitor, ExprVisitor):
     def __init__(self, debug_mode=False):
         self.statements = []
         self.env = Environment()
+        self.globals = {"clock": clock}
         self.output = io.StringIO()
         self.saved_stdout = sys.stdout
         self.debug_mode = debug_mode
@@ -160,6 +165,14 @@ class Interpreter(StmtVisitor, ExprVisitor):
 
     def visit_var_expression(self, expr):
         return self.env.get(expr.ident.lexeme)
+
+    def visit_call_expression(self, expr):
+        if len(expr.args) >= 128:
+            raise Exception("To many arguments have been provided")
+        func = self.globals.get(expr.callee.ident.lexeme)
+        if func is not None:
+            return func()
+        raise Exception("Undefined function ..")
 
     def is_truthy(self, expr):
         if expr == None:

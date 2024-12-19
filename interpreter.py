@@ -9,15 +9,16 @@ def clock():
     from datetime import datetime
     return f"{datetime.now()}"
 
-def something():
-    print("This is a builtin function that is supposed to do something")
-    return
+class Callable:
+    def __init__(self, func, arity):
+        self.func  = func
+        self.arity = arity
 
 class Interpreter(StmtVisitor, ExprVisitor):
     def __init__(self, debug_mode=False):
         self.statements = []
         self.env = Environment()
-        self.globals = {"clock": clock, "something": something}
+        self.env.define("clock", Callable(clock, 0))
         self.output = io.StringIO()
         self.saved_stdout = sys.stdout
         self.debug_mode = debug_mode
@@ -170,14 +171,12 @@ class Interpreter(StmtVisitor, ExprVisitor):
     def visit_call_expression(self, expr):
         if len(expr.args) >= 128:
             raise Exception("To many arguments have been provided")
-        func = self.globals.get(expr.callee.ident.lexeme)
-        if func is not None:
-            import inspect
-            sig = inspect.signature(func)
-            if len(sig.parameters) != len(expr.args):
-                raise Exception(f"Invalid number of arguments to the func {func.__name__}")
-            return func(*expr.args)
-        raise Exception("Undefined function ..")
+        func = self.evaluate(expr.callee)
+        if func is None or not isinstance(func, Callable):
+            raise Exception(f"Error with defined func")
+        if func.arity != len(expr.args):
+            raise Exception(f"Error with the defined number of args")
+        return func.func()
 
     def is_truthy(self, expr):
         if expr == None:

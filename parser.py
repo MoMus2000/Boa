@@ -1,6 +1,6 @@
 from token_types import TokenType
 from expr import Binary, Unary, Literal, Grouping, Var as ExprVar, Assign, Logical, Call
-from statement import Print, Expression, Var, Block, IfStmt, WhileStmt, ForLoopStmt
+from statement import Print, Expression, Var, Block, IfStmt, WhileStmt, ForLoopStmt, FuncStmt
 """
 Order of precedence  
 expression → equality ;                                     (Lowest precedence)
@@ -108,6 +108,8 @@ class Parser:
         return ForLoopStmt(start, predi, incre, block)
 
     def declaration(self):
+        if self.match(TokenType.FUN):
+            return self.define_fun_statement()
         if self.match(TokenType.VAR):
             return self.var_statement()
         if self.match(TokenType.FOR):
@@ -121,7 +123,24 @@ class Parser:
         return self.statement()
 
     def define_fun_statement(self):
-        raise Exception("Not yet implemented")
+        name = self.consume(TokenType.IDENTIFIER, "Expected Identifier")
+        self.consume(TokenType.LEFT_PAREN, "Expected Left Paren")
+        args = []
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                if self.peek().type == TokenType.IDENTIFIER:
+                    arg = self.consume(TokenType.IDENTIFIER, "Expected args")
+                    args.append(arg)
+                if not self.match(TokenType.COMMA):
+                    break
+        self.consume(TokenType.RIGHT_PAREN, "Expected RIGHT Paren")
+        self.consume(TokenType.LEFT_BRACE, "Expected LEFT Brace")
+        block = self.block()
+        return FuncStmt(
+            name,
+            args,
+            block
+        )
 
     def expression_statement(self):
         value = self.expression()

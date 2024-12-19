@@ -14,6 +14,23 @@ class Callable:
         self.func  = func
         self.arity = arity
 
+    def call(self):
+        return self.func()
+
+class CallableFunc:
+    def __init__(self, decl, arity):
+        self.decl = decl
+        self.arity = arity
+
+    def call(self, interpreter, args):
+        env = Environment(interpreter.env)
+
+        for param, arg in zip(self.decl.params, args):
+            env.define(param.lexeme, arg)
+
+        interpreter.execute_block(self.decl.body, env)
+        return None
+
 class Interpreter(StmtVisitor, ExprVisitor):
     def __init__(self, debug_mode=False):
         self.statements = []
@@ -172,11 +189,20 @@ class Interpreter(StmtVisitor, ExprVisitor):
         if len(expr.args) >= 128:
             raise Exception("To many arguments have been provided")
         func = self.evaluate(expr.callee)
-        if func is None or not isinstance(func, Callable):
+        if func is None or not (isinstance(func, Callable) or isinstance(func,
+                                                                         CallableFunc)):
             raise Exception(f"Error with defined func")
         if func.arity != len(expr.args):
             raise Exception(f"Error with the defined number of args")
-        return func.func()
+
+        if isinstance(func, CallableFunc):
+            return func.call(self, expr.args)
+        return func.call()
+    
+    def visit_func_statement(self, visitor):
+        func = CallableFunc(visitor, len(visitor.params))
+        self.env.define(visitor.token_name.lexeme, func)
+        return None
 
     def is_truthy(self, expr):
         if expr == None:

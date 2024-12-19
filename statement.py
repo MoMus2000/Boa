@@ -81,3 +81,11 @@ class ForLoopStmt(Statement):
     def accept(self, visitor):
         return visitor.visit_loop_statement(self)
 
+class FuncStmt(Statement):
+    def __init__(self, token_name, params, body):
+        self.token_name = token_name
+        self.params = params
+        self.body = body
+
+    def accept(self, visitor):
+        return visitor.visit_func_statement(self)

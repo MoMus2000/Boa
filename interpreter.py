@@ -9,11 +9,15 @@ def clock():
     from datetime import datetime
     return f"{datetime.now()}"
 
+def something():
+    print("This is a builtin function that is supposed to do something")
+    return
+
 class Interpreter(StmtVisitor, ExprVisitor):
     def __init__(self, debug_mode=False):
         self.statements = []
         self.env = Environment()
-        self.globals = {"clock": clock}
+        self.globals = {"clock": clock, "something": something}
         self.output = io.StringIO()
         self.saved_stdout = sys.stdout
         self.debug_mode = debug_mode
@@ -97,8 +101,6 @@ class Interpreter(StmtVisitor, ExprVisitor):
 
         return self.evaluate(logicalexpr.right)
 
-
-
     def execute_block(self, block, env):
         prev = env
         self.env = env
@@ -107,7 +109,6 @@ class Interpreter(StmtVisitor, ExprVisitor):
             res.append(self.evaluate(statement))
         self.env = prev
         return res
-
 
     def visit_assign_expression(self, expr):
         self.env.assign(expr.ident, self.evaluate(expr.value))
@@ -171,7 +172,11 @@ class Interpreter(StmtVisitor, ExprVisitor):
             raise Exception("To many arguments have been provided")
         func = self.globals.get(expr.callee.ident.lexeme)
         if func is not None:
-            return func()
+            import inspect
+            sig = inspect.signature(func)
+            if len(sig.parameters) != len(expr.args):
+                raise Exception(f"Invalid number of arguments to the func {func.__name__}")
+            return func(*expr.args)
         raise Exception("Undefined function ..")
 
     def is_truthy(self, expr):

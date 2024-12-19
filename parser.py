@@ -116,7 +116,12 @@ class Parser:
             return self.if_statement()
         if self.match(TokenType.WHILE):
             return self.while_statement()
+        if self.match(TokenType.FUN):
+            return self.define_fun_statement()
         return self.statement()
+
+    def define_fun_statement(self):
+        raise Exception("Not yet implemented")
 
     def expression_statement(self):
         value = self.expression()
@@ -233,7 +238,7 @@ class Parser:
         if not self.check(TokenType.RIGHT_PAREN):
             while True:
                 args.append(self.expression())
-                if self.match(TokenType.COMMA):
+                if not self.match(TokenType.COMMA):
                     break
 
         paren = self.consume(TokenType.RIGHT_PAREN, "Expected ')' after args")

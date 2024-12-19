@@ -89,3 +89,12 @@ class FuncStmt(Statement):
 
     def accept(self, visitor):
         return visitor.visit_func_statement(self)
+
+class ReturnStmt(Statement):
+    def __init__(self, keyword, value):
+        self.keyword = keyword
+        self.value = value
+
+    def accept(self, visitor):
+        return visitor.visit_return_statement(self)
+

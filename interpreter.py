@@ -1,7 +1,7 @@
 import io
 import sys
 from environment import Environment
-from expr import ExprVisitor
+from expr import ExprVisitor, Literal, Var, Call
 from statement import StmtVisitor
 from token_types import TokenType
 
@@ -24,11 +24,16 @@ class CallableFunc:
 
     def call(self, interpreter, args):
         env = Environment(interpreter.env)
-
         for param, arg in zip(self.decl.params, args):
-            env.define(param.lexeme, arg)
-
-        interpreter.execute_block(self.decl.body, env)
+            if isinstance(arg, Call):
+                arg = interpreter.evaluate(arg)
+                env.define(param.lexeme, arg)
+            else:
+                env.define(param.lexeme, arg)
+        try:
+            interpreter.execute_block(self.decl.body, env)
+        except ReturnException as r:
+            return r.return_statement
         return None
 
 class Interpreter(StmtVisitor, ExprVisitor):
@@ -64,6 +69,10 @@ class Interpreter(StmtVisitor, ExprVisitor):
 
     def parse_to_float(self, value):
         try:
+            if isinstance(value, Var):
+                value = self.env.get(value.ident.lexeme)
+            elif isinstance(value, Literal):
+                value = value.value
             return float(value), True
         except ValueError:
             return value, False
@@ -204,6 +213,12 @@ class Interpreter(StmtVisitor, ExprVisitor):
         self.env.define(visitor.token_name.lexeme, func)
         return None
 
+    def visit_return_statement(self, visitor):
+        val = None
+        if visitor.value != None:
+            val = self.evaluate(visitor.value)
+        raise ReturnException(val)
+
     def is_truthy(self, expr):
         if expr == None:
             return False
@@ -214,3 +229,6 @@ class Interpreter(StmtVisitor, ExprVisitor):
     def evaluate(self, expr):
         return expr.accept(self)
 
+class ReturnException(Exception):
+    def __init__(self, return_statement):
+        self.return_statement = return_statement

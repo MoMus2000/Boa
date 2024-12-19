@@ -1,6 +1,16 @@
 from token_types import TokenType
-from expr import Binary, Unary, Literal, Grouping, Var as ExprVar, Assign, Logical, Call
-from statement import Print, Expression, Var, Block, IfStmt, WhileStmt, ForLoopStmt, FuncStmt
+
+from expr import (
+    Binary, Unary, Literal, Grouping,
+    Var as ExprVar, Assign, Logical, Call
+)
+
+from statement import (
+    Print, Expression, Var, 
+    Block, IfStmt, WhileStmt,
+    ForLoopStmt, FuncStmt, ReturnStmt
+)
+
 """
 Order of precedence  
 expression → equality ;                                     (Lowest precedence)
@@ -49,10 +59,23 @@ class Parser:
     def statement(self):
         if self.match(TokenType.PRINT):
             return self.print_statement()
+        if self.match(TokenType.RETURN):
+            return self.return_statement()
         if self.match(TokenType.LEFT_BRACE):
             return self.block()
 
         return self.expression_statement()
+
+    def return_statement(self):
+        keyword = self.previous()
+        value = None
+
+        if not self.check(TokenType.SEMICOLON):
+            value = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expected ; ")
+
+        return ReturnStmt(keyword, value)
 
     def print_statement(self):
         value = self.expression()

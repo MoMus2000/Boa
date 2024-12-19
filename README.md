@@ -16,11 +16,6 @@ python3 main.py
 Sample Boa Code
 
 ```lua
-
-fun print_hello(){
-  print "Hello";
-}
-
 fun add_time_together(){
   var start = clock();
   var end   = clock();
@@ -30,10 +25,22 @@ fun add_time_together(){
 
 }
 
-print_hello();
-print_hello();
-
 add_time_together();
+
+fun add(a, b){
+  return a + b;
+}
+
+fun sub(a, b){
+  return a - b;
+}
+
+print add(1, 7);
+print add(sub(add(2,7), 3), 4);
+print sub(add(20, sub(15, 5)), add(10, 5));
+print add(sub(add(5, 10), sub(8, 3)), sub(20, add(5, 5)));
+print sub(sub(add(8, 4), add(2, 3)), add(1, sub(5, 3)));
+print add(sub(add(3, sub(9, 6)), 2), sub(10, add(4, 2)));
 
 ```
 

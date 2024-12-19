@@ -16,6 +16,28 @@ python3 main.py
 Sample Boa Code
 
 ```lua
+
+fun print_hello(){
+  print "Hello";
+}
+
+fun add_time_together(){
+  var start = clock();
+  var end   = clock();
+
+  print "Starting at " + start;
+  print "Ending   at " + end;
+
+}
+
+print_hello();
+print_hello();
+
+add_time_together();
+
+```
+
+```lua
 var hello = "Hello";
 var world = "World";
 

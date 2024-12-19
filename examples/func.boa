@@ -1,0 +1,18 @@
+fun print_hello(){
+  print "Hello";
+}
+
+fun add_time_together(){
+  var start = clock();
+  var end   = clock();
+
+  print "Starting at " + start;
+  print "Ending   at " + end;
+
+}
+
+print_hello();
+print_hello();
+
+add_time_together();
+

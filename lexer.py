@@ -96,6 +96,7 @@ class Lexer:
         return c.isalpha()
 
     def is_alphanumeric(self, c):
+        if c == "_": return True
         return c.isalnum()
     
     def identifier(self):

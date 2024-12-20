@@ -75,6 +75,7 @@ class Unary(Expr):
 class Var(Expr):
     def __init__(self, ident):
         self.ident = ident
+        self.value = ident # Mirroring ident for literal
 
     def accept(self, visitor):
         return visitor.visit_var_expression(self)

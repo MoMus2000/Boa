@@ -6,7 +6,7 @@ def test():
     lexer = None
     tests = [
         3,
-        "hello kitty jungle party",
+        '"hello kitty jungle party"',
         True,
         False,
         True

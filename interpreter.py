@@ -9,13 +9,16 @@ def clock():
     from datetime import datetime
     return f"{datetime.now()}"
 
+def assert_eq(a, b, message):
+    assert a == b, message
+
 class Callable:
     def __init__(self, func, arity):
         self.func  = func
         self.arity = arity
 
-    def call(self):
-        return self.func()
+    def call(self, args):
+        return self.func(*args)
 
 class CallableFunc:
     def __init__(self, decl, arity):
@@ -25,11 +28,7 @@ class CallableFunc:
     def call(self, interpreter, args):
         env = Environment(interpreter.env)
         for param, arg in zip(self.decl.params, args):
-            if isinstance(arg, Call):
-                arg = interpreter.evaluate(arg)
-                env.define(param.lexeme, arg)
-            else:
-                env.define(param.lexeme, arg)
+            env.define(param.lexeme, arg)
         try:
             interpreter.execute_block(self.decl.body, env)
         except ReturnException as r:
@@ -41,6 +40,7 @@ class Interpreter(StmtVisitor, ExprVisitor):
         self.statements = []
         self.env = Environment()
         self.env.define("clock", Callable(clock, 0))
+        self.env.define("assert_eq", Callable(assert_eq, 3))
         self.output = io.StringIO()
         self.saved_stdout = sys.stdout
         self.debug_mode = debug_mode
@@ -170,7 +170,10 @@ class Interpreter(StmtVisitor, ExprVisitor):
                 return left >= right
         else:
             if expr.op.type == TokenType.PLUS:
-                return str(left).strip('"') + str(right).strip('"') 
+                l = str(left).strip('"')
+                r = str(right).strip('"')
+                f = l + r
+                return f'"{f}"'
             if expr.op.type == TokenType.BANG_EQUAL:
                 return left != right
             if expr.op.type == TokenType.EQUAL_EQUAL:
@@ -203,10 +206,12 @@ class Interpreter(StmtVisitor, ExprVisitor):
             raise Exception(f"Error with defined func")
         if func.arity != len(expr.args):
             raise Exception(f"Error with the defined number of args")
-
+        args = []
+        for arg in expr.args:
+            args.append(self.evaluate(arg))
         if isinstance(func, CallableFunc):
-            return func.call(self, expr.args)
-        return func.call()
+            return func.call(self, args)
+        return func.call(args)
     
     def visit_func_statement(self, visitor):
         func = CallableFunc(visitor, len(visitor.params))

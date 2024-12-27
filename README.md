@@ -3,11 +3,14 @@
 Creating a language.
 
 ```bash
+# Run setup
+./setup.sh (make sure to provide relevant permissions)
+
 # Load source code
-python3 main.py examples/demo.boa
+boa path_to_file
 
 # Launch interpreter
-python3 main.py
+boa
 
 # Run tests
 ./tests.sh

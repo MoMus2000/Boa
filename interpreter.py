@@ -1,7 +1,7 @@
 import io
 import sys
 from environment import Environment
-from expr import ExprVisitor, Literal, Var, Call
+from expr import ExprVisitor, Literal, Var, Call, Binary
 from statement import StmtVisitor
 from token_types import TokenType
 
@@ -26,7 +26,7 @@ class CallableFunc:
         self.arity = arity
 
     def call(self, interpreter, args):
-        env = Environment(interpreter.env)
+        env = Environment(interpreter.globals)
         for param, arg in zip(self.decl.params, args):
             env.define(param.lexeme, arg)
         try:
@@ -38,9 +38,10 @@ class CallableFunc:
 class Interpreter(StmtVisitor, ExprVisitor):
     def __init__(self, debug_mode=False):
         self.statements = []
-        self.env = Environment()
-        self.env.define("clock", Callable(clock, 0))
-        self.env.define("assert_eq", Callable(assert_eq, 3))
+        self.globals = Environment()
+        self.env = self.globals
+        self.globals.define("clock", Callable(clock, 0))
+        self.globals.define("assert_eq", Callable(assert_eq, 3))
         self.output = io.StringIO()
         self.saved_stdout = sys.stdout
         self.debug_mode = debug_mode
@@ -210,7 +211,8 @@ class Interpreter(StmtVisitor, ExprVisitor):
         for arg in expr.args:
             args.append(self.evaluate(arg))
         if isinstance(func, CallableFunc):
-            return func.call(self, args)
+            import copy
+            return func.call(copy.copy(self), args)
         return func.call(args)
     
     def visit_func_statement(self, visitor):

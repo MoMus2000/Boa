@@ -59,10 +59,14 @@ class Parser:
     def statement(self):
         if self.match(TokenType.PRINT):
             return self.print_statement()
-        if self.match(TokenType.RETURN):
-            return self.return_statement()
         if self.match(TokenType.LEFT_BRACE):
             return self.block()
+        if self.match(TokenType.IF):
+            return self.if_statement()
+        if self.match(TokenType.WHILE):
+            return self.while_statement()
+        if self.match(TokenType.RETURN):
+            return self.return_statement()
 
         return self.expression_statement()
 
@@ -137,12 +141,6 @@ class Parser:
             return self.var_statement()
         if self.match(TokenType.FOR):
             return self.for_loop_statement()
-        if self.match(TokenType.IF):
-            return self.if_statement()
-        if self.match(TokenType.WHILE):
-            return self.while_statement()
-        if self.match(TokenType.FUN):
-            return self.define_fun_statement()
         return self.statement()
 
     def define_fun_statement(self):

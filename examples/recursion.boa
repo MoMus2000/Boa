@@ -1,11 +1,41 @@
-fun fib(n) {
-  if (n <= 1){
-    return n;
+import math
+
+fun factorial(n) {
+  if (n == 0) {
+    return 1; // Base case
+  } else {
+    return n * factorial(n - 1); // Recursive step
   }
-  return fib(n - 2) + fib(n - 1);
 }
 
-for (var i = 0; i < 20; i = i + 1;) {
-  print fib(i);
+print factorial(0);
+print factorial(1);
+print factorial(5);
+print factorial(10);
+
+fun fibonacci(n) {
+  if (n <= 1) {
+    return n; // Base cases
+  } else {
+    return fibonacci(n - 1) + fibonacci(n - 2); // Recursive step
+  }
 }
 
+print fibonacci(0);
+print fibonacci(1);
+print fibonacci(2);
+print fibonacci(10);
+
+fun towersOfHanoi(n, source, destination, auxiliary) {
+  if (n == 1) {
+    print "Move disk 1 from " + source + " to " + destination;
+    return;
+  }
+  towersOfHanoi(n - 1, source, auxiliary, destination);
+  print "Move disk " + n + " from " + source + " to " + destination;
+  towersOfHanoi(n - 1, auxiliary, destination, source);
+}
+
+towersOfHanoi(3, "A", "C", "B");
+
+print math.pow(2, 3);

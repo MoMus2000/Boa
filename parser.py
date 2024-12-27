@@ -8,7 +8,8 @@ from expr import (
 from statement import (
     Print, Expression, Var, 
     Block, IfStmt, WhileStmt,
-    ForLoopStmt, FuncStmt, ReturnStmt
+    ForLoopStmt, FuncStmt, ReturnStmt,
+    ImportStmt
 )
 
 """
@@ -57,6 +58,8 @@ class Parser:
         return self.statements 
 
     def statement(self):
+        if self.match(TokenType.IMPORT):
+            return self.import_statement()
         if self.match(TokenType.PRINT):
             return self.print_statement()
         if self.match(TokenType.LEFT_BRACE):
@@ -69,6 +72,10 @@ class Parser:
             return self.return_statement()
 
         return self.expression_statement()
+
+    def import_statement(self):
+        lib_name = self.consume(TokenType.IDENTIFIER, "expected import name")
+        return ImportStmt(lib_name)
 
     def return_statement(self):
         keyword = self.previous()

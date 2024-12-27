@@ -42,5 +42,6 @@ class TokenType(Enum):
     TRUE          = auto()
     VAR           = auto()
     WHILE         = auto()
+    IMPORT        = auto()
 
     EOF           = auto()

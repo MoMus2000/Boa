@@ -1,0 +1,7 @@
+import math
+
+print math.pow(2, 3);
+print math.factorial(10);
+print math.ceil(6.9);
+print math.floor(6.9);
+

@@ -1,7 +1,7 @@
 import io
 import sys
 from environment import Environment
-from expr import ExprVisitor, Literal, Var, Call, Binary
+from expr import ExprVisitor, Literal, Var
 from statement import StmtVisitor
 from token_types import TokenType
 
@@ -11,6 +11,22 @@ def clock():
 
 def assert_eq(a, b, message):
     assert a == b, message
+
+def pow(a, b):
+    import math
+    return math.pow(float(a), float(b))
+
+def factorial(a):
+    import math
+    return math.factorial(int(a))
+
+def ceil(a):
+    import math
+    return math.ceil(float(a))
+
+def floor(a):
+    import math
+    return math.floor(float(a))
 
 class Callable:
     def __init__(self, func, arity):
@@ -225,6 +241,14 @@ class Interpreter(StmtVisitor, ExprVisitor):
         if visitor.value != None:
             val = self.evaluate(visitor.value)
         raise ReturnException(val)
+    
+    def visit_import_statement(self, visitor):
+        if visitor.lib_name.lexeme == "math":
+            self.globals.define("math.pow", Callable(pow, 2))
+            self.globals.define("math.factorial", Callable(factorial, 1))
+            self.globals.define("math.ceil", Callable(ceil, 1))
+            self.globals.define("math.floor", Callable(floor, 1))
+        return
 
     def is_truthy(self, expr):
         if expr == None:

@@ -98,3 +98,10 @@ class ReturnStmt(Statement):
     def accept(self, visitor):
         return visitor.visit_return_statement(self)
 
+class ImportStmt(Statement):
+    def __init__(self, lib_name):
+        self.lib_name = lib_name
+
+    def accept(self, visitor):
+        return visitor.visit_import_statement(self)
+

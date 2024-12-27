@@ -25,6 +25,7 @@ class Lexer:
             "true"   : TokenType.TRUE,
             "var"    : TokenType.VAR,
             "while"  : TokenType.WHILE,
+            "import" : TokenType.IMPORT,
         }
 
     def scan_tokens(self):
@@ -97,6 +98,7 @@ class Lexer:
 
     def is_alphanumeric(self, c):
         if c == "_": return True
+        if c == ".": return True
         return c.isalnum()
     
     def identifier(self):

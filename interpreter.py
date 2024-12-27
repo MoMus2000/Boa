@@ -1,5 +1,7 @@
 import io
 import sys
+from boa_math import Math
+from boa_time import Time
 from environment import Environment
 from expr import ExprVisitor, Literal, Var
 from statement import StmtVisitor
@@ -11,22 +13,6 @@ def clock():
 
 def assert_eq(a, b, message):
     assert a == b, message
-
-def pow(a, b):
-    import math
-    return math.pow(float(a), float(b))
-
-def factorial(a):
-    import math
-    return math.factorial(int(a))
-
-def ceil(a):
-    import math
-    return math.ceil(float(a))
-
-def floor(a):
-    import math
-    return math.floor(float(a))
 
 class Callable:
     def __init__(self, func, arity):
@@ -56,7 +42,6 @@ class Interpreter(StmtVisitor, ExprVisitor):
         self.statements = []
         self.globals = Environment()
         self.env = self.globals
-        self.globals.define("clock", Callable(clock, 0))
         self.globals.define("assert_eq", Callable(assert_eq, 3))
         self.output = io.StringIO()
         self.saved_stdout = sys.stdout
@@ -244,10 +229,19 @@ class Interpreter(StmtVisitor, ExprVisitor):
     
     def visit_import_statement(self, visitor):
         if visitor.lib_name.lexeme == "math":
-            self.globals.define("math.pow", Callable(pow, 2))
-            self.globals.define("math.factorial", Callable(factorial, 1))
-            self.globals.define("math.ceil", Callable(ceil, 1))
-            self.globals.define("math.floor", Callable(floor, 1))
+            math = Math()
+            self.globals.define("math.pow", Callable(math.pow, 2))
+            self.globals.define("math.factorial", Callable(math.factorial, 1))
+            self.globals.define("math.ceil", Callable(math.ceil, 1))
+            self.globals.define("math.floor", Callable(math.floor, 1))
+            self.globals.define("math.is_prime", Callable(math.is_prime, 1))
+            self.globals.define("math.min", Callable(math.min, 2))
+            self.globals.define("math.max", Callable(math.max, 2))
+            self.globals.define("math.sqrt", Callable(math.sqrt, 1))
+        if visitor.lib_name.lexeme == "time":
+            time = Time()
+            self.globals.define("time.sleep", Callable(time.sleep, 1))
+            self.globals.define("time.clock", Callable(time.clock, 0))
         return
 
     def is_truthy(self, expr):

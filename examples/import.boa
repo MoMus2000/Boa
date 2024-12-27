@@ -1,7 +1,15 @@
 import math
+import time
 
 print math.pow(2, 3);
 print math.factorial(10);
 print math.ceil(6.9);
 print math.floor(6.9);
+print math.is_prime(2);
+
+print "Going to sleep";
+time.sleep(1);
+print "Done sleeping";
+
+print time.clock();
 

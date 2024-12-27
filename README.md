@@ -57,11 +57,16 @@ print add(sub(add(2,7), 3), 4);
 Standard lib (Work in Progress)
 ```lua
 import math
+import time
 
 print math.pow(2, 3);
 print math.factorial(10);
 print math.ceil(6.9);
 print math.floor(6.9);
+
+time.sleep(1);
+
+print time.clock();
 
 ```
 

@@ -47,6 +47,22 @@ print add(sub(add(3, sub(9, 6)), 2), sub(10, add(4, 2)));
 
 ```
 
+Recursion
+
+```lua
+fun fib(n) {
+  if (n <= 1){
+    return n;
+  }
+  return fib(n - 2) + fib(n - 1);
+}
+
+for (var i = 0; i < 20; i = i + 1;) {
+  print fib(i);
+}
+
+```
+
 ```lua
 var hello = "Hello";
 var world = "World";

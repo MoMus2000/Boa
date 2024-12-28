@@ -6,6 +6,8 @@ print math.factorial(10);
 print math.ceil(6.9);
 print math.floor(6.9);
 print math.is_prime(2);
+print math.max(69, 420);
+print math.min(69, 420);
 
 print "Going to sleep";
 time.sleep(1);

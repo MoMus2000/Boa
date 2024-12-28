@@ -1,0 +1,12 @@
+var a = true;
+
+var b = false;
+
+var c = true;
+
+var a = (b or c);
+
+print a;
+
+print a or c;
+

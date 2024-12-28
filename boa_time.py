@@ -11,3 +11,4 @@ class Time:
     def clock(self):
         from datetime import datetime
         return f"{datetime.now()}"
+

@@ -1,6 +1,6 @@
 # Boa
 
-Creating a language.
+Boa is an interpreter written in Python. It is inspired by Bob Nystrom's implementation of the Lox programming language. The project was originally intended to be written in Rust, but I found myself struggling with the borrow checker rather than enjoying the process of writing code, so I switched to Python for the initial implementation.
 
 # Warning
 

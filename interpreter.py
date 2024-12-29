@@ -144,7 +144,7 @@ class Interpreter(StmtVisitor, ExprVisitor):
         return self.evaluate(logicalexpr.right)
 
     def execute_block(self, block, env):
-        prev = env
+        prev = self.env
         self.env = env
         res = []
         for statement in block.statements:

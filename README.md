@@ -4,7 +4,7 @@ Boa is an interpreter written in Python. It is inspired by Bob Nystrom's impleme
 
 # Warning
 
-**Experimental Language:** This is an experimental language that is currently not optimized for performance. In benchmark tests, a simple for loop with computation is approximately **2000% slower** than Python. Please keep this in mind if you plan to use this for performance-critical applications.
+**Experimental Language:** This is an experimental language that is currently not optimized for performance nor considered stable. In benchmark tests, a simple for loop with computation is approximately **2000% slower** than Python. Please keep this in mind if you plan to use this for your applications.
 
 
 **Note:** Future optimizations may improve performance, performance should

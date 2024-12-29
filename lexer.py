@@ -106,10 +106,18 @@ class Lexer:
             self.advance()
 
         text = self.source[self.start:self.current]
+
+        if len(text.split(".")) > 2:
+            raise Exception(
+                "Not supporting dot notation, single level traversal only available"
+            )
+
         ttype = self.ident_map.get(text)
+
         if ttype == None:
             self.add_token(TokenType.IDENTIFIER)
             return
+
         self.add_token(ttype)
     
     def scan_token(self):

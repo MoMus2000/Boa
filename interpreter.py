@@ -1,7 +1,7 @@
 import io
 import sys
-from boa_math import Math
-from boa_time import Time
+from stdlib.boa_math import Math
+from stdlib.boa_time import Time
 from environment import Environment
 from expr import ExprVisitor, Literal, Var
 from statement import StmtVisitor
@@ -13,6 +13,9 @@ def clock():
 
 def assert_eq(a, b, message):
     assert a == b, message
+
+def assert_boa(a, message):
+    assert a, message
 
 class Callable:
     def __init__(self, func, arity):
@@ -43,6 +46,7 @@ class Interpreter(StmtVisitor, ExprVisitor):
         self.globals = Environment()
         self.env = self.globals
         self.globals.define("assert_eq", Callable(assert_eq, 3))
+        self.globals.define("assert", Callable(assert_boa, 2))
         self.output = io.StringIO()
         self.saved_stdout = sys.stdout
         self.debug_mode = debug_mode
@@ -75,8 +79,8 @@ class Interpreter(StmtVisitor, ExprVisitor):
                 value = self.env.get(value.ident.lexeme)
             elif isinstance(value, Literal):
                 value = value.value
-            return float(value), True
-        except ValueError:
+            return round(float(value), 3), True
+        except Exception:
             return value, False
 
     def visit_expression_statement(self, stmt):
@@ -86,7 +90,15 @@ class Interpreter(StmtVisitor, ExprVisitor):
 
     def visit_print_statement(self, stmt):
         val = self.evaluate(stmt.expression)
-        print(val)
+        if val and self.parse_to_float(val)[1]:
+            try:
+                print(round(val, 3))
+            except Exception:
+                print(val)
+        elif val == None:
+            print ("nil")
+        else:
+            print(val)
         return None
 
     def visit_if_statement(self, ifstmt):
@@ -175,6 +187,10 @@ class Interpreter(StmtVisitor, ExprVisitor):
             if expr.op.type == TokenType.PLUS:
                 l = str(left).strip('"')
                 r = str(right).strip('"')
+
+                l = l.replace("None", "nil")
+                r = r.replace("None", "nil")
+
                 f = l + r
                 return f'"{f}"'
             if expr.op.type == TokenType.BANG_EQUAL:
@@ -231,6 +247,7 @@ class Interpreter(StmtVisitor, ExprVisitor):
     def visit_import_statement(self, visitor):
         if visitor.lib_name.lexeme == "math":
             math = Math()
+            self.globals.define("math.pi", Callable(math.pi, 0))
             self.globals.define("math.pow", Callable(math.pow, 2))
             self.globals.define("math.factorial", Callable(math.factorial, 1))
             self.globals.define("math.ceil", Callable(math.ceil, 1))
@@ -239,6 +256,7 @@ class Interpreter(StmtVisitor, ExprVisitor):
             self.globals.define("math.min", Callable(math.min, 2))
             self.globals.define("math.max", Callable(math.max, 2))
             self.globals.define("math.sqrt", Callable(math.sqrt, 1))
+            self.globals.define("math.abs", Callable(math.abs, 1))
         if visitor.lib_name.lexeme == "time":
             time = Time()
             self.globals.define("time.sleep", Callable(time.sleep, 1))

@@ -1,6 +1,9 @@
 var a = 1.0;
 
+assert_eq(a, 1.0, "Expected a = 1.0, but got a = "+ a);
+
 while ( a <= 5 ) {
+  assert(a <= 5, "Expected a <= 5");
   print a;
   a = a +1;
 }
@@ -8,4 +11,6 @@ while ( a <= 5 ) {
 if ( a > 5 ) {
   print "A is greater than five";
 }
+
+assert(a > 5, "A should be greater than 5");
 

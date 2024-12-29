@@ -1,0 +1,18 @@
+import time
+import math
+
+print "The value of "+ math.pi();
+
+fun area_of_circle(radius){
+  return math.pi() * math.pow(radius, 2);
+}
+
+fun area_of_rect(l, b){
+  return l * b;
+}
+
+var radius = 2.0;
+
+print "The area of the circle is " + area_of_circle(radius);
+
+print "The area of rect with h = 2 and l = 2 is " +area_of_rect(2, 2);

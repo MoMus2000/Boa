@@ -11,6 +11,8 @@ Boa is an interpreter written in Python. It is inspired by Bob Nystrom's impleme
 not be considered on par with more mature languages like Python for simple computational
 tasks. 
 
+# Setup
+
 
 ```bash
 # Run setup
@@ -26,7 +28,7 @@ boa
 ./tests.sh
 ```
 
-Sample Boa Code
+# Sample Boa Code
 
 ```lua
 // Fibonacci Numbers via recursion:

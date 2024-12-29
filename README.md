@@ -2,6 +2,16 @@
 
 Creating a language.
 
+# Warning
+
+**Experimental Language:** This is an experimental language that is currently not optimized for performance. In benchmark tests, a simple for loop with computation is approximately **2000% slower** than Python. Please keep this in mind if you plan to use this for performance-critical applications.
+
+
+**Note:** Future optimizations may improve performance, performance should
+not be considered on par with more mature languages like Python for simple computational
+tasks. 
+
+
 ```bash
 # Run setup
 ./setup.sh (make sure to provide relevant permissions)

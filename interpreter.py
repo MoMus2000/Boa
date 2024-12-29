@@ -257,6 +257,7 @@ class Interpreter(StmtVisitor, ExprVisitor):
             self.globals.define("math.max", Callable(math.max, 2))
             self.globals.define("math.sqrt", Callable(math.sqrt, 1))
             self.globals.define("math.abs", Callable(math.abs, 1))
+            self.globals.define("math.random_f", Callable(math.random_f, 0))
         if visitor.lib_name.lexeme == "time":
             time = Time()
             self.globals.define("time.sleep", Callable(time.sleep, 1))

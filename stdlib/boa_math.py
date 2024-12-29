@@ -40,6 +40,10 @@ class Math:
     def abs(self, a):
         return abs(float(a))
 
+    def random_f(self):
+        import random
+        return float(random.random())
+
     def is_prime(self, n):
         n = int(n)
         """

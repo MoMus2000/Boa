@@ -90,7 +90,7 @@ class Interpreter(StmtVisitor, ExprVisitor):
 
     def visit_print_statement(self, stmt):
         val = self.evaluate(stmt.expression)
-        if val and self.parse_to_float(val)[1]:
+        if (isinstance(val, bool) or val) and self.parse_to_float(val)[1]:
             try:
                 print(round(val, 3))
             except Exception:

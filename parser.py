@@ -186,7 +186,7 @@ class Parser:
 
     def or_expr(self):
         expr = self.and_expr()
-        if self.match(TokenType.OR):
+        while self.match(TokenType.OR):
             operator = self.previous()
             right = self.and_expr()
             expr = Logical(expr, operator, right)

@@ -125,7 +125,8 @@ class Interpreter(StmtVisitor, ExprVisitor):
         if logicalexpr.op.type == TokenType.OR:
             if self.is_truthy(left):
                 return left
-            elif not self.is_truthy(left):
+        else:
+            if not self.is_truthy(left):
                 return left
 
         return self.evaluate(logicalexpr.right)

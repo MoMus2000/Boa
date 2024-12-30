@@ -2,6 +2,7 @@ import io
 import sys
 from stdlib.boa_math import Math
 from stdlib.boa_time import Time
+from stdlib.boa_arr  import Arr
 from environment import Environment
 from expr import ExprVisitor, Literal, Var
 from statement import StmtVisitor, ArrayStmt
@@ -13,15 +14,6 @@ def assert_eq(a, b, message):
 def assert_boa(a, message):
     assert a, message
 
-def append(a, val):
-    if not isinstance(a, list):
-        raise NotImplemented("Append only works for list")
-    a.append(val)
-
-def length(a):
-    if not isinstance(a, list):
-        raise NotImplemented("Append only works for list")
-    return len(a)
 
 class Callable:
     def __init__(self, func, arity):
@@ -53,8 +45,6 @@ class Interpreter(StmtVisitor, ExprVisitor):
         self.env = self.globals
         self.globals.define("assert_eq", Callable(assert_eq, 3))
         self.globals.define("assert", Callable(assert_boa, 2))
-        self.globals.define("append", Callable(append, 2))
-        self.globals.define("length", Callable(length, 1))
         self.output = io.StringIO()
         self.saved_stdout = sys.stdout
         self.debug_mode = debug_mode
@@ -284,6 +274,11 @@ class Interpreter(StmtVisitor, ExprVisitor):
             time = Time()
             self.globals.define("time.sleep", Callable(time.sleep, 1))
             self.globals.define("time.clock", Callable(time.clock, 0))
+        if visitor.lib_name.lexeme == "arr":
+            arr = Arr()
+            self.globals.define("arr.length", Callable(arr.length, 1))
+            self.globals.define("arr.append", Callable(arr.append, 2))
+            self.globals.define("arr.pop", Callable(arr.pop, 1))
         return
 
     def is_truthy(self, expr):

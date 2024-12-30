@@ -1,3 +1,5 @@
+import arr
+
 var a = [1, 2, 3];
 
 var i = 0;
@@ -9,23 +11,29 @@ while(i < 3){
 
 var a = [];
 for(var j=0; j < 10; j = j + 1;){
-  append(a, j);
+  arr.append(a, j);
 }
 
 for(var k=0; k < 10; k = k + 1;){
   assert(a[k] == k, "ERROR: Expected "+ a[k] + " but got " + k+1);
 }
 
-assert(length(a) == 10, "Expected length to equal 10");
+assert(arr.length(a) == 10, "Expected length to equal 10");
+
+while(arr.length(a) > 0) {
+  arr.pop(a);
+}
+
+assert(arr.length(a) == 0, "Expected length to be 0");
 
 var b = [1];
 
-assert(length(b) == 1, "Expected length to equal 1");
+assert(arr.length(b) == 1, "Expected length to equal 1");
 
 {
   var b = [];
 
-  assert(length(b) == 0, "Expected length to equal 0");
+  assert(arr.length(b) == 0, "Expected length to equal 0");
 
 }
 

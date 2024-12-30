@@ -7,15 +7,21 @@ from expr import ExprVisitor, Literal, Var
 from statement import StmtVisitor, ArrayStmt
 from token_types import TokenType
 
-def clock():
-    from datetime import datetime
-    return f"{datetime.now()}"
-
 def assert_eq(a, b, message):
     assert a == b, message
 
 def assert_boa(a, message):
     assert a, message
+
+def append(a, val):
+    if not isinstance(a, list):
+        raise NotImplemented("Append only works for list")
+    a.append(val)
+
+def length(a):
+    if not isinstance(a, list):
+        raise NotImplemented("Append only works for list")
+    return len(a)
 
 class Callable:
     def __init__(self, func, arity):
@@ -47,6 +53,8 @@ class Interpreter(StmtVisitor, ExprVisitor):
         self.env = self.globals
         self.globals.define("assert_eq", Callable(assert_eq, 3))
         self.globals.define("assert", Callable(assert_boa, 2))
+        self.globals.define("append", Callable(append, 2))
+        self.globals.define("length", Callable(length, 1))
         self.output = io.StringIO()
         self.saved_stdout = sys.stdout
         self.debug_mode = debug_mode
@@ -250,7 +258,11 @@ class Interpreter(StmtVisitor, ExprVisitor):
 
     def visit_array_statement(self, visitor):
         try:
-            return self.env.get(visitor.ident.lexeme)[int(visitor.elements.value)]
+            if isinstance(visitor.elements, Var):
+                index = self.env.get(visitor.elements.ident.lexeme)
+            else:
+                index = visitor.elements
+            return self.env.get(visitor.ident.lexeme)[int(index)]
         except Exception:
             raise IndexError("Array does not contain index ", int(visitor.elements.value))
     

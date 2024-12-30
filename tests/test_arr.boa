@@ -1,0 +1,35 @@
+var a = [1, 2, 3];
+
+var i = 0;
+
+while(i < 3){
+  assert(i+1 == a[i], "ERROR: Expected "+ a[i] + " but got " + i+1);
+  i = i + 1;
+}
+
+var a = [];
+for(var j=0; j < 10; j = j + 1;){
+  append(a, j);
+}
+
+for(var k=0; k < 10; k = k + 1;){
+  assert(a[k] == k, "ERROR: Expected "+ a[k] + " but got " + k+1);
+}
+
+assert(length(a) == 10, "Expected length to equal 10");
+
+var b = [1];
+
+assert(length(b) == 1, "Expected length to equal 1");
+
+{
+  var b = [];
+
+  assert(length(b) == 0, "Expected length to equal 0");
+
+}
+
+var b;
+
+assert(b == nil, "Expected b to be nil");
+

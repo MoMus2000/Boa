@@ -9,7 +9,7 @@ from statement import (
     Print, Expression, Var, 
     Block, IfStmt, WhileStmt,
     ForLoopStmt, FuncStmt, ReturnStmt,
-    ImportStmt
+    ImportStmt, ArrayStmt
 )
 
 """
@@ -73,6 +73,7 @@ class Parser:
 
         return self.expression_statement()
 
+
     def import_statement(self):
         lib_name = self.consume(TokenType.IDENTIFIER, "expected import name")
         return ImportStmt(lib_name)
@@ -105,7 +106,10 @@ class Parser:
         ident = self.consume(TokenType.IDENTIFIER, "Expected Variable Name");
         init = None
         if self.match(TokenType.EQUAL):
-            init = self.expression()
+            if self.match(TokenType.LEFT_ANGLE_BRACKET):
+                init = self.define_array_statement(ident)
+            else:
+                init = self.expression()
         self.consume(TokenType.SEMICOLON, "Expected ; after value");
         return Var(init, ident)
 
@@ -150,6 +154,24 @@ class Parser:
             return self.for_loop_statement()
         return self.statement()
 
+    def define_array_statement(self, ident):
+        args = []
+        if not self.check(TokenType.RIGHT_ANGLE_BRACKET):
+            while True:
+                if self.peek().type == TokenType.IDENTIFIER:
+                    arg = self.consume(TokenType.IDENTIFIER, "Expected args")
+                    args.append(arg)
+                elif self.peek().type == TokenType.NUMBER:
+                    arg = self.consume(TokenType.NUMBER, "Expected args")
+                    args.append(arg)
+                elif self.peek().type == TokenType.STRING:
+                    arg = self.consume(TokenType.STRING, "Expected args")
+                    args.append(arg)
+                if not self.match(TokenType.COMMA):
+                    break
+        self.consume(TokenType.RIGHT_ANGLE_BRACKET, "Expected RIGHT_ANGLE_BRACKET")
+        return ArrayStmt(ident, args)
+
     def define_fun_statement(self):
         name = self.consume(TokenType.IDENTIFIER, "Expected Identifier")
         self.consume(TokenType.LEFT_PAREN, "Expected Left Paren")
@@ -169,6 +191,7 @@ class Parser:
             args,
             block
         )
+
 
     def expression_statement(self):
         value = self.expression()
@@ -203,6 +226,7 @@ class Parser:
             else:
                 raise Exception("Invalid Expression Type")
         return expr
+
 
     def expression(self):
         return self.assign()
@@ -305,9 +329,22 @@ class Parser:
             self.consume(TokenType.RIGHT_PAREN, "Expected ')' after expression")
             return Grouping(expr)
         if self.match(TokenType.IDENTIFIER):
+            if self.check(TokenType.LEFT_ANGLE_BRACKET):
+                expr = self.index_array()
+                if expr is not None:
+                    return expr
             expr = self.previous()
             return ExprVar(expr)
         raise Exception("expected an expression")
+
+    def index_array(self):
+        if self.peek().type == TokenType.LEFT_ANGLE_BRACKET:
+            ident = self.previous()
+            self.consume(TokenType.LEFT_ANGLE_BRACKET, "Left Angle Bracket")
+            index = self.expression()
+            self.consume(TokenType.RIGHT_ANGLE_BRACKET, "Expected right angle bracket")
+            return ArrayStmt(ident, index)
+        return None
 
     def synchronize(self):
         self.advance()

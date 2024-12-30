@@ -4,7 +4,7 @@ from stdlib.boa_math import Math
 from stdlib.boa_time import Time
 from environment import Environment
 from expr import ExprVisitor, Literal, Var
-from statement import StmtVisitor
+from statement import StmtVisitor, ArrayStmt
 from token_types import TokenType
 
 def clock():
@@ -122,8 +122,12 @@ class Interpreter(StmtVisitor, ExprVisitor):
     def visit_var_statement(self, stmt):
         identifier = stmt.ident
         if stmt.expression != None:
-            val = self.evaluate(stmt.expression)
-            self.env.define(identifier.lexeme, val)
+            if isinstance(stmt.expression, ArrayStmt):
+                val = stmt.expression.elements
+                self.env.define(identifier.lexeme, [x.lexeme for x in val])
+            else:
+                val = self.evaluate(stmt.expression)
+                self.env.define(identifier.lexeme, val)
         else:
             self.env.define(identifier.lexeme, None)
         return self.env.get(identifier.lexeme)
@@ -243,6 +247,12 @@ class Interpreter(StmtVisitor, ExprVisitor):
         if visitor.value != None:
             val = self.evaluate(visitor.value)
         raise ReturnException(val)
+
+    def visit_array_statement(self, visitor):
+        try:
+            return self.env.get(visitor.ident.lexeme)[int(visitor.elements.value)]
+        except Exception:
+            raise IndexError("Array does not contain index ", int(visitor.elements.value))
     
     def visit_import_statement(self, visitor):
         if visitor.lib_name.lexeme == "math":

@@ -105,3 +105,11 @@ class ImportStmt(Statement):
     def accept(self, visitor):
         return visitor.visit_import_statement(self)
 
+class ArrayStmt(Statement):
+    def __init__(self, ident, elements=[]):
+        self.ident = ident
+        self.elements = elements
+
+    def accept(self, visitor):
+        return visitor.visit_array_statement(self)
+

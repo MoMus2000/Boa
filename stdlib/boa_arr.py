@@ -18,3 +18,9 @@ class Arr:
         a.pop()
         return self.length(a)
 
+    def modify(self, a, val, idx):
+        if not isinstance(a, list):
+            raise NotImplemented("Append only works for list")
+
+        a[int(idx)] = val
+        

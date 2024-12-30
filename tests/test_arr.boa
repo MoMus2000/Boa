@@ -41,3 +41,7 @@ var b;
 
 assert(b == nil, "Expected b to be nil");
 
+var b = [1, 2];
+arr.modify(b, 5, 0);
+assert(b[0] == 5, "Expected 5");
+

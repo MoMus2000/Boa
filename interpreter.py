@@ -251,7 +251,7 @@ class Interpreter(StmtVisitor, ExprVisitor):
             if isinstance(visitor.elements, Var):
                 index = self.env.get(visitor.elements.ident.lexeme)
             else:
-                index = visitor.elements
+                index = visitor.elements.value
             return self.env.get(visitor.ident.lexeme)[int(index)]
         except Exception:
             raise IndexError("Array does not contain index ", int(visitor.elements.value))
@@ -279,6 +279,7 @@ class Interpreter(StmtVisitor, ExprVisitor):
             self.globals.define("arr.length", Callable(arr.length, 1))
             self.globals.define("arr.append", Callable(arr.append, 2))
             self.globals.define("arr.pop", Callable(arr.pop, 1))
+            self.globals.define("arr.modify", Callable(arr.modify, 3))
         return
 
     def is_truthy(self, expr):

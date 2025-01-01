@@ -158,6 +158,11 @@ class Parser:
         args = []
         if not self.check(TokenType.RIGHT_ANGLE_BRACKET):
             while True:
+                if self.peek().type == TokenType.LEFT_ANGLE_BRACKET:
+                    self.consume(TokenType.LEFT_ANGLE_BRACKET, "Expected args")
+                    inner = (self.define_array_statement(ident))
+                    args.append(inner.elements)
+                    raise Exception("Not currently supporting more than 1D arrays")
                 if self.peek().type == TokenType.IDENTIFIER:
                     arg = self.consume(TokenType.IDENTIFIER, "Expected args")
                     args.append(arg)

@@ -66,19 +66,41 @@ print add(sub(add(2,7), 3), 4);
 
 ```
 
-Standard lib (Work in Progress)
+## Standard lib (Work in Progress)
+
+### Arrays
+```lua
+import arr
+
+var nums = [1, 2, 3];
+
+for(var i=0; i<arr.length(nums); i = i + 1;) {
+    print nums[i];
+}
+
+print nums[0];
+
+nums[0] = 4;
+
+```
+
+### Math
 ```lua
 import math
-import time
 
 print math.pow(2, 3);
 print math.factorial(10);
 print math.ceil(6.9);
 print math.floor(6.9);
 
-time.sleep(1);
+```
+### Time
+```lua
+import time
 
-print time.clock();
+print "Sleeping for 5 secs";
+time.sleep(5);
+
+print "Time Stamp " + time.clock();
 
 ```
-

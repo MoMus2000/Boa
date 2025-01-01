@@ -82,6 +82,12 @@ print nums[0];
 
 nums[0] = 4;
 
+var nums2 = [4, 5, 6];
+
+var nums3 = nums + nums2;
+
+print nums3;
+
 ```
 
 ### Math

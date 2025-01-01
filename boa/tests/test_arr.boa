@@ -1,66 +1,72 @@
 import arr
 
-var a = [1, 2, 3];
+ var a = [1, 2, 3];
+ 
+ var i = 0;
+ 
+ while(i < 3){
+   assert(i+1 == a[i], "ERROR: Expected "+ a[i] + " but got " + i+1);
+   i = i + 1;
+ }
+ 
+ var a = [];
+ for(var j=0; j < 10; j = j + 1;){
+   arr.append(a, j);
+ }
+ 
+ for(var k=0; k < 10; k = k + 1;){
+   assert(a[k] == k, "ERROR: Expected "+ a[k] + " but got " + k+1);
+ }
+ 
+ assert(arr.length(a) == 10, "Expected length to equal 10");
+ 
+ while(arr.length(a) > 0) {
+   arr.pop(a);
+ }
+ 
+ assert(arr.length(a) == 0, "Expected length to be 0");
+ 
+ var b = [1];
+ 
+ assert(arr.length(b) == 1, "Expected length to equal 1");
+ 
+ {
+   var b = [];
+ 
+   assert(arr.length(b) == 0, "Expected length to equal 0");
+ 
+ }
+ 
+ var b;
+ 
+ assert(b == nil, "Expected b to be nil");
+ 
+ var b = [1, 2];
+ arr.modify(b, 5, 0);
+ assert(b[0] == 5, "Expected 5");
+ 
+ var b = [1, 2];
+ b[0] = 5;
+ assert(b[0] == 5, "Expected 5");
+ 
+ var i =4;
+ 
+ b[i-3] = 8;
+ assert(b[1] == 8, "Expected 8");
+ 
+ var c = [1, 2];
+ var d = c + b;
+ 
+ d[0] = 69;
+ assert(d[0] == 69, "Expected 69");
+ 
+ var i =4;
+ var b = [1, i+4];
+ assert(b[1] == 8, "Expected 8");
 
-var i = 0;
-
-while(i < 3){
-  assert(i+1 == a[i], "ERROR: Expected "+ a[i] + " but got " + i+1);
-  i = i + 1;
-}
-
-var a = [];
-for(var j=0; j < 10; j = j + 1;){
-  arr.append(a, j);
-}
-
-for(var k=0; k < 10; k = k + 1;){
-  assert(a[k] == k, "ERROR: Expected "+ a[k] + " but got " + k+1);
-}
-
-assert(arr.length(a) == 10, "Expected length to equal 10");
-
-while(arr.length(a) > 0) {
-  arr.pop(a);
-}
-
-assert(arr.length(a) == 0, "Expected length to be 0");
-
-var b = [1];
-
-assert(arr.length(b) == 1, "Expected length to equal 1");
-
-{
-  var b = [];
-
-  assert(arr.length(b) == 0, "Expected length to equal 0");
-
-}
-
-var b;
-
-assert(b == nil, "Expected b to be nil");
-
-var b = [1, 2];
-arr.modify(b, 5, 0);
-assert(b[0] == 5, "Expected 5");
-
-var b = [1, 2];
-b[0] = 5;
-assert(b[0] == 5, "Expected 5");
-
-var i =4;
-
-b[i-3] = 8;
-assert(b[1] == 8, "Expected 8");
-
-var c = [1, 2];
-var d = c + b;
-
-d[0] = 69;
-assert(d[0] == 69, "Expected 69");
-
-var i =4;
-var b = [1, i+4];
-assert(b[1] == 8, "Expected 8");
+var c = [1, 2, 3, [1, 2, 7+i, [5, 6, 7]]];
+var x = c[3];
+var y = [5, 6, 7];
+var x = x[3];
+assert(x == y, "ERROR x does not match y");
 

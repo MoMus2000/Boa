@@ -136,9 +136,12 @@ class Interpreter(StmtVisitor, ExprVisitor):
         if stmt.expression != None:
             if isinstance(stmt.expression, ArrayStmt):
                 val = stmt.expression.elements
-                args = []
-                args = self.evaluate_array(val)
-                self.env.define(identifier.lexeme, args)
+                if isinstance(val, list):
+                    val = self.evaluate_array(val)
+                else:
+                    index = self.evaluate(val) # index
+                    val = self.env.get(stmt.expression.ident.lexeme)[int(index)]
+                self.env.define(identifier.lexeme, val)
             else:
                 val = self.evaluate(stmt.expression)
                 self.env.define(identifier.lexeme, val)
@@ -202,7 +205,7 @@ class Interpreter(StmtVisitor, ExprVisitor):
             if expr.op.type == TokenType.GREATER_EQUAL:
                 return left >= right
         else:
-            if isinstance(left, list) and isinstance(right, list):
+            if isinstance(left, list) and isinstance(right, list) and expr.op.type == TokenType.PLUS:
                 return left + right
             if expr.op.type == TokenType.PLUS:
                 l = str(left).strip('"')

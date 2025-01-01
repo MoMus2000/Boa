@@ -162,8 +162,8 @@ class Parser:
                     self.consume(TokenType.LEFT_ANGLE_BRACKET, "Expected args")
                     inner = self.define_array_statement(ident)
                     args.append(inner.elements)
-                    raise Exception("Not currently supporting more than 1D arrays")
-                args.append(self.expression())
+                else:
+                    args.append(self.expression())
                 if not self.match(TokenType.COMMA):
                     break
         self.consume(TokenType.RIGHT_ANGLE_BRACKET, "Expected RIGHT_ANGLE_BRACKET")

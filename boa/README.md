@@ -88,6 +88,14 @@ var nums3 = nums + nums2;
 
 print nums3;
 
+var i = 4;
+
+var c = [1, 2, 3, [1, 2, 7+i, [5, 6, 7]]];
+var x = c[3];
+var y = [5, 6, 7];
+var x = x[3];
+assert(x == y, "ERROR x does not match y");
+
 ```
 
 ### Math

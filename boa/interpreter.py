@@ -186,6 +186,8 @@ class Interpreter(StmtVisitor, ExprVisitor):
             if expr.op.type == TokenType.GREATER_EQUAL:
                 return left >= right
         else:
+            if isinstance(left, list) and isinstance(right, list):
+                return left + right
             if expr.op.type == TokenType.PLUS:
                 l = str(left).strip('"')
                 r = str(right).strip('"')

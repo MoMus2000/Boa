@@ -54,3 +54,10 @@ var i =4;
 b[i-3] = 8;
 assert(b[1] == 8, "Expected 8");
 
+var c = [1, 2];
+var d = c + b;
+
+d[0] = 69;
+assert(d[0] == 69, "Expected 69");
+
+

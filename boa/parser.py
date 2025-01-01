@@ -160,18 +160,10 @@ class Parser:
             while True:
                 if self.peek().type == TokenType.LEFT_ANGLE_BRACKET:
                     self.consume(TokenType.LEFT_ANGLE_BRACKET, "Expected args")
-                    inner = (self.define_array_statement(ident))
+                    inner = self.define_array_statement(ident)
                     args.append(inner.elements)
                     raise Exception("Not currently supporting more than 1D arrays")
-                if self.peek().type == TokenType.IDENTIFIER:
-                    arg = self.consume(TokenType.IDENTIFIER, "Expected args")
-                    args.append(arg)
-                elif self.peek().type == TokenType.NUMBER:
-                    arg = self.consume(TokenType.NUMBER, "Expected args")
-                    args.append(arg)
-                elif self.peek().type == TokenType.STRING:
-                    arg = self.consume(TokenType.STRING, "Expected args")
-                    args.append(arg)
+                args.append(self.expression())
                 if not self.match(TokenType.COMMA):
                     break
         self.consume(TokenType.RIGHT_ANGLE_BRACKET, "Expected RIGHT_ANGLE_BRACKET")
@@ -327,8 +319,10 @@ class Parser:
             return Literal(False)
         if self.match(TokenType.TRUE):
             return Literal(True)
-        if self.match(TokenType.STRING, TokenType.NUMBER):
+        if self.match(TokenType.STRING):
             return Literal(self.previous().lexeme)
+        if self.match(TokenType.NUMBER):
+            return Literal(float(self.previous().lexeme))
         if self.match(TokenType.NIL):
             return Literal(None)
         if self.match(TokenType.LEFT_PAREN):

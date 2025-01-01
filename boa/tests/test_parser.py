@@ -7,11 +7,11 @@ def test():
     printer = AstPrinter()
     tests = [
         '"hi"',
-        "(+ 1 2)",
-        "(* (group (+ 4 5)) (group (+ 6 7)))",
-        "(* (group (- 5 3)) 2)",
-        "(- 2 (group (+ 3 (* 4 5))))",
-        "(+ (+ 3 (* 4 5)) 2)",
+        "(+ 1.0 2.0)",
+        "(* (group (+ 4.0 5.0)) (group (+ 6.0 7.0)))",
+        "(* (group (- 5.0 3.0)) 2.0)",
+        "(- 2.0 (group (+ 3.0 (* 4.0 5.0))))",
+        "(+ (+ 3.0 (* 4.0 5.0)) 2.0)",
     ]
     with open("./tests/test_parser.boa", "r") as source:
         for test, line in zip(tests, source.readlines()):

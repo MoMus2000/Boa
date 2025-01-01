@@ -117,12 +117,28 @@ class Interpreter(StmtVisitor, ExprVisitor):
             self.visit_block_statement(forstmt.block)
             self.evaluate(forstmt.incrementer)
 
+    def evaluate_array(self, array):
+        evaluated = []
+        for element in array:
+            if isinstance(element, list):
+                evaluated.append(self.evaluate_array(element))
+            elif hasattr(element, "lexeme"):
+                if element.type == TokenType.IDENTIFIER:
+                    evaluated.append(self.env.get(element.lexeme))
+                else:
+                    evaluated.append(element.lexeme)
+            else:
+                evaluated.append(self.evaluate(element))
+        return evaluated
+
     def visit_var_statement(self, stmt):
         identifier = stmt.ident
         if stmt.expression != None:
             if isinstance(stmt.expression, ArrayStmt):
                 val = stmt.expression.elements
-                self.env.define(identifier.lexeme, [x.lexeme for x in val])
+                args = []
+                args = self.evaluate_array(val)
+                self.env.define(identifier.lexeme, args)
             else:
                 val = self.evaluate(stmt.expression)
                 self.env.define(identifier.lexeme, val)

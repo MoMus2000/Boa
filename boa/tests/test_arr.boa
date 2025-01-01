@@ -60,4 +60,7 @@ var d = c + b;
 d[0] = 69;
 assert(d[0] == 69, "Expected 69");
 
+var i =4;
+var b = [1, i+4];
+assert(b[1] == 8, "Expected 8");
 

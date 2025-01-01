@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 PYTHONPATH=$(pwd) pytest tests -s -v -q
 

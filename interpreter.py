@@ -255,6 +255,11 @@ class Interpreter(StmtVisitor, ExprVisitor):
             return self.env.get(visitor.ident.lexeme)[int(index)]
         except Exception:
             raise IndexError("Array does not contain index ", int(visitor.elements.value))
+
+    def visit_array_assign_statement(self, visitor):
+        value = self.evaluate(visitor.value)
+        self.env.get(visitor.ident.lexeme)[int(self.evaluate(visitor.index))] = value
+        return None
     
     def visit_import_statement(self, visitor):
         if visitor.lib_name.lexeme == "math":

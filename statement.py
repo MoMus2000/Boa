@@ -113,3 +113,11 @@ class ArrayStmt(Statement):
     def accept(self, visitor):
         return visitor.visit_array_statement(self)
 
+class ArrayAssignStmt(Statement):
+    def __init__(self, ident, index, value):
+        self.ident = ident
+        self.index = index
+        self.value = value
+
+    def accept(self, visitor):
+        return visitor.visit_array_assign_statement(self)

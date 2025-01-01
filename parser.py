@@ -9,7 +9,7 @@ from statement import (
     Print, Expression, Var, 
     Block, IfStmt, WhileStmt,
     ForLoopStmt, FuncStmt, ReturnStmt,
-    ImportStmt, ArrayStmt
+    ImportStmt, ArrayStmt, ArrayAssignStmt
 )
 
 """
@@ -223,6 +223,8 @@ class Parser:
             value  = self.assign()
             if isinstance(expr, ExprVar):
                return Assign(expr.ident, value)
+            if isinstance(expr, ArrayStmt):
+                return ArrayAssignStmt(expr.ident, expr.elements, value)
             else:
                 raise Exception("Invalid Expression Type")
         return expr

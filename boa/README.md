@@ -66,7 +66,7 @@ print add(sub(add(2,7), 3), 4);
 
 ```
 
-## Standard lib (Work in Progress)
+## Standard lib
 
 ### Arrays
 ```lua

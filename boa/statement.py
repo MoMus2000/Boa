@@ -106,9 +106,12 @@ class ImportStmt(Statement):
         return visitor.visit_import_statement(self)
 
 class ArrayStmt(Statement):
-    def __init__(self, ident, elements=[]):
+    def __init__(self, ident, elements=None, index=None):
+        if index is not None and elements is not None:
+            raise Exception("Collision Error")
         self.ident = ident
         self.elements = elements
+        self.index = index
 
     def accept(self, visitor):
         return visitor.visit_array_statement(self)

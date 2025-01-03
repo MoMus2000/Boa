@@ -132,15 +132,17 @@ class Interpreter(StmtVisitor, ExprVisitor):
         return evaluated
 
     def visit_var_statement(self, stmt):
+        from functools import reduce
         identifier = stmt.ident
         if stmt.expression != None:
             if isinstance(stmt.expression, ArrayStmt):
-                val = stmt.expression.elements
-                if isinstance(val, list):
-                    val = self.evaluate_array(val)
+                val = stmt.expression
+                if val.elements != None:
+                    val = self.evaluate_array(val.elements)
                 else:
-                    index = self.evaluate(val) # index
-                    val = self.env.get(stmt.expression.ident.lexeme)[int(index)]
+                    index = [int(self.evaluate(x)) for x in val.index]
+                    val = reduce(lambda acc, idx: acc[idx], index, 
+                        self.env.get(stmt.expression.ident.lexeme))
                 self.env.define(identifier.lexeme, val)
             else:
                 val = self.evaluate(stmt.expression)
@@ -268,18 +270,24 @@ class Interpreter(StmtVisitor, ExprVisitor):
         raise ReturnException(val)
 
     def visit_array_statement(self, visitor):
+        from functools import reduce
         try:
-            if isinstance(visitor.elements, Var):
-                index = self.env.get(visitor.elements.ident.lexeme)
+            if isinstance(visitor.index, Var):
+                index = self.env.get(visitor.index.ident.lexeme)
             else:
-                index = visitor.elements.value
-            return self.env.get(visitor.ident.lexeme)[int(index)]
+                index = [int(self.evaluate(x)) for x in visitor.index]
+            return reduce(lambda acc, idx: acc[idx], index, self.env.get(visitor.ident.lexeme))
         except Exception:
-            raise IndexError("Array does not contain index ", int(visitor.elements.value))
+            raise IndexError("Array does not contain index ", visitor.index)
 
     def visit_array_assign_statement(self, visitor):
         value = self.evaluate(visitor.value)
-        self.env.get(visitor.ident.lexeme)[int(self.evaluate(visitor.index))] = value
+        array = self.env.get(visitor.ident.lexeme)
+        indices = [int(self.evaluate(x)) for x in visitor.index]
+        for idx in indices[:-1]:
+            array = array[idx]
+        # Assign the value at the final index
+        array[indices[-1]] = value
         return None
     
     def visit_import_statement(self, visitor):

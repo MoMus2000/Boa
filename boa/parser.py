@@ -167,7 +167,7 @@ class Parser:
                 if not self.match(TokenType.COMMA):
                     break
         self.consume(TokenType.RIGHT_ANGLE_BRACKET, "Expected RIGHT_ANGLE_BRACKET")
-        return ArrayStmt(ident, args)
+        return ArrayStmt(ident, index=None, elements=args)
 
     def define_fun_statement(self):
         name = self.consume(TokenType.IDENTIFIER, "Expected Identifier")
@@ -221,7 +221,7 @@ class Parser:
             if isinstance(expr, ExprVar):
                return Assign(expr.ident, value)
             if isinstance(expr, ArrayStmt):
-                return ArrayAssignStmt(expr.ident, expr.elements, value)
+                return ArrayAssignStmt(expr.ident, expr.index, value)
             else:
                 raise Exception("Invalid Expression Type")
         return expr
@@ -339,13 +339,13 @@ class Parser:
         raise Exception("expected an expression")
 
     def index_array(self):
-        if self.peek().type == TokenType.LEFT_ANGLE_BRACKET:
-            ident = self.previous()
-            self.consume(TokenType.LEFT_ANGLE_BRACKET, "Left Angle Bracket")
+        ident = self.previous()
+        indexes = []
+        while self.match(TokenType.LEFT_ANGLE_BRACKET):
             index = self.expression()
+            indexes.append(index)
             self.consume(TokenType.RIGHT_ANGLE_BRACKET, "Expected right angle bracket")
-            return ArrayStmt(ident, index)
-        return None
+        return  ArrayStmt(ident, index=indexes, elements=None)
 
     def synchronize(self):
         self.advance()

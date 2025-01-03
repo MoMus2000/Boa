@@ -86,15 +86,42 @@ var nums2 = [4, 5, 6];
 
 var nums3 = nums + nums2;
 
-print nums3;
+var a = [[1, 2], [3, 4]];
+var b = [[5, 6], [7, 8]];
 
-var i = 4;
+fun multiply_matrices(a, b) {
+  var m = arr.length(a);
+  var n = arr.length(a[0]);
+  var p = arr.length(b[0]);
 
-var c = [1, 2, 3, [1, 2, 7+i, [5, 6, 7]]];
-var x = c[3];
-var y = [5, 6, 7];
-var x = x[3];
-assert(x == y, "ERROR x does not match y");
+  if(n != arr.length(b)) {
+    return nil;
+  }
+
+  var c = [];
+
+  for(var i =0; i< m; i = i + 1;) {
+    var row = [];
+    for(var j=0; j <p; j = j +1;) {
+      arr.append(row, 0);
+    }
+    arr.append(c, row);
+  }
+
+  for(var i =0; i< m; i = i+1;){
+    for(var j =0; j < p; j = j +1;) {
+      for(var k =0; k < n; k = k +1;) {
+          c[i][j] = c[i][j] + a[i][k]*b[k][j];
+      }
+    }
+  }
+
+  return c;
+}
+
+var mul_ab = multiply_matrices(a, b);
+var result = [[19.0, 22.0], [43.0, 50.0]];
+assert(mul_ab == result, "Output does not match");
 
 ```
 

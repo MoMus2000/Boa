@@ -77,3 +77,28 @@ var mul_ab = multiply_matrices(a, b);
 var result = nil;
 assert(mul_ab == result, "Output does not match");
 
+fun transpose(matrix){
+    var rows = arr.length(matrix);
+    var cols = arr.length(matrix[0]);
+    var result = [];
+    for(var i =0; i< cols; i = i + 1;) {
+      var row = [];
+      for(var j=0; j < rows; j = j +1;) {
+        arr.append(row, 0);
+      }
+      arr.append(result, row);
+    }
+
+    for(var i =0; i< rows; i = i + 1;) {
+      for(var j=0; j < cols; j = j +1;) {
+          result[j][i] = matrix[i][j];
+      }
+    }
+
+    return result;
+}
+
+var t1 = transpose(a);
+var result = [[1, 4], [2, 5], [3, 6]];
+assert(t1 == result, "ERROR expected t1 to equal result");
+

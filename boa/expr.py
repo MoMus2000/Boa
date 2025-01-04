@@ -106,3 +106,11 @@ class Call(Expr):
 
     def accept(self, visitor):
         return visitor.visit_call_expression(self)
+
+class Arr(Expr):
+    def __init__(self, elements):
+        self.elements = elements
+
+    def accept(self, visitor):
+        return visitor.visit_array_expression(self)
+

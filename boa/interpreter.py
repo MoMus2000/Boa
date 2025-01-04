@@ -272,11 +272,25 @@ class Interpreter(StmtVisitor, ExprVisitor):
     def visit_array_statement(self, visitor):
         from functools import reduce
         try:
-            if isinstance(visitor.index, Var):
-                index = self.env.get(visitor.index.ident.lexeme)
-            else:
-                index = [int(self.evaluate(x)) for x in visitor.index]
-            return reduce(lambda acc, idx: acc[idx], index, self.env.get(visitor.ident.lexeme))
+            getter = self.env.get(visitor.ident.lexeme)
+            if isinstance(getter, list):
+                if isinstance(visitor.index, Var):
+                    index = self.env.get(visitor.index.ident.lexeme)
+                else:
+                    index = [int(self.evaluate(x)) for x in visitor.index]
+                return reduce(lambda acc, idx: acc[idx], index, getter)
+            elif isinstance(getter, dict):
+                if isinstance(visitor.index, Var):
+                    index = self.env.get(visitor.index.ident.lexeme)
+                else:
+                    index = []
+                    for x in visitor.index:
+                        x = self.evaluate(x)
+                        if type(x) == float:
+                            index.append(int(x))
+                        else:
+                            index.append(x)
+                return reduce(lambda acc, idx: acc[idx], index, getter)
         except Exception:
             raise IndexError("Array does not contain index ", visitor.index)
 
@@ -289,6 +303,16 @@ class Interpreter(StmtVisitor, ExprVisitor):
         # Assign the value at the final index
         array[indices[-1]] = value
         return None
+
+    def visit_hash_map_statement(self, visitor):
+        keys   = [self.evaluate(k) for k in visitor.keys]
+        values = [self.evaluate(v) for v in visitor.values]
+        if None in keys:
+            raise Exception("nil values are not allowed as keys in hashmap")
+        return dict(zip(keys, values))
+
+    def visit_array_expression(self, visitor):
+        return [self.evaluate(v) for v in visitor.elements]
     
     def visit_import_statement(self, visitor):
         if visitor.lib_name.lexeme == "math":

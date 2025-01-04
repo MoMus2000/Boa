@@ -6,7 +6,7 @@ def test():
     lexer = None
     printer = AstPrinter()
     tests = [
-        '"hi"',
+        'hi',
         "(+ 1.0 2.0)",
         "(* (group (+ 4.0 5.0)) (group (+ 6.0 7.0)))",
         "(* (group (- 5.0 3.0)) 2.0)",

@@ -10,6 +10,7 @@ class TokenType(Enum):
     RIGHT_ANGLE_BRACKET  = auto()
 
     PIPE                 = auto()
+    COLON                = auto()
 
     COMMA                = auto()
     DOT                  = auto()

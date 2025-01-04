@@ -146,6 +146,8 @@ class Lexer:
             self.add_token(TokenType.LEFT_ANGLE_BRACKET)
         elif c == "]":
             self.add_token(TokenType.RIGHT_ANGLE_BRACKET)
+        elif c == ":":
+            self.add_token(TokenType.COLON)
         elif c == "!":
             if self.match("="):
                 self.add_token(TokenType.BANG_EQUAL)

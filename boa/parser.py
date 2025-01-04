@@ -2,14 +2,14 @@ from token_types import TokenType
 
 from expr import (
     Binary, Unary, Literal, Grouping,
-    Var as ExprVar, Assign, Logical, Call
+    Var as ExprVar, Assign, Logical, Call, Arr as ExprArr
 )
 
 from statement import (
     Print, Expression, Var, 
     Block, IfStmt, WhileStmt,
     ForLoopStmt, FuncStmt, ReturnStmt,
-    ImportStmt, ArrayStmt, ArrayAssignStmt
+    ImportStmt, ArrayStmt, ArrayAssignStmt, HashMapStatement
 )
 
 """
@@ -106,12 +106,31 @@ class Parser:
         ident = self.consume(TokenType.IDENTIFIER, "Expected Variable Name");
         init = None
         if self.match(TokenType.EQUAL):
-            if self.match(TokenType.LEFT_ANGLE_BRACKET):
+            if self.check(TokenType.LEFT_ANGLE_BRACKET):
+                self.consume(TokenType.LEFT_ANGLE_BRACKET, "Expected a Left Angle Bracket")
                 init = self.define_array_statement(ident)
+            elif self.check(TokenType.LEFT_BRACE):
+                self.consume(TokenType.LEFT_BRACE, "Expected a Left Angle Bracket")
+                init = self.define_hash_map_statement(ident)
             else:
                 init = self.expression()
         self.consume(TokenType.SEMICOLON, "Expected ; after value");
         return Var(init, ident)
+
+    def define_hash_map_statement(self, ident):
+        keys   = []
+        values = []
+        if not self.check(TokenType.RIGHT_BRACE):
+            while True:
+                key = self.expression()
+                self.consume(TokenType.COLON, "Expected a colon after key")
+                value = self.expression()
+                keys.append(key)
+                values.append(value)
+                if not self.match(TokenType.COMMA):
+                    break
+        self.consume(TokenType.RIGHT_BRACE, "Expected a right brace to close the map")
+        return HashMapStatement(keys, values)
 
     def if_statement(self):
         self.consume(TokenType.LEFT_PAREN, "Expected ( after if")
@@ -226,7 +245,6 @@ class Parser:
                 raise Exception("Invalid Expression Type")
         return expr
 
-
     def expression(self):
         return self.assign()
 
@@ -320,7 +338,7 @@ class Parser:
         if self.match(TokenType.TRUE):
             return Literal(True)
         if self.match(TokenType.STRING):
-            return Literal(self.previous().lexeme)
+            return Literal(self.previous().lexeme.strip('"'))
         if self.match(TokenType.NUMBER):
             return Literal(float(self.previous().lexeme))
         if self.match(TokenType.NIL):
@@ -331,14 +349,32 @@ class Parser:
             return Grouping(expr)
         if self.match(TokenType.IDENTIFIER):
             if self.check(TokenType.LEFT_ANGLE_BRACKET):
-                expr = self.index_array()
+                expr = self.get_index()
                 if expr is not None:
                     return expr
             expr = self.previous()
             return ExprVar(expr)
+        if self.match(TokenType.LEFT_ANGLE_BRACKET):
+            expr = self.define_arr_expr()
+            return expr
         raise Exception("expected an expression")
 
-    def index_array(self):
+    def define_arr_expr(self):
+        args = []
+        if not self.check(TokenType.RIGHT_ANGLE_BRACKET):
+            while True:
+                if self.peek().type == TokenType.LEFT_ANGLE_BRACKET:
+                    self.consume(TokenType.LEFT_ANGLE_BRACKET, "Expected args")
+                    inner = self.define_arr_expr()
+                    args.append(inner.elements)
+                else:
+                    args.append(self.expression())
+                if not self.match(TokenType.COMMA):
+                    break
+        self.consume(TokenType.RIGHT_ANGLE_BRACKET, "Expected RIGHT_ANGLE_BRACKET")
+        return ExprArr(args)
+
+    def get_index(self):
         ident = self.previous()
         indexes = []
         while self.match(TokenType.LEFT_ANGLE_BRACKET):

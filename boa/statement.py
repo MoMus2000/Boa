@@ -124,3 +124,12 @@ class ArrayAssignStmt(Statement):
 
     def accept(self, visitor):
         return visitor.visit_array_assign_statement(self)
+
+class HashMapStatement(Statement):
+    def __init__(self, keys, values):
+        self.keys  = keys
+        self.values = values
+
+    def accept(self, visitor):
+        return visitor.visit_hash_map_statement(self)
+

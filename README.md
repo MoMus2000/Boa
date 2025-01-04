@@ -53,17 +53,6 @@ for (var b = 1; a < 10000; b = temp + b;) {
   a = b;
 }
 
-fun add(a, b){
-  return a + b;
-}
-
-fun sub(a, b){
-  return a - b;
-}
-
-print add(1, 7);
-print add(sub(add(2,7), 3), 4);
-
 ```
 
 ## Standard lib

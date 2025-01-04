@@ -68,6 +68,22 @@ print add(sub(add(2,7), 3), 4);
 
 ## Standard lib
 
+### Maps
+```lua
+var b = [1.0, 2.0];
+
+var mapper = {
+  "1"   : b,
+  "2"   : "momus2000",
+  "3"   : [1, 2, 3]
+};
+
+assert(mapper["1"][1] == 2, "Expected value of 1");
+assert(mapper["2"]    == "momus2000", "momus2000");
+assert(mapper["3"][2] == 3, "Expected value of 3");
+
+```
+
 ### Arrays
 ```lua
 import arr

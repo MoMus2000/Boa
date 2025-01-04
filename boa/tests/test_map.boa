@@ -7,6 +7,6 @@ var mapper = {
 };
 
 assert(mapper["1"][1] == 2, "Expected value of 1");
-assert(mapper["2"] == "BUBBA", "Expected BUBBA");
+assert(mapper["2"]    == "BUBBA", "Expected BUBBA");
 assert(mapper["3"][2] == 3, "Expected value of 3");
 

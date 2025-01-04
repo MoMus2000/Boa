@@ -59,6 +59,8 @@ for (var b = 1; a < 10000; b = temp + b;) {
 
 ### Maps
 ```lua
+import map
+
 var b = [1.0, 2.0];
 
 var mapper = {
@@ -67,10 +69,13 @@ var mapper = {
   "3"   : [1, 2, 3]
 };
 
-assert(mapper["1"][1] == 2, "Expected value of 1");
-assert(mapper["2"]    == "momus2000", "momus2000");
-assert(mapper["3"][2] == 3, "Expected value of 3");
+print map.keys(mapper);
+print map.values(mapper);
 
+print map["1"];
+print map["2"];
+
+print map["3"][0];
 ```
 
 ### Arrays

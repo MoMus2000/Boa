@@ -3,6 +3,7 @@ import sys
 from stdlib.boa_math import Math
 from stdlib.boa_time import Time
 from stdlib.boa_arr  import Arr
+from stdlib.boa_map  import Map
 from environment import Environment
 from expr import ExprVisitor, Literal, Var
 from statement import StmtVisitor, ArrayStmt
@@ -315,6 +316,15 @@ class Interpreter(StmtVisitor, ExprVisitor):
         return [self.evaluate(v) for v in visitor.elements]
     
     def visit_import_statement(self, visitor):
+        allowed_libs = ["math", "arr", "time", "map"]
+        if visitor.lib_name.lexeme not in allowed_libs:
+            raise Exception(f"import {visitor.lib_name.lexeme} not found")
+        if visitor.lib_name.lexeme == "map":
+            map = Map()
+            self.globals.define("map.insert", Callable(map.insert, 3))
+            self.globals.define("map.keys", Callable(map.keys, 1))
+            self.globals.define("map.values", Callable(map.values, 1))
+            self.globals.define("map.get", Callable(map.get, 2))
         if visitor.lib_name.lexeme == "math":
             math = Math()
             self.globals.define("math.pi", Callable(math.pi, 0))

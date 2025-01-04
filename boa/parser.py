@@ -114,7 +114,8 @@ class Parser:
                 init = self.define_hash_map_statement(ident)
             else:
                 init = self.expression()
-        self.consume(TokenType.SEMICOLON, "Expected ; after value");
+        if not self.check(TokenType.LEFT_ANGLE_BRACKET):
+            self.consume(TokenType.SEMICOLON, "Expected ; after value")
         return Var(init, ident)
 
     def define_hash_map_statement(self, ident):

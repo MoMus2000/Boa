@@ -18,18 +18,63 @@ func NewParser(source_code []byte) *Parser {
 
 func (p *Parser) parse() []Statement {
   var statements []Statement = make([]Statement, 0)
-  le := LiteralExpression{}
-  le.Accept(p)
+  for !p.is_at_end(){
+    // statements = append(statements, )
+  }
   return statements
 }
 
-func (p *Parser) visit_binary_expression(bi Expression){
+//  program     -> declaration* eof
+//  
+//  declaration -> varDecl
+//              | statement
+//  
+//  varDecl     -> "var" IDENTIFIER ( "=" expression )? ";"
+//  
+//  statement   -> exprStmt
+//              | forStmt
+//              | ifStmt
+//              | printStmt
+//              | whileStmt
+//              | blockStmt
+//  
+//  exprStmt    -> expression ";"
+//  
+//  forStmt     -> "for" "(" (varDecl | exprStmt | ";" ) expression? ";" expression? ")" statement
+//  
+//  ifStmt      -> "if" "(" expression ")" statement ( "else" statement )?
+//  
+//  blockStmt   -> "{" declaration* "}"
+//  
+//  whileStmt   -> "while" "(" expression ")" statement
+//  
+//  printStmt   -> "print" expression ";"
+//  
+//  expression  -> assignment
+//  
+//  assignment  -> identifier ( "=" assignment )?
+//              | logic_or
+//  
+//  logic_or    -> logic_and ( "or " logic_and )*
+//  
+//  logic_and   -> equality ( "and" equality )*
+//  
+//  equality    -> comparison ( ( "!=" | "==" ) comparison )*
+//  
+//  comparison  -> term ( ( ">" | ">=" | "<" | "<=" ) term )*
+//  
+//  term        -> factor ( ( "-" | "+" ) factor )*
+//  
+//  factor      -> unary ( ( "/" | "*" ) unary )*
+//  
+//  unary       -> ( "!" | "-" ) unary
+//              | primary
+//  
+//  primary     -> NUMBER | STRING
+//              | "false" | "true" | "nil"
+//              | "(" expression ")"
+//              | IDENTIFIER
 
-}
-
-func (p *Parser) visit_literal_expression(le Expression){
-  fmt.Println("Inside the Literal Expression")
-}
 
 func (p *Parser) match(ttype ...TokenType) bool {
 

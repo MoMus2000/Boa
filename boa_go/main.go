@@ -33,8 +33,8 @@ func (boa *Boa) run_prompt() {
 }
 
 func (boa *Boa) run(source_code []byte) {
-	lexer := NewLexer(source_code)
-	fmt.Println(lexer.ScanTokens())
+  parser := NewParser(source_code)
+  parser.parse()
 }
 
 func main() {

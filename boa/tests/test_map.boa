@@ -10,5 +10,4 @@ var mapper = {
 //assert(mapper["3"][2] == 3, "Expected value of 3");
 print map.keys(mapper);
 var a = map.values(mapper);
-print a[1][1];
 

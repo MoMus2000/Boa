@@ -1,3 +1,4 @@
 *.py linguist-language=Python
 *.go linguist-language=Go
+*.boa linguist-language=Boa
 

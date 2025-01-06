@@ -7,6 +7,7 @@ import (
 )
 
 type Boa struct {
+  interpreter Interpreter
 }
 
 func (boa *Boa) run_file(file_path string) {
@@ -28,20 +29,21 @@ func (boa *Boa) run_prompt() {
 		}
 		text_bytes := []byte(text)
 		boa.run(text_bytes)
-    // fmt.Printf("%v", text)
 	}
 }
 
 func (boa *Boa) run(source_code []byte) {
   parser      := NewParser(source_code)
   statements  := parser.parse()
-  interpreter := NewInterpreter()
-  interpreter.interpret(statements)
+  boa.interpreter.interpret(statements)
 }
 
 func main() {
 	args := os.Args
-	boa := Boa{}
+  interpreter := NewInterpreter()
+	boa := Boa{
+    interpreter: *interpreter,
+  }
 	if len(args) > 2 {
 		fmt.Println(fmt.Errorf("Usage: Boa [script]"))
 		return

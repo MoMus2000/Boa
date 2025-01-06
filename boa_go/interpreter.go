@@ -6,11 +6,13 @@ import (
 )
 
 type Interpreter struct {
+  env        *Env
   statements []Statement
 }
 
 func NewInterpreter() *Interpreter {
   return &Interpreter{
+    env:        NewEnv(nil),
     statements: make([]Statement, 0),
   }
 }
@@ -46,7 +48,7 @@ func (i *Interpreter) visit_debug_statement(visitor *DebugStatement){
 }
 
 func (i *Interpreter) visit_var_statement(visitor *VarStatement){
-
+  i.env.define(visitor.ident.Lexeme.(string), visitor.value)
 }
 
 func (i *Interpreter) visit_logical_expression(visitor *LogicalExpression) interface{}{
@@ -144,6 +146,10 @@ func (i *Interpreter) visit_grouping_expression(visitor *GroupingExpression) int
 
 func (i *Interpreter) visit_literal_expression(visitor *LiteralExpression) interface{} {
   return visitor.value
+}
+
+func (i *Interpreter) visit_var_expression(visitor *VarExpression) interface{} {
+  return i.evaluate(i.env.get(visitor.ident.Lexeme.(string)).(Expression))
 }
 
 func (i *Interpreter) visit_unary_expression(visitor *UnaryExpression) interface {}{

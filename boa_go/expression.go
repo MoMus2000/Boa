@@ -15,7 +15,8 @@ type ExpressionVisitor interface {
   visit_unary_expression    (e *UnaryExpression   ) interface{}
   visit_binary_expression   (e *BinaryExpression  ) interface{}
   visit_grouping_expression (e *GroupingExpression) interface{}
-  visit_logical_expression  (e *LogicalExpression) interface{}
+  visit_logical_expression  (e *LogicalExpression)  interface{}
+  visit_var_expression      (e *VarExpression)      interface{}
 }
 
 type UnaryExpression struct {
@@ -61,5 +62,13 @@ type LogicalExpression struct {
 
 func (le *LogicalExpression) Accept(visitor ExpressionVisitor) interface{} {
   return visitor.visit_logical_expression(le)
+}
+
+type VarExpression struct {
+  ident Token
+}
+
+func (le *VarExpression) Accept(visitor ExpressionVisitor) interface{} {
+  return visitor.visit_var_expression(le)
 }
 

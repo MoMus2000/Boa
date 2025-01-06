@@ -92,6 +92,7 @@ func (p *Parser) block_statement() Statement {
 
 func (p *Parser) debug_statement() Statement{
   expr := p.expression()
+  p.consume(SEMICOLON, "Expected ;")
   return &DebugStatement{
     expr: expr,
   }
@@ -226,11 +227,12 @@ func (p *Parser) primary() Expression {
       p.consume(RIGHT_PAREN, "Expect )")
       return ge
     case IDENTIFIER:
-      fmt.Println("Found an Identifier")
+      return &VarExpression{
+        ident: p.previous(),
+      }
     default:
       panic(fmt.Sprint("Unexpected primary value encountered ", token.Type))
   }
-  panic("Unreachable Code")
 }
 
 //  program     -> declaration* eof

@@ -1,0 +1,6 @@
+if (false and 1) {
+  dbg "Hello World"
+} 
+else {
+  dbg "Should Not come here"
+}

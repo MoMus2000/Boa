@@ -22,17 +22,72 @@ func NewParser(source_code []byte) *Parser {
 func (p *Parser) parse() []Statement {
   var statements []Statement = make([]Statement, 0)
   for !p.is_at_end(){
-    statement := p.statement()
+    statement := p.declaration()
     statements = append(statements, statement)
   }
   return statements
+}
+
+func (p *Parser) declaration() Statement {
+  if p.match(VAR){
+    return p.var_declaration()
+  }
+  return p.statement()
+}
+
+func (p *Parser) var_declaration() Statement{
+  ident := p.consume(IDENTIFIER, "Expected an identifier")
+  var expr Expression
+  if p.match(EQUAL){
+    expr = p.expression()
+  }
+  p.consume(SEMICOLON, "Expected ;")
+  return &VarStatement{
+    ident: ident,
+    value: expr,
+  }
 }
 
 func (p *Parser) statement() Statement {
   if p.match(DEBUG){
      return p.debug_statement()
   }
+  if p.match(IF){
+    return p.if_statement()
+  }
+  if p.match(LEFT_BRACE){
+    return  p.block_statement()
+  }
   return p.expression_statement()
+}
+
+func (p *Parser) if_statement() Statement{
+  p.consume(LEFT_PAREN, "Expected (")
+  predicate := p.expression()
+  p.consume(RIGHT_PAREN, "Expected )")
+  if_block := p.statement().(*BlockStatement)
+  if p.match(ELSE){
+    else_condition := p.statement().(*BlockStatement)
+    return &IfStatement{
+      predicate: predicate,
+      if_condition: if_block,
+      else_condition: else_condition,
+    }
+  }
+  return &IfStatement{
+    predicate: predicate,
+    if_condition: if_block,
+    else_condition: nil,
+  }
+}
+
+func (p *Parser) block_statement() Statement {
+  statements := make([]Statement, 0)
+  for !p.match(RIGHT_BRACE) && !p.is_at_end(){
+    statement := p.statement()
+    statements = append(statements, statement)
+  }
+  return &BlockStatement{statements: statements}
 }
 
 func (p *Parser) debug_statement() Statement{
@@ -43,11 +98,13 @@ func (p *Parser) debug_statement() Statement{
 }
 
 func (p *Parser) expression() Expression{
-  return p.logical() // Point where the expression parsing begins
+    expr:= p.logical() // Point where the expression parsing begins
+    return expr
 }
 
 func (p *Parser) expression_statement() Statement{
   expression := p.expression()
+  p.consume(SEMICOLON, "Expected ;")
   return &ExpressionStatement{
     expr: expression,
   }
@@ -241,12 +298,12 @@ func (p *Parser) match(ttype ...TokenType) bool {
 }
 
 
-func (p *Parser) consume(ttype TokenType, message string) TokenType{
+func (p *Parser) consume(ttype TokenType, message string) Token{
   consumed := p.match(ttype)
   if !consumed {
     fmt.Println(message)
   }
-  return ttype
+  return p.previous()
 }
 
 func (p *Parser) check(ttype TokenType) bool{

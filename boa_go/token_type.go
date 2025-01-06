@@ -67,7 +67,7 @@ var tokenNames = [...]string{
 	"SEMICOLON", "SLASH", "STAR", "BANG", "BANG_EQUAL", "EQUAL", "EQUAL_EQUAL", 
 	"GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL", "IDENTIFIER", "STRING", 
 	"NUMBER", "AND", "CLASS", "ELSE", "FALSE", "FUN", "FOR", "IF", "NIL", 
-	"OR", "PRINT", "RETURN", "SUPER", "THIS", "TRUE", "VAR", "WHILE", 
+	"OR", "DEBUG", "RETURN", "SUPER", "THIS", "TRUE", "VAR", "WHILE", 
 	"IMPORT", "EOF",
 }
 

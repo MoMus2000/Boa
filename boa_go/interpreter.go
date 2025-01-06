@@ -25,6 +25,21 @@ func (i *Interpreter) execute_statement(statement Statement) {
    statement.Accept(i)
 }
 
+func (i *Interpreter) visit_if_statement(visitor *IfStatement){
+  predicate := is_truthy(i.evaluate(visitor.predicate))
+  if predicate {
+    i.visit_block_statement(visitor.if_condition)
+  } else if !predicate && visitor.else_condition != nil{
+    i.visit_block_statement(visitor.else_condition)
+  }
+}
+
+func (i *Interpreter) visit_block_statement(visitor *BlockStatement) {
+  for _, statement := range visitor.statements{
+    i.execute_statement(statement)
+  }
+}
+
 func (i *Interpreter) visit_debug_statement(visitor *DebugStatement){
   evaluated_expr := i.evaluate(visitor.expr)
   fmt.Println(evaluated_expr)

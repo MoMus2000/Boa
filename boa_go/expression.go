@@ -15,6 +15,7 @@ type ExpressionVisitor interface {
   visit_unary_expression    (e *UnaryExpression   ) interface{}
   visit_binary_expression   (e *BinaryExpression  ) interface{}
   visit_grouping_expression (e *GroupingExpression) interface{}
+  visit_logical_expression  (e *LogicalExpression) interface{}
 }
 
 type UnaryExpression struct {
@@ -50,5 +51,15 @@ type GroupingExpression struct {
 
 func (ge *GroupingExpression) Accept(visitor ExpressionVisitor) interface{} {
   return visitor.visit_grouping_expression(ge)
+}
+
+type LogicalExpression struct {
+  op    Token
+  left  Expression
+  right Expression
+}
+
+func (le *LogicalExpression) Accept(visitor ExpressionVisitor) interface{} {
+  return visitor.visit_logical_expression(le)
 }
 

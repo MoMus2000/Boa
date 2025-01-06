@@ -48,7 +48,7 @@ const (
   IF                   
   NIL                  
   OR                   
-  PRINT                
+  DEBUG
   RETURN               
   SUPER                
   THIS                 

@@ -25,9 +25,29 @@ func (i *Interpreter) execute_statement(statement Statement) {
    statement.Accept(i)
 }
 
+func (i *Interpreter) visit_debug_statement(visitor *DebugStatement){
+  evaluated_expr := i.evaluate(visitor.expr)
+  fmt.Println(evaluated_expr)
+}
+
+func (i *Interpreter) visit_var_statement(visitor *VarStatement){
+
+}
+
+func (i *Interpreter) visit_logical_expression(visitor *LogicalExpression) interface{}{
+  left := i.evaluate(visitor.left)
+  right := i.evaluate(visitor.right)
+  if visitor.op.Type == OR{
+    return is_truthy(left) || is_truthy(right)
+  }
+  if visitor.op.Type == AND{
+    return is_truthy(left) && is_truthy(right)
+  }
+  panic("Unreachable Code")
+}
+
 func (i *Interpreter) visit_expression_statement(visitor *ExpressionStatement){
-  val := i.evaluate(visitor.expr)
-  fmt.Println(val)
+  i.evaluate(visitor.expr)
 }
 
 func (i *Interpreter) evaluate(expr Expression) interface{} {

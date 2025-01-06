@@ -22,13 +22,49 @@ func NewParser(source_code []byte) *Parser {
 func (p *Parser) parse() []Statement {
   var statements []Statement = make([]Statement, 0)
   for !p.is_at_end(){
-    expr := p.equality()
-    expressionStatement := &ExpressionStatement{
-      expr : expr,
-    }
-    statements = append(statements, expressionStatement)
+    statement := p.statement()
+    statements = append(statements, statement)
   }
   return statements
+}
+
+func (p *Parser) statement() Statement {
+  if p.match(DEBUG){
+     return p.debug_statement()
+  }
+  return p.expression_statement()
+}
+
+func (p *Parser) debug_statement() Statement{
+  expr := p.expression()
+  return &DebugStatement{
+    expr: expr,
+  }
+}
+
+func (p *Parser) expression() Expression{
+  return p.logical() // Point where the expression parsing begins
+}
+
+func (p *Parser) expression_statement() Statement{
+  expression := p.expression()
+  return &ExpressionStatement{
+    expr: expression,
+  }
+}
+
+func (p *Parser) logical() Expression{
+  expr := p.equality()
+  for p.match(OR, AND){
+    op    := p.previous()
+    right := p.logical()
+    return &LogicalExpression{
+      op   : op,
+      right: right,
+      left : expr,
+    }
+  }
+  return expr
 }
 
 func (p *Parser) equality() Expression{
@@ -127,7 +163,11 @@ func (p *Parser) primary() Expression {
         value: nil,
       }
     case LEFT_PAREN:
-      fmt.Println("Found a Grouping")
+      ge := &GroupingExpression{
+        expr: p.expression(),
+      }
+      p.consume(RIGHT_PAREN, "Expect )")
+      return ge
     case IDENTIFIER:
       fmt.Println("Found an Identifier")
     default:
@@ -204,7 +244,7 @@ func (p *Parser) match(ttype ...TokenType) bool {
 func (p *Parser) consume(ttype TokenType, message string) TokenType{
   consumed := p.match(ttype)
   if !consumed {
-    panic(fmt.Errorf(p.peek().String(), message))
+    fmt.Println(message)
   }
   return ttype
 }

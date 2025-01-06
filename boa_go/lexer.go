@@ -24,7 +24,7 @@ func NewLexer(source_code []byte) *Lexer {
     "if"     : IF,
     "nil"    : NIL,
     "or"     : OR,
-    "print"  : PRINT,
+    "dbg"    : DEBUG,
     "return" : RETURN,
     "super"  : SUPER,
     "this"   : THIS,

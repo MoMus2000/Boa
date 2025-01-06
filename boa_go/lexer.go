@@ -131,9 +131,9 @@ func (lexer *Lexer) scanToken() {
     }
   case '>' :
     if lexer.match('=') {
-      lexer.add_token(LESS_EQUAL)
+      lexer.add_token(GREATER_EQUAL)
     }else{
-      lexer.add_token(LESS)
+      lexer.add_token(GREATER)
     }
   case ' ':
     // do nothing

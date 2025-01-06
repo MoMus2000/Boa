@@ -22,13 +22,69 @@ func NewParser(source_code []byte) *Parser {
 func (p *Parser) parse() []Statement {
   var statements []Statement = make([]Statement, 0)
   for !p.is_at_end(){
-    expr := p.unary()
+    expr := p.equality()
     expressionStatement := &ExpressionStatement{
       expr : expr,
     }
     statements = append(statements, expressionStatement)
   }
   return statements
+}
+
+func (p *Parser) equality() Expression{
+  expr := p.comparision()
+  for p.match(EQUAL_EQUAL, BANG_EQUAL){
+    op    := p.previous()
+    right := p.comparision()
+    return &BinaryExpression{
+      op : op,
+      right : right,
+      left  : expr,
+    }
+  }
+  return expr
+}
+
+func (p *Parser) comparision() Expression {
+  expr := p.term()
+  for p.match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL){
+    op    := p.previous()
+    right := p.term()
+    return &BinaryExpression{
+      op : op,
+      right : right,
+      left  : expr,
+    }
+  }
+  return expr
+}
+
+func (p *Parser) term() Expression {
+  expr := p.factor()
+  for p.match(PLUS, MINUS){
+    op    := p.previous()
+    right := p.factor()
+    return &BinaryExpression{
+      op : op,
+      right : right,
+      left  : expr,
+    }
+  }
+  return expr
+}
+
+func (p *Parser) factor() Expression {
+  expr := p.unary()
+  for p.match(SLASH, STAR){
+    op    := p.previous()
+    right := p.unary()
+    return &BinaryExpression{
+      op    : op,
+      right : right,
+      left  : expr,
+    }
+  }
+  return expr
 }
 
 func (p *Parser) unary() Expression {
@@ -143,6 +199,7 @@ func (p *Parser) match(ttype ...TokenType) bool {
 
   return false
 }
+
 
 func (p *Parser) consume(ttype TokenType, message string) TokenType{
   consumed := p.match(ttype)

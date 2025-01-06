@@ -11,8 +11,10 @@ type Expression interface{
 
 // Has to be implemented by the interpreter
 type ExpressionVisitor interface {
-  visit_literal_expression(l *LiteralExpression) interface{}
-  visit_unary_expression(e *UnaryExpression) interface{}
+  visit_literal_expression  (l *LiteralExpression ) interface{}
+  visit_unary_expression    (e *UnaryExpression   ) interface{}
+  visit_binary_expression   (e *BinaryExpression  ) interface{}
+  visit_grouping_expression (e *GroupingExpression) interface{}
 }
 
 type UnaryExpression struct {
@@ -30,5 +32,23 @@ type LiteralExpression struct {
 
 func (l *LiteralExpression) Accept(visitor ExpressionVisitor) interface{} {
   return visitor.visit_literal_expression(l)
+}
+
+type BinaryExpression struct {
+  left  Expression
+  right Expression
+  op    Token
+}
+
+func (be *BinaryExpression) Accept(visitor ExpressionVisitor) interface{} {
+  return visitor.visit_binary_expression(be)
+}
+
+type GroupingExpression struct {
+  expr Expression
+}
+
+func (ge *GroupingExpression) Accept(visitor ExpressionVisitor) interface{} {
+  return visitor.visit_grouping_expression(ge)
 }
 

@@ -26,15 +26,17 @@ func (boa *Boa) run_prompt() {
 		if err != nil {
 			fmt.Println(fmt.Errorf("Error Reading Stdin"))
 		}
-		fmt.Printf("%v", text)
 		text_bytes := []byte(text)
 		boa.run(text_bytes)
+    // fmt.Printf("%v", text)
 	}
 }
 
 func (boa *Boa) run(source_code []byte) {
-  parser := NewParser(source_code)
-  parser.parse()
+  parser      := NewParser(source_code)
+  statements  := parser.parse()
+  interpreter := NewInterpreter()
+  interpreter.interpret(statements)
 }
 
 func main() {

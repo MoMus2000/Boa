@@ -200,7 +200,7 @@ func (lexer *Lexer) peek_next() byte{
 }
 
 func (lexer *Lexer) lex_string() {
-  for lexer.peek() == '"' && lexer.isNotAtEnd() {
+  for lexer.peek() != '"' && lexer.isNotAtEnd() {
     if lexer.peek() == '\n'{
       lexer.line += 1
     }
@@ -220,11 +220,11 @@ func (lexer *Lexer) match(c byte) bool{
   if !lexer.isNotAtEnd() {
     return false
   }
-  next := lexer.advance()
-  if next == c {
-    return true
+  if lexer.source[lexer.current] != c{
+    return false
   }
-  return false
+  lexer.current += 1
+  return true
 }
 
 func (lexer *Lexer) advance() byte {

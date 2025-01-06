@@ -6,28 +6,29 @@ type Expression interface{
   // visit_literal_expression has the expression statement given to it as the arg
   // Going back to the implementation which exists inside the Callee which is the
   // interpreter
-  Accept(visitor ExpressionVisitor)
+  Accept(visitor ExpressionVisitor) interface{}
 }
 
 // Has to be implemented by the interpreter
 type ExpressionVisitor interface {
-  visit_literal_expression(e Expression)
-  visit_binary_expression(e Expression)
+  visit_literal_expression(l *LiteralExpression) interface{}
+  visit_unary_expression(e *UnaryExpression) interface{}
+}
+
+type UnaryExpression struct {
+  op    Token
+  right Expression
+}
+
+func (u *UnaryExpression) Accept(visitor ExpressionVisitor) interface{}{
+  return visitor.visit_unary_expression(u)
 }
 
 type LiteralExpression struct {
   value interface{}
 }
 
-type BinaryExpression struct {
-  value interface{}
-}
-
-func (l *LiteralExpression) Accept(visitor ExpressionVisitor){
-  visitor.visit_literal_expression(l)
-}
-
-func (l *BinaryExpression) Accept(visitor ExpressionVisitor){
-  visitor.visit_binary_expression(l)
+func (l *LiteralExpression) Accept(visitor ExpressionVisitor) interface{} {
+  return visitor.visit_literal_expression(l)
 }
 

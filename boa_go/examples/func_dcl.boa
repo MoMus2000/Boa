@@ -1,0 +1,9 @@
+fun a(a, b, c){
+  dbg "TOO TURNT";
+}
+
+fun aFunction(a,c){
+
+}
+
+a(1, 2, 3+1, 5);

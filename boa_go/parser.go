@@ -32,6 +32,9 @@ func (p *Parser) declaration() Statement {
   if p.match(VAR){
     return p.var_declaration()
   }
+  if p.match(FUN){
+    return p.func_declaration()
+  }
   return p.statement()
 }
 
@@ -63,6 +66,26 @@ func (p *Parser) statement() Statement {
     return p.for_loop_statement()
   }
   return p.expression_statement()
+}
+
+func (p *Parser) func_declaration() Statement {
+  ident := p.consume(IDENTIFIER, "Expected Function Name")
+  p.consume(LEFT_PAREN, "Expected (")
+  args := make([]string , 0)
+  for !p.match(RIGHT_PAREN){
+    arg := p.consume(IDENTIFIER, "Expected a function arg")
+    args = append(args, arg.Lexeme.(string))
+    if !p.match(COMMA){
+      break
+    }
+  }
+  p.consume(RIGHT_PAREN, "Expected )")
+  body := p.statement().(*BlockStatement)
+  return &FunctionStatement{
+    ident: ident,
+    args : args,
+    body : body,
+  }
 }
 
 func (p *Parser) for_loop_statement() Statement{
@@ -272,11 +295,30 @@ func (p *Parser) primary() Expression {
       p.consume(RIGHT_PAREN, "Expect )")
       return ge
     case IDENTIFIER:
+      if p.match(LEFT_PAREN){
+        return p.call(token)
+      }
       return &VarExpression{
         ident: p.previous(),
       }
     default:
       panic(fmt.Sprint("Unexpected primary value encountered ", token.Type))
+  }
+}
+
+func (p *Parser) call(ident Token) Expression{
+  args := make([]Expression, 0)
+  for !p.match(RIGHT_PAREN){
+    e := p.expression()
+    args = append(args, e)
+    if !p.match(COMMA){
+      break
+    }
+  }
+  p.consume(RIGHT_PAREN, "Expected )")
+  return &FuncCallExpression{
+    ident: ident,
+    args: args,
   }
 }
 

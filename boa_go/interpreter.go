@@ -23,8 +23,31 @@ func (i *Interpreter) interpret (statements []Statement) {
   }
 }
 
+
 func (i *Interpreter) execute_statement(statement Statement) {
    statement.Accept(i)
+}
+
+func (i *Interpreter) visit_func_call_expression(statement *FuncCallExpression) interface{}{
+  fun := i.env.get(statement.ident.Lexeme.(string))
+  fmt.Println(fun)
+  if fun != nil {
+    f := fun.(CallableFunc)
+    f_args := make([]interface{}, 0)
+    for _, arg := range statement.args{
+      expr := i.evaluate(arg)
+      f_args = append(f_args, expr)
+    }
+    f.call(i, f_args)
+  }
+  return nil
+}
+
+func (i *Interpreter) visit_func_statement(statement *FunctionStatement){
+  cf := CallableFunc{
+    declaration: statement,
+  }
+  i.env.define(statement.ident.Lexeme.(string), cf)
 }
 
 func (i *Interpreter) visit_for_statement(visitor *ForStatement){
@@ -62,6 +85,15 @@ func (i *Interpreter) visit_block_statement(visitor *BlockStatement) {
   prev := i.env
   i.env = env
   for _, statement := range visitor.statements{
+    i.execute_statement(statement)
+  }
+  i.env = prev
+}
+
+func (i *Interpreter) execute_block(statement *BlockStatement, env *Env){
+  prev := i.env
+  i.env = env
+  for _, statement := range statement.statements{
     i.execute_statement(statement)
   }
   i.env = prev

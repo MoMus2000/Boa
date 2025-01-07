@@ -12,6 +12,7 @@ type StatementVisitor interface{
   visit_if_statement        (ifs *IfStatement)
   visit_while_statement     (ws *WhileStatement)
   visit_for_statement       (fs *ForStatement)
+  visit_func_statement      (fs *FunctionStatement)
 }
 
 type ExpressionStatement struct {
@@ -77,4 +78,13 @@ func (fs *ForStatement) Accept(visitor StatementVisitor){
   visitor.visit_for_statement(fs)
 }
 
+type FunctionStatement struct {
+  ident   Token
+  args    []string
+  body    *BlockStatement
+}
+
+func (fs *FunctionStatement) Accept(visitor StatementVisitor){
+  visitor.visit_func_statement(fs)
+}
 

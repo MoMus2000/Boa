@@ -18,6 +18,7 @@ type ExpressionVisitor interface {
   visit_logical_expression  (e *LogicalExpression)  interface{}
   visit_var_expression      (e *VarExpression)      interface{}
   visit_assign_expression   (e *AssignExpression)   interface{}
+  visit_func_call_expression(e *FuncCallExpression)   interface{}
 }
 
 type UnaryExpression struct {
@@ -80,5 +81,14 @@ type AssignExpression struct {
 
 func (as *AssignExpression) Accept(visitor ExpressionVisitor) interface{}{
   return visitor.visit_assign_expression(as)
+}
+
+type FuncCallExpression struct {
+  ident Token
+  args  []Expression
+}
+
+func (fs *FuncCallExpression) Accept(visitor ExpressionVisitor) interface{}{
+  return visitor.visit_func_call_expression(fs)
 }
 

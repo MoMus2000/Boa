@@ -56,7 +56,7 @@ const (
   VAR                  
   WHILE                
   IMPORT               
-                       
+
   EOF                  
 
 )

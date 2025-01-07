@@ -27,6 +27,14 @@ func (i *Interpreter) execute_statement(statement Statement) {
    statement.Accept(i)
 }
 
+func (i *Interpreter) visit_for_statement(visitor *ForStatement){
+  i.execute_statement(visitor.start)
+  for i.evaluate(visitor.predicate) == true{
+    i.execute_statement(visitor.inner_statements)
+    i.evaluate(visitor.incre)
+  }
+}
+
 func (i *Interpreter) visit_while_statement(visitor *WhileStatement){
   predicate := is_truthy(i.evaluate(visitor.predicate))
   for predicate {

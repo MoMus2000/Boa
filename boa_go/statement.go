@@ -11,6 +11,7 @@ type StatementVisitor interface{
   visit_block_statement     (bs  *BlockStatement)
   visit_if_statement        (ifs *IfStatement)
   visit_while_statement     (ws *WhileStatement)
+  visit_for_statement       (fs *ForStatement)
 }
 
 type ExpressionStatement struct {
@@ -64,4 +65,16 @@ type WhileStatement struct {
 func (ws *WhileStatement) Accept(visitor StatementVisitor){
   visitor.visit_while_statement(ws)
 }
+
+type ForStatement struct {
+  start            Statement
+  predicate        Expression
+  incre            Expression
+  inner_statements *BlockStatement
+}
+
+func (fs *ForStatement) Accept(visitor StatementVisitor){
+  visitor.visit_for_statement(fs)
+}
+
 

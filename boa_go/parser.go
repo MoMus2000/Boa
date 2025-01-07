@@ -59,7 +59,27 @@ func (p *Parser) statement() Statement {
   if p.match(WHILE){
     return p.while_statement()
   }
+  if p.match(FOR){
+    return p.for_loop_statement()
+  }
   return p.expression_statement()
+}
+
+func (p *Parser) for_loop_statement() Statement{
+  p.consume(LEFT_PAREN, "Expected (")
+  start      := p.declaration()
+  predicate := p.expression()
+  p.consume(SEMICOLON, "Expected ;")
+  increment := p.expression()
+  p.consume(RIGHT_PAREN, "Expected )")
+  block_statement := p.statement().(*BlockStatement)
+  return &ForStatement{
+    start,
+    predicate,
+    increment,
+    block_statement,
+  }
+
 }
 
 func (p *Parser) while_statement() Statement {

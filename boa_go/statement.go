@@ -13,6 +13,7 @@ type StatementVisitor interface{
   visit_while_statement     (ws *WhileStatement)
   visit_for_statement       (fs *ForStatement)
   visit_func_statement      (fs *FunctionStatement)
+  visit_return_statement    (fs *ReturnStatement) error
 }
 
 type ExpressionStatement struct {
@@ -86,5 +87,14 @@ type FunctionStatement struct {
 
 func (fs *FunctionStatement) Accept(visitor StatementVisitor){
   visitor.visit_func_statement(fs)
+}
+
+type ReturnStatement struct {
+  ident Token
+  val   Expression
+}
+
+func (fs *ReturnStatement) Accept(visitor StatementVisitor){
+  visitor.visit_return_statement(fs)
 }
 

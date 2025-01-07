@@ -10,6 +10,10 @@ type Interpreter struct {
   statements []Statement
 }
 
+type ReturnValue struct {
+  value interface{}
+}
+
 func NewInterpreter() *Interpreter {
   return &Interpreter{
     env:        NewEnv(nil),
@@ -28,18 +32,30 @@ func (i *Interpreter) execute_statement(statement Statement) {
    statement.Accept(i)
 }
 
-func (i *Interpreter) visit_func_call_expression(statement *FuncCallExpression) interface{}{
+func (i *Interpreter) visit_return_statement(statement *ReturnStatement) error {
+  expr := i.evaluate(statement.val)
+  panic(ReturnValue{expr})
+}
+
+func (i *Interpreter) visit_func_call_expression(statement *FuncCallExpression) (returnval interface{}){
   fun := i.env.get(statement.ident.Lexeme.(string))
-  fmt.Println(fun)
-  if fun != nil {
+    defer func() {
+        if r := recover(); r != nil {
+          returnval = r.(ReturnValue).value
+          return 
+        }
+        panic("Unreachable")
+    }()
     f := fun.(CallableFunc)
+    i_copy := &Interpreter{
+      env: i.env,
+    }
     f_args := make([]interface{}, 0)
     for _, arg := range statement.args{
       expr := i.evaluate(arg)
       f_args = append(f_args, expr)
     }
-    f.call(i, f_args)
-  }
+    f.call(i_copy, f_args)
   return nil
 }
 

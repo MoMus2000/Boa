@@ -65,7 +65,20 @@ func (p *Parser) statement() Statement {
   if p.match(FOR){
     return p.for_loop_statement()
   }
+  if p.match(RETURN){
+    return p.return_statement()
+  }
   return p.expression_statement()
+}
+
+func (p *Parser) return_statement() Statement {
+  ident := p.previous()
+  expr  := p.expression()
+  p.consume(SEMICOLON, "Expected ;")
+  return &ReturnStatement{
+    ident: ident,
+    val  : expr,
+  }
 }
 
 func (p *Parser) func_declaration() Statement {

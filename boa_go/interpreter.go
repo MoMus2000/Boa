@@ -58,9 +58,13 @@ func (i *Interpreter) visit_assign_expression(visitor *AssignExpression) interfa
 }
 
 func (i *Interpreter) visit_block_statement(visitor *BlockStatement) {
+  env := NewEnv(i.env)
+  prev := i.env
+  i.env = env
   for _, statement := range visitor.statements{
     i.execute_statement(statement)
   }
+  i.env = prev
 }
 
 func (i *Interpreter) visit_debug_statement(visitor *DebugStatement){

@@ -116,7 +116,7 @@ func (p *Parser) if_statement() Statement{
 func (p *Parser) block_statement() Statement {
   statements := make([]Statement, 0)
   for !p.match(RIGHT_BRACE) && !p.is_at_end(){
-    statement := p.statement()
+    statement := p.declaration()
     statements = append(statements, statement)
   }
   return &BlockStatement{statements: statements}

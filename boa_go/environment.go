@@ -1,5 +1,7 @@
 package main
 
+import _"fmt"
+
 type Env struct{
   mapper       map[string]interface{}
   enclosed_env *Env
@@ -18,13 +20,13 @@ func (e *Env) define(name string, value interface{}) {
 
 func (e *Env) get(name string) interface{}{
   val, exists := e.mapper[name]
-  if !exists {
-    panic("Error: undefined var")
+  if exists {
+    return val
   }
   if e.enclosed_env != nil {
     return e.enclosed_env.get(name)
   }
-  return val
+  return nil
 }
 
 func (e *Env) assign(name string, value interface{}) interface{} {

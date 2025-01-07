@@ -27,18 +27,19 @@ func (e *Env) get(name string) interface{}{
   return val
 }
 
-func (e *Env) assign(name string, value interface{}) {
+func (e *Env) assign(name string, value interface{}) interface{} {
   _ , exists := e.mapper[name]
   if exists {
     e.mapper[name] = value
-    return
+    return e.mapper[name]
   }
   if e.enclosed_env != nil {
     e.enclosed_env.assign(name, value)
-    return
+    return e.enclosed_env.mapper[name]
   }
   if !exists {
     panic("Error: undefined var")
   }
+  return nil
 }
 

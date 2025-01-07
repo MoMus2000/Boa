@@ -38,9 +38,7 @@ func (p *Parser) declaration() Statement {
 func (p *Parser) var_declaration() Statement{
   ident := p.consume(IDENTIFIER, "Expected an identifier")
   var expr Expression
-  if p.match(EQUAL){
-    expr = p.expression()
-  }
+  if p.match(EQUAL){ expr = p.expression() }
   p.consume(SEMICOLON, "Expected ;")
   return &VarStatement{
     ident: ident,
@@ -58,7 +56,21 @@ func (p *Parser) statement() Statement {
   if p.match(LEFT_BRACE){
     return  p.block_statement()
   }
+  if p.match(WHILE){
+    return p.while_statement()
+  }
   return p.expression_statement()
+}
+
+func (p *Parser) while_statement() Statement {
+  p.consume(LEFT_PAREN, "Expected (")
+  predicate := p.expression()
+  p.consume(RIGHT_PAREN, "Expected )")
+  block_statement := p.statement().(*BlockStatement)
+  return &WhileStatement{
+    predicate: predicate,
+    inner_statements: block_statement,
+  }
 }
 
 func (p *Parser) if_statement() Statement{
@@ -98,8 +110,21 @@ func (p *Parser) debug_statement() Statement{
   }
 }
 
+func (p *Parser) assign() Expression {
+  expr := p.logical()
+  if p.match(EQUAL){
+    value := p.assign()
+    token := expr.(*VarExpression).ident
+    return &AssignExpression{
+      ident: token,
+      value: value,
+    }
+  }
+  return expr
+}
+
 func (p *Parser) expression() Expression{
-    expr:= p.logical() // Point where the expression parsing begins
+    expr:= p.assign() // Point where the expression parsing begins
     return expr
 }
 

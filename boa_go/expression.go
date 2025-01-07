@@ -17,6 +17,7 @@ type ExpressionVisitor interface {
   visit_grouping_expression (e *GroupingExpression) interface{}
   visit_logical_expression  (e *LogicalExpression)  interface{}
   visit_var_expression      (e *VarExpression)      interface{}
+  visit_assign_expression   (e *AssignExpression)   interface{}
 }
 
 type UnaryExpression struct {
@@ -70,5 +71,14 @@ type VarExpression struct {
 
 func (le *VarExpression) Accept(visitor ExpressionVisitor) interface{} {
   return visitor.visit_var_expression(le)
+}
+
+type AssignExpression struct {
+  ident Token
+  value Expression
+}
+
+func (as *AssignExpression) Accept(visitor ExpressionVisitor) interface{}{
+  return visitor.visit_assign_expression(as)
 }
 

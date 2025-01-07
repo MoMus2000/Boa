@@ -27,13 +27,26 @@ func (i *Interpreter) execute_statement(statement Statement) {
    statement.Accept(i)
 }
 
+func (i *Interpreter) visit_while_statement(visitor *WhileStatement){
+  predicate := is_truthy(i.evaluate(visitor.predicate))
+  for predicate {
+    i.execute_statement(visitor.inner_statements)
+    predicate = is_truthy(i.evaluate(visitor.predicate))
+  }
+}
+
 func (i *Interpreter) visit_if_statement(visitor *IfStatement){
   predicate := is_truthy(i.evaluate(visitor.predicate))
   if predicate {
-    i.visit_block_statement(visitor.if_condition)
+    i.execute_statement(visitor.if_condition)
   } else if !predicate && visitor.else_condition != nil{
-    i.visit_block_statement(visitor.else_condition)
+    i.execute_statement(visitor.else_condition)
   }
+}
+
+func (i *Interpreter) visit_assign_expression(visitor *AssignExpression) interface{}{
+  assigned := i.env.assign(visitor.ident.Lexeme.(string), i.evaluate(visitor.value))
+  return assigned
 }
 
 func (i *Interpreter) visit_block_statement(visitor *BlockStatement) {
@@ -48,7 +61,7 @@ func (i *Interpreter) visit_debug_statement(visitor *DebugStatement){
 }
 
 func (i *Interpreter) visit_var_statement(visitor *VarStatement){
-  i.env.define(visitor.ident.Lexeme.(string), visitor.value)
+  i.env.define(visitor.ident.Lexeme.(string), i.evaluate(visitor.value))
 }
 
 func (i *Interpreter) visit_logical_expression(visitor *LogicalExpression) interface{}{
@@ -149,7 +162,7 @@ func (i *Interpreter) visit_literal_expression(visitor *LiteralExpression) inter
 }
 
 func (i *Interpreter) visit_var_expression(visitor *VarExpression) interface{} {
-  return i.evaluate(i.env.get(visitor.ident.Lexeme.(string)).(Expression))
+  return i.env.get(visitor.ident.Lexeme.(string))
 }
 
 func (i *Interpreter) visit_unary_expression(visitor *UnaryExpression) interface {}{

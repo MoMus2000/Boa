@@ -5,11 +5,12 @@ type Statement interface{
 }
 
 type StatementVisitor interface{
-  visit_expression_statement(es  *ExpressionStatement) 
-  visit_var_statement       (vs  *VarStatement) 
-  visit_debug_statement     (ps  *DebugStatement) 
+  visit_expression_statement(es  *ExpressionStatement)
+  visit_var_statement       (vs  *VarStatement)
+  visit_debug_statement     (ps  *DebugStatement)
   visit_block_statement     (bs  *BlockStatement)
   visit_if_statement        (ifs *IfStatement)
+  visit_while_statement     (ws *WhileStatement)
 }
 
 type ExpressionStatement struct {
@@ -37,7 +38,7 @@ func (bs *BlockStatement) Accept(visitor StatementVisitor){
 }
 
 type VarStatement struct {
-  ident Token
+  ident Token     
   value Expression
 }
 
@@ -46,12 +47,21 @@ func (v *VarStatement) Accept(visitor StatementVisitor){
 }
 
 type IfStatement struct {
-  predicate      Expression
+  predicate      Expression     
   if_condition   *BlockStatement
   else_condition *BlockStatement
 }
 
 func (ifs *IfStatement) Accept(visitor StatementVisitor){
   visitor.visit_if_statement(ifs)
+}
+
+type WhileStatement struct {
+  predicate        Expression
+  inner_statements *BlockStatement
+}
+
+func (ws *WhileStatement) Accept(visitor StatementVisitor){
+  visitor.visit_while_statement(ws)
 }
 

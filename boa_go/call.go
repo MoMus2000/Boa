@@ -4,6 +4,14 @@ type Callable interface{
   call(interpreter *Interpreter, args []interface{})
 }
 
+type BuiltInFunc struct {
+  ident string
+}
+
+func (call *BuiltInFunc) call(_ *Interpreter, args []interface{}){
+
+}
+
 type CallableFunc struct {
   declaration *FunctionStatement
 }

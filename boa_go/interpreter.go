@@ -3,6 +3,7 @@ package main
 import (
   "fmt"
   "reflect"
+  "time"
 )
 
 type Interpreter struct {
@@ -15,8 +16,9 @@ type ReturnValue struct {
 }
 
 func NewInterpreter() *Interpreter {
+  env := NewEnv(nil)
   return &Interpreter{
-    env:        NewEnv(nil),
+    env       : env,
     statements: make([]Statement, 0),
   }
 }
@@ -26,7 +28,6 @@ func (i *Interpreter) interpret (statements []Statement) {
     statement.Accept(i)
   }
 }
-
 
 func (i *Interpreter) execute_statement(statement Statement) {
    statement.Accept(i)
@@ -39,23 +40,23 @@ func (i *Interpreter) visit_return_statement(statement *ReturnStatement) error {
 
 func (i *Interpreter) visit_func_call_expression(statement *FuncCallExpression) (returnval interface{}){
   fun := i.env.get(statement.ident.Lexeme.(string))
-    defer func() {
-        if r := recover(); r != nil {
-          returnval = r.(ReturnValue).value
-          return 
-        }
-        panic("Unreachable")
-    }()
-    f := fun.(CallableFunc)
-    i_copy := &Interpreter{
-      env: i.env,
-    }
-    f_args := make([]interface{}, 0)
-    for _, arg := range statement.args{
-      expr := i.evaluate(arg)
-      f_args = append(f_args, expr)
-    }
-    f.call(i_copy, f_args)
+  defer func() {
+      if r := recover(); r != nil {
+        returnval = r.(ReturnValue).value
+        return 
+      }
+      panic("Unreachable")
+  }()
+  f := fun.(CallableFunc)
+  i_copy := &Interpreter{
+    env: i.env,
+  }
+  f_args := make([]interface{}, 0)
+  for _, arg := range statement.args{
+    expr := i.evaluate(arg)
+    f_args = append(f_args, expr)
+  }
+  f.call(i_copy, f_args)
   return nil
 }
 

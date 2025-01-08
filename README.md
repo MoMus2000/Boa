@@ -11,6 +11,25 @@ Boa is an interpreter written in Python and Go. It is inspired by Bob Nystrom's 
 not be considered on par with more mature languages for simple computational
 tasks. 
 
+# Benchmarks
+
+I ran the fibonacci function (recursive) no memoization for n = 35 for both my
+implementations and compared the output to CPython.
+
+
+|  CPython | Boa (Go) | Boa (Py) |
+|----------|----------|----------|
+| 1.17 (s) | 18 (s)   | 215 (s)  |
+
+
+The Go Implementation for Boa is 15X slower than Python, whereas the Python implementation
+for Boa turns out to be around 183X slower than Python.
+
+This is because Boa implements a [TreeWalk interpreter](https://www.reddit.com/r/AskComputerScience/comments/lu3edy/tree_walking_vs_bytecode_interpreters/)
+
+Next steps would be create a bytecode interpreter which would be magnitudes faster than
+the current implementation.
+
 ## Setup
 
 

@@ -405,7 +405,7 @@ func (p *Parser) match(ttype ...TokenType) bool {
 func (p *Parser) consume(ttype TokenType, message string) Token{
   consumed := p.match(ttype)
   if !consumed {
-    fmt.Println(message)
+    panic(message)
   }
   return p.previous()
 }

@@ -7,6 +7,6 @@ fun fib(n){
 }
 
 print time.clock();
-print fib(30);
+print fib(35);
 print time.clock();
 

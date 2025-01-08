@@ -5,6 +5,7 @@ import (
   "reflect"
   "time"
 )
+  
 
 type Interpreter struct {
   env        *Env
@@ -15,8 +16,18 @@ type ReturnValue struct {
   value interface{}
 }
 
+type Clock struct {
+  arity int32
+}
+
+func (clock *Clock) call(interpreter *Interpreter, args []interface{}){
+  t := time.Now().Unix()
+  fmt.Println(t)
+}
+
 func NewInterpreter() *Interpreter {
   env := NewEnv(nil)
+  env.define("clock", &Clock{0})
   return &Interpreter{
     env       : env,
     statements: make([]Statement, 0),
@@ -45,9 +56,7 @@ func (i *Interpreter) visit_func_call_expression(statement *FuncCallExpression) 
         returnval = r.(ReturnValue).value
         return 
       }
-      panic("Unreachable")
   }()
-  f := fun.(CallableFunc)
   i_copy := &Interpreter{
     env: i.env,
   }
@@ -56,12 +65,19 @@ func (i *Interpreter) visit_func_call_expression(statement *FuncCallExpression) 
     expr := i.evaluate(arg)
     f_args = append(f_args, expr)
   }
-  f.call(i_copy, f_args)
+  switch f := fun.(type) {
+    case *CallableFunc:
+        f.call(i_copy, f_args)
+    case *Clock:
+        f.call(i_copy, f_args)
+    default:
+        fmt.Println("Unsupported type")
+  }
   return nil
 }
 
 func (i *Interpreter) visit_func_statement(statement *FunctionStatement){
-  cf := CallableFunc{
+  cf := &CallableFunc{
     declaration: statement,
   }
   i.env.define(statement.ident.Lexeme.(string), cf)

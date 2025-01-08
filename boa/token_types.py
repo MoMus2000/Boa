@@ -42,7 +42,7 @@ class TokenType(Enum):
     IF                   = auto()
     NIL                  = auto()
     OR                   = auto()
-    DEBUG                = auto()
+    PRINT                = auto()
     RETURN               = auto()
     SUPER                = auto()
     THIS                 = auto()

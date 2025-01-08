@@ -321,11 +321,13 @@ func (p *Parser) primary() Expression {
 
 func (p *Parser) call(ident Token) Expression{
   args := make([]Expression, 0)
-  for !p.match(RIGHT_PAREN){
-    e := p.expression()
-    args = append(args, e)
-    if !p.match(COMMA){
-      break
+  if !p.check(RIGHT_PAREN){
+    for{
+      e := p.expression()
+      args = append(args, e)
+      if !p.match(COMMA){
+        break
+      }
     }
   }
   p.consume(RIGHT_PAREN, "Expected )")

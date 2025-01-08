@@ -85,11 +85,13 @@ func (p *Parser) func_declaration() Statement {
   ident := p.consume(IDENTIFIER, "Expected Function Name")
   p.consume(LEFT_PAREN, "Expected (")
   args := make([]string , 0)
-  for !p.match(RIGHT_PAREN){
-    arg := p.consume(IDENTIFIER, "Expected a function arg")
-    args = append(args, arg.Lexeme.(string))
-    if !p.match(COMMA){
-      break
+  if !p.check(RIGHT_PAREN){
+    for {
+      arg := p.consume(IDENTIFIER, "Expected a function arg")
+      args = append(args, arg.Lexeme.(string))
+      if !p.match(COMMA){
+        break
+      }
     }
   }
   p.consume(RIGHT_PAREN, "Expected )")
@@ -271,7 +273,33 @@ func (p *Parser) unary() Expression {
       right: right,
     }
   }
-  return p.primary()
+  return p.call()
+}
+
+func (p *Parser) call() Expression{
+  expr := p.primary()
+  for p.match(LEFT_PAREN){
+    expr = p.finish_call(expr)
+  }
+  return expr
+}
+
+func (p *Parser) finish_call(expr Expression) Expression{
+  ident := expr.(*VarExpression).ident
+  args := make([]Expression, 0)
+  if !p.check(RIGHT_PAREN){
+    for {
+      args = append(args, p.expression())
+      if !p.match(COMMA){
+        break
+      }
+    }
+  }
+  p.consume(RIGHT_PAREN, "Expected ( after args")
+  return &FuncCallExpression{
+    ident: ident,
+    args: args,
+  }
 }
 
 func (p *Parser) primary() Expression {
@@ -308,9 +336,6 @@ func (p *Parser) primary() Expression {
       p.consume(RIGHT_PAREN, "Expect )")
       return ge
     case IDENTIFIER:
-      if p.match(LEFT_PAREN){
-        return p.call(token)
-      }
       return &VarExpression{
         ident: p.previous(),
       }
@@ -319,23 +344,23 @@ func (p *Parser) primary() Expression {
   }
 }
 
-func (p *Parser) call(ident Token) Expression{
-  args := make([]Expression, 0)
-  if !p.check(RIGHT_PAREN){
-    for{
-      e := p.expression()
-      args = append(args, e)
-      if !p.match(COMMA){
-        break
-      }
-    }
-  }
-  p.consume(RIGHT_PAREN, "Expected )")
-  return &FuncCallExpression{
-    ident: ident,
-    args: args,
-  }
-}
+// func (p *Parser) call(ident Token) Expression{
+//   args := make([]Expression, 0)
+//   if !p.check(RIGHT_PAREN){
+//     for{
+//       e := p.expression()
+//       args = append(args, e)
+//       if !p.match(COMMA){
+//         break
+//       }
+//     }
+//   }
+//   p.consume(RIGHT_PAREN, "Expected )")
+//   return &FuncCallExpression{
+//     ident: ident,
+//     args: args,
+//   }
+// }
 
 //  program     -> declaration* eof
 //  

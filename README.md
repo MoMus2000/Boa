@@ -1,14 +1,14 @@
 # Boa
 
-Boa is an interpreter written in Python. It is inspired by Bob Nystrom's implementation of the Lox programming language. The project was originally intended to be written in Rust, but I found myself struggling with the borrow checker rather than enjoying the process of writing code, so I switched to Python for the initial implementation.
+Boa is an interpreter written in Python and Go. It is inspired by Bob Nystrom's implementation of the Lox programming language. The project was originally intended to be written in Rust, but I found myself struggling with the borrow checker rather than enjoying the process of writing code, so I switched to Python for the initial implementation and later reimplemented in Go to observe the speed up when switching to a compiled language.
 
 # Warning
 
-**Experimental Language:** This is an experimental language that is currently not optimized for performance nor considered stable. In benchmark tests, a simple for loop with computation is approximately **2000% slower** than Python. Please keep this in mind if you plan to use this for your applications.
+**Experimental Language:** This is an experimental language that is currently not optimized for performance nor considered stable. In benchmark tests, a simple for loop with computation is approximately **20X slower** than Python (when run using Python based Implementation) . Please keep this in mind if you plan to use this for your applications.
 
 
 **Note:** Future optimizations may improve performance, performance should
-not be considered on par with more mature languages like Python for simple computational
+not be considered on par with more mature languages for simple computational
 tasks. 
 
 ## Setup

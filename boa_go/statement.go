@@ -1,7 +1,7 @@
 package main
 
 type Statement interface{
-  Accept(visitor StatementVisitor)
+  Accept(visitor StatementVisitor) error
 }
 
 type StatementVisitor interface{
@@ -20,24 +20,27 @@ type ExpressionStatement struct {
   expr Expression
 }
 
-func (es *ExpressionStatement) Accept(visitor StatementVisitor){
+func (es *ExpressionStatement) Accept(visitor StatementVisitor) error {
   visitor.visit_expression_statement(es)
+  return nil
 }
 
 type DebugStatement struct {
   expr Expression
 }
 
-func (ps *DebugStatement) Accept(visitor StatementVisitor){
+func (ps *DebugStatement) Accept(visitor StatementVisitor) error {
   visitor.visit_debug_statement(ps)
+  return nil
 }
 
 type BlockStatement struct {
   statements []Statement
 }
 
-func (bs *BlockStatement) Accept(visitor StatementVisitor){
+func (bs *BlockStatement) Accept(visitor StatementVisitor) error {
   visitor.visit_block_statement(bs)
+  return nil
 }
 
 type VarStatement struct {
@@ -45,8 +48,9 @@ type VarStatement struct {
   value Expression
 }
 
-func (v *VarStatement) Accept(visitor StatementVisitor){
+func (v *VarStatement) Accept(visitor StatementVisitor) error {
   visitor.visit_var_statement(v)
+  return nil
 }
 
 type IfStatement struct {
@@ -55,8 +59,9 @@ type IfStatement struct {
   else_condition *BlockStatement
 }
 
-func (ifs *IfStatement) Accept(visitor StatementVisitor){
+func (ifs *IfStatement) Accept(visitor StatementVisitor) error {
   visitor.visit_if_statement(ifs)
+  return nil
 }
 
 type WhileStatement struct {
@@ -64,8 +69,9 @@ type WhileStatement struct {
   inner_statements *BlockStatement
 }
 
-func (ws *WhileStatement) Accept(visitor StatementVisitor){
+func (ws *WhileStatement) Accept(visitor StatementVisitor) error {
   visitor.visit_while_statement(ws)
+  return nil
 }
 
 type ForStatement struct {
@@ -75,8 +81,9 @@ type ForStatement struct {
   inner_statements *BlockStatement
 }
 
-func (fs *ForStatement) Accept(visitor StatementVisitor){
+func (fs *ForStatement) Accept(visitor StatementVisitor) error {
   visitor.visit_for_statement(fs)
+  return nil
 }
 
 type FunctionStatement struct {
@@ -85,8 +92,9 @@ type FunctionStatement struct {
   body    *BlockStatement
 }
 
-func (fs *FunctionStatement) Accept(visitor StatementVisitor){
+func (fs *FunctionStatement) Accept(visitor StatementVisitor) error {
   visitor.visit_func_statement(fs)
+  return nil
 }
 
 type ReturnStatement struct {
@@ -94,7 +102,8 @@ type ReturnStatement struct {
   val   Expression
 }
 
-func (fs *ReturnStatement) Accept(visitor StatementVisitor){
+func (fs *ReturnStatement) Accept(visitor StatementVisitor) error {
   visitor.visit_return_statement(fs)
+  return nil
 }
 

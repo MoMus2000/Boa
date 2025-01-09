@@ -34,10 +34,14 @@ func NewInterpreter() *Interpreter {
   }
 }
 
-func (i *Interpreter) interpret (statements []Statement) {
+func (i *Interpreter) interpret (statements []Statement) error {
   for _, statement := range statements {
-    statement.Accept(i)
+    err := statement.Accept(i)
+    if err != nil {
+      return err
+    }
   }
+  return nil
 }
 
 func (i *Interpreter) execute_statement(statement Statement) {

@@ -32,10 +32,19 @@ func (boa *Boa) run_prompt() {
 	}
 }
 
-func (boa *Boa) run(source_code []byte) {
+func (boa *Boa) run(source_code []byte) error {
   parser      := NewParser(source_code)
-  statements  := parser.parse()
-  boa.interpreter.interpret(statements)
+  statements, err  := parser.parse()
+  if err != nil {
+    fmt.Println(err)
+    return err
+  }
+  err = boa.interpreter.interpret(statements)
+  if err != nil {
+    fmt.Println(err)
+    return err
+  }
+  return nil
 }
 
 func main() {

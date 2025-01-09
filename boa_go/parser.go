@@ -19,18 +19,25 @@ func NewParser(source_code []byte) *Parser {
   }
 }
 
-func (p *Parser) parse() []Statement {
+func (p *Parser) parse() ([]Statement, error) {
   var statements []Statement = make([]Statement, 0)
   for !p.is_at_end(){
-    statement := p.declaration()
+    statement, err := p.declaration()
+    if err != nil {
+      return nil, err
+    }
     statements = append(statements, statement)
   }
-  return statements
+  return statements, nil
 }
 
-func (p *Parser) declaration() Statement {
+func (p *Parser) declaration() (Statement, error) {
   if p.match(VAR){
-    return p.var_declaration()
+    v, err := p.var_declaration()
+    if err != nil {
+      return nil, err
+    }
+    return v, nil
   }
   if p.match(FUN){
     return p.func_declaration()
@@ -38,20 +45,23 @@ func (p *Parser) declaration() Statement {
   return p.statement()
 }
 
-func (p *Parser) var_declaration() Statement{
-  ident := p.consume(IDENTIFIER, "Expected an identifier")
+func (p *Parser) var_declaration() (Statement, error){
+  ident, err := p.consume(IDENTIFIER, "Expected an identifier")
+  if err != nil {
+    return nil, err
+  }
   var expr Expression
   if p.match(EQUAL){ expr = p.expression() }
   p.consume(SEMICOLON, "Expected ;")
   return &VarStatement{
-    ident: ident,
+    ident: *ident,
     value: expr,
-  }
+  }, nil
 }
 
-func (p *Parser) statement() Statement {
+func (p *Parser) statement() (Statement, error) {
   if p.match(DEBUG){
-     return p.debug_statement()
+     return p.debug_statement(), nil
   }
   if p.match(IF){
     return p.if_statement()
@@ -66,9 +76,9 @@ func (p *Parser) statement() Statement {
     return p.for_loop_statement()
   }
   if p.match(RETURN){
-    return p.return_statement()
+    return p.return_statement(), nil
   }
-  return p.expression_statement()
+  return p.expression_statement(), nil
 }
 
 func (p *Parser) return_statement() Statement {
@@ -76,18 +86,24 @@ func (p *Parser) return_statement() Statement {
   expr  := p.expression()
   p.consume(SEMICOLON, "Expected ;")
   return &ReturnStatement{
-    ident: ident,
+    ident: *ident,
     val  : expr,
   }
 }
 
-func (p *Parser) func_declaration() Statement {
-  ident := p.consume(IDENTIFIER, "Expected Function Name")
+func (p *Parser) func_declaration() (Statement, error) {
+  ident, err := p.consume(IDENTIFIER, "Expected Function Name")
+  if err != nil {
+    return nil, err
+  }
   p.consume(LEFT_PAREN, "Expected (")
   args := make([]string , 0)
   if !p.check(RIGHT_PAREN){
     for {
-      arg := p.consume(IDENTIFIER, "Expected a function arg")
+      arg, err := p.consume(IDENTIFIER, "Expected a function arg")
+      if err != nil {
+        return nil, err
+      }
       args = append(args, arg.Lexeme.(string))
       if !p.match(COMMA){
         break
@@ -95,69 +111,81 @@ func (p *Parser) func_declaration() Statement {
     }
   }
   p.consume(RIGHT_PAREN, "Expected )")
-  body := p.statement().(*BlockStatement)
+  body, err := p.statement()
   return &FunctionStatement{
-    ident: ident,
+    ident: *ident,
     args : args,
-    body : body,
-  }
+    body : body.(*BlockStatement),
+  }, nil
 }
 
-func (p *Parser) for_loop_statement() Statement{
+func (p *Parser) for_loop_statement() (Statement, error){
   p.consume(LEFT_PAREN, "Expected (")
-  start      := p.declaration()
+  start, err      := p.declaration()
+  if err != nil{
+    return nil, err
+  }
   predicate := p.expression()
   p.consume(SEMICOLON, "Expected ;")
   increment := p.expression()
   p.consume(RIGHT_PAREN, "Expected )")
-  block_statement := p.statement().(*BlockStatement)
+  block_statement , err := p.statement()
   return &ForStatement{
     start,
     predicate,
     increment,
-    block_statement,
-  }
+    block_statement.(*BlockStatement),
+  }, err
 
 }
 
-func (p *Parser) while_statement() Statement {
+func (p *Parser) while_statement() (Statement, error) {
   p.consume(LEFT_PAREN, "Expected (")
   predicate := p.expression()
   p.consume(RIGHT_PAREN, "Expected )")
-  block_statement := p.statement().(*BlockStatement)
+  block_statement, err := p.statement()
   return &WhileStatement{
     predicate: predicate,
-    inner_statements: block_statement,
-  }
+    inner_statements: block_statement.(*BlockStatement),
+  }, err
 }
 
-func (p *Parser) if_statement() Statement{
+func (p *Parser) if_statement() (Statement, error){
   p.consume(LEFT_PAREN, "Expected (")
   predicate := p.expression()
   p.consume(RIGHT_PAREN, "Expected )")
-  if_block := p.statement().(*BlockStatement)
+  if_block, err := p.statement()
+  if err != nil {
+    return nil, err
+  }
   if p.match(ELSE){
-    else_condition := p.statement().(*BlockStatement)
+    else_condition, err := p.statement()
+    if err != nil {
+      return nil, err
+    }
     return &IfStatement{
       predicate: predicate,
-      if_condition: if_block,
-      else_condition: else_condition,
-    }
+      if_condition: if_block.(*BlockStatement),
+      else_condition: else_condition.(*BlockStatement),
+    }, err
   }
   return &IfStatement{
     predicate: predicate,
-    if_condition: if_block,
+    if_condition: if_block.(*BlockStatement),
     else_condition: nil,
-  }
+  }, err
 }
 
-func (p *Parser) block_statement() Statement {
+func (p *Parser) block_statement() (Statement, error) {
   statements := make([]Statement, 0)
   for !p.match(RIGHT_BRACE) && !p.is_at_end(){
-    statement := p.declaration()
+    statement, err := p.declaration()
+    if err != nil {
+      return nil, err
+    }
     statements = append(statements, statement)
   }
-  return &BlockStatement{statements: statements}
+  return &BlockStatement{statements: statements}, nil
 }
 
 func (p *Parser) debug_statement() Statement{
@@ -200,7 +228,7 @@ func (p *Parser) logical() Expression{
     op    := p.previous()
     right := p.logical()
     return &LogicalExpression{
-      op   : op,
+      op   : *op,
       right: right,
       left : expr,
     }
@@ -214,7 +242,7 @@ func (p *Parser) equality() Expression{
     op    := p.previous()
     right := p.comparision()
     return &BinaryExpression{
-      op : op,
+      op : *op,
       right : right,
       left  : expr,
     }
@@ -228,7 +256,7 @@ func (p *Parser) comparision() Expression {
     op    := p.previous()
     right := p.term()
     return &BinaryExpression{
-      op : op,
+      op : *op,
       right : right,
       left  : expr,
     }
@@ -242,7 +270,7 @@ func (p *Parser) term() Expression {
     op    := p.previous()
     right := p.factor()
     return &BinaryExpression{
-      op : op,
+      op : *op,
       right : right,
       left  : expr,
     }
@@ -256,7 +284,7 @@ func (p *Parser) factor() Expression {
     op    := p.previous()
     right := p.unary()
     return &BinaryExpression{
-      op    : op,
+      op    : *op,
       right : right,
       left  : expr,
     }
@@ -269,7 +297,7 @@ func (p *Parser) unary() Expression {
     op := p.previous()
     right := p.unary()
     return &UnaryExpression{
-      op: op,
+      op: *op,
       right: right,
     }
   }
@@ -337,7 +365,7 @@ func (p *Parser) primary() Expression {
       return ge
     case IDENTIFIER:
       return &VarExpression{
-        ident: p.previous(),
+        ident: *p.previous(),
       }
     default:
       panic(fmt.Sprint("Unexpected primary value encountered ", token.Type))
@@ -427,12 +455,12 @@ func (p *Parser) match(ttype ...TokenType) bool {
 }
 
 
-func (p *Parser) consume(ttype TokenType, message string) Token{
+func (p *Parser) consume(ttype TokenType, message string) (*Token, error) {
   consumed := p.match(ttype)
   if !consumed {
-    panic(message)
+    return nil, error(fmt.Errorf(message))
   }
-  return p.previous()
+  return p.previous(), nil
 }
 
 func (p *Parser) check(ttype TokenType) bool{
@@ -446,11 +474,11 @@ func (p *Parser) advance() Token{
   if !p.is_at_end() {
     p.current += 1
   }
-  return p.previous()
+  return *p.previous()
 }
 
-func (p *Parser) previous() Token{
-  return p.tokens[p.current-1]
+func (p *Parser) previous() *Token{
+  return &p.tokens[p.current-1]
 }
 
 func (p *Parser) peek() Token {

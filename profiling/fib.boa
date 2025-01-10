@@ -7,6 +7,6 @@ fun fib(n){
 
 
 clock();
-dbg fib(35);
+dbg fib(40);
 clock();
 

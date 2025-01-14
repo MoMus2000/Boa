@@ -1,0 +1,9 @@
+fun print(a) { dbg a; }
+var five = 5;
+assert_eq(five, 5, "Expected five = 5");
+five;
+var six = 6969;
+assert_eq(six, 6969, "expected six = 6969");
+var mustafa = "mustafa";
+assert_eq(mustafa, "mustafa", "Expected mustafa = `mustafa`");
+

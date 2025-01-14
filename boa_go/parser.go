@@ -119,6 +119,10 @@ func (p *Parser) func_declaration() (Statement, error) {
   }, nil
 }
 
+func (p *Parser) enhanced_loop_statement() (Statement, error) {
+  return nil, nil
+}
+
 func (p *Parser) for_loop_statement() (Statement, error){
   p.consume(LEFT_PAREN, "Expected (")
   start, err      := p.declaration()

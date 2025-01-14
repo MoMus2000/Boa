@@ -5,15 +5,16 @@ type Statement interface{
 }
 
 type StatementVisitor interface{
-  visit_expression_statement(es  *ExpressionStatement)
-  visit_var_statement       (vs  *VarStatement)
-  visit_debug_statement     (ps  *DebugStatement)
-  visit_block_statement     (bs  *BlockStatement)
-  visit_if_statement        (ifs *IfStatement)
-  visit_while_statement     (ws *WhileStatement)
-  visit_for_statement       (fs *ForStatement)
-  visit_func_statement      (fs *FunctionStatement)
+  visit_expression_statement(es  *ExpressionStatement) error
+  visit_var_statement       (vs  *VarStatement) error
+  visit_debug_statement     (ps  *DebugStatement) error
+  visit_block_statement     (bs  *BlockStatement) error
+  visit_if_statement        (ifs *IfStatement) error
+  visit_while_statement     (ws *WhileStatement) error
+  visit_for_statement       (fs *ForStatement) error
+  visit_func_statement      (fs *FunctionStatement) error
   visit_return_statement    (fs *ReturnStatement) error
+  visit_enhanced_loop_statement (es *EnhancedLoop) error
 }
 
 type ExpressionStatement struct {
@@ -104,6 +105,16 @@ type ReturnStatement struct {
 
 func (fs *ReturnStatement) Accept(visitor StatementVisitor) error {
   visitor.visit_return_statement(fs)
+  return nil
+}
+
+type EnhancedLoop struct {
+  iteratee Statement
+  iterator Iterator
+}
+
+func (es *EnhancedLoop) Accept(visitor StatementVisitor) error {
+  visitor.visit_enhanced_loop_statement(es)
   return nil
 }
 

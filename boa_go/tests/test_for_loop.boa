@@ -1,0 +1,10 @@
+var a = 0;
+var temp = nil;
+assert_eq(temp, nil, "Expected nil");
+
+for (var b = 1; a < 10000; b = b + 1) {
+  a = b;
+  temp = a;
+  assert_eq(temp, a, "Temp and a dont match");
+}
+

@@ -1,0 +1,19 @@
+var a = "A";
+var b = "B";
+
+assert(a != b, "Expected a != b");
+if (a == b) {
+  assert(false, "Did not expect to get here");
+  // print "A is equal to B";
+}
+else{
+  assert(a != b, "Expected a != b");
+  // print "Inside the else block";
+  // print "A is equal to B";
+}
+
+if (a != b) {
+  assert(a != b, "Expected a != b");
+  // print "A is not equal to B";
+}
+

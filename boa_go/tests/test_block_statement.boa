@@ -1,0 +1,33 @@
+var a = "A";
+
+assert_eq(a , "A", "Expected var a = 'A'");
+
+var s = "Hello World, my name is Mustafa";
+
+assert_eq(s , "Hello World, my name is Mustafa", "Expected s to equal `Hello World, 
+  my name is Mustafa`" );
+
+var b = a;
+
+assert_eq(b , a, "Expected b to equal a");
+
+var x = "xxx";
+
+assert_eq(x , "xxx", "Expected x to equal xxx");
+
+b;
+
+{
+  var x = "www";
+  assert_eq(x , "www", "Expected x to equal www");
+  a;
+  assert_eq(a , "A", "Expected a to equal A");
+
+  var c = "GENKI";
+}
+
+x;
+assert_eq(x , "xxx", "Expected x to equal xxx");
+a;
+assert_eq(a , "A", "Expected a to equal A");
+

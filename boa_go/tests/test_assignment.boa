@@ -1,0 +1,9 @@
+var five = 5;
+assert_eq(five, 5, "Expected 5 but got " + five);
+five = 6;
+five = "mustafa";
+assert_eq(five, "mustafa", "ERROR: five does not equal 'mustafa'");
+var six = 6;
+five = six;
+assert_eq(five, six, "Expected 6 but got "+five);
+

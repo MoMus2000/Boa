@@ -32,6 +32,8 @@ func NewLexer(source_code []byte) *Lexer {
     "var"    : VAR,
     "while"  : WHILE,
     "import" : IMPORT,
+    "in"     : IN,
+    "range"  : RANGE,
   }
 	return &Lexer{
     source:    string(source_code),

@@ -1,0 +1,11 @@
+fun fib(n){
+  if (n <= 1){
+    return n;
+  }
+  return fib(n-1) + fib(n-2);
+}
+
+assert_eq(fib(0), 0, "Expected 0 got something else");
+assert_eq(fib(5), 5, "Expected 5 got something else");
+assert_eq(fib(8), 21, "Expected 21 got something else");
+assert_eq(fib(15), 610, "Expected 610 got something else");

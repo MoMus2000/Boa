@@ -57,6 +57,9 @@ const (
   WHILE                
   IMPORT               
 
+  IN
+  RANGE
+
   EOF                  
 
 )
@@ -68,7 +71,7 @@ var tokenNames = [...]string{
 	"GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL", "IDENTIFIER", "STRING", 
 	"NUMBER", "AND", "CLASS", "ELSE", "FALSE", "FUN", "FOR", "IF", "NIL", 
 	"OR", "DEBUG", "RETURN", "SUPER", "THIS", "TRUE", "VAR", "WHILE", 
-	"IMPORT", "EOF",
+	"IMPORT", "IN", "RANGE", "EOF",
 }
 
 // String method to print enum name
@@ -78,3 +81,4 @@ func (t TokenType) String() string {
 	}
 	return tokenNames[t]
 }
+

@@ -25,9 +25,29 @@ func (clock *Clock) call(interpreter *Interpreter, args []interface{}){
   fmt.Println(t)
 }
 
+type Assert struct {
+  arity int
+}
+
+func (as *Assert) call(interpreter *Interpreter, args []interface{}){
+  if len(args) != as.arity {
+    panic("expected 3 arguments")
+  }
+
+  v1 := args[0];
+  v2 := args[1];
+  msg := args[2];
+
+  if v1 != v2 {
+    fmt.Println(msg)
+  }
+
+}
+
 func NewInterpreter() *Interpreter {
   env := NewEnv(nil)
   env.define("clock", &Clock{0})
+  env.define("assert_eq", &Assert{3})
   return &Interpreter{
     env       : env,
     statements: make([]Statement, 0),
@@ -46,6 +66,10 @@ func (i *Interpreter) interpret (statements []Statement) error {
 
 func (i *Interpreter) execute_statement(statement Statement) {
    statement.Accept(i)
+}
+
+func (i *Interpreter) visit_enhanced_loop_statement(statement *EnhancedLoop) error {
+  return nil
 }
 
 func (i *Interpreter) visit_return_statement(statement *ReturnStatement) error {
@@ -74,42 +98,48 @@ func (i *Interpreter) visit_func_call_expression(statement *FuncCallExpression) 
         f.call(i_copy, f_args)
     case *Clock:
         f.call(i_copy, f_args)
+    case *Assert:
+        f.call(i_copy, f_args)
     default:
         fmt.Println("Unsupported type")
   }
   return nil
 }
 
-func (i *Interpreter) visit_func_statement(statement *FunctionStatement){
+func (i *Interpreter) visit_func_statement(statement *FunctionStatement) error {
   cf := &CallableFunc{
     declaration: statement,
   }
   i.env.define(statement.ident.Lexeme.(string), cf)
+  return nil
 }
 
-func (i *Interpreter) visit_for_statement(visitor *ForStatement){
+func (i *Interpreter) visit_for_statement(visitor *ForStatement) error {
   i.execute_statement(visitor.start)
   for i.evaluate(visitor.predicate) == true{
     i.execute_statement(visitor.inner_statements)
     i.evaluate(visitor.incre)
   }
+  return nil
 }
 
-func (i *Interpreter) visit_while_statement(visitor *WhileStatement){
+func (i *Interpreter) visit_while_statement(visitor *WhileStatement) error {
   predicate := is_truthy(i.evaluate(visitor.predicate))
   for predicate {
     i.execute_statement(visitor.inner_statements)
     predicate = is_truthy(i.evaluate(visitor.predicate))
   }
+  return nil
 }
 
-func (i *Interpreter) visit_if_statement(visitor *IfStatement){
+func (i *Interpreter) visit_if_statement(visitor *IfStatement) error {
   predicate := is_truthy(i.evaluate(visitor.predicate))
   if predicate {
     i.execute_statement(visitor.if_condition)
   } else if !predicate && visitor.else_condition != nil{
     i.execute_statement(visitor.else_condition)
   }
+  return nil
 }
 
 func (i *Interpreter) visit_assign_expression(visitor *AssignExpression) interface{}{
@@ -117,7 +147,7 @@ func (i *Interpreter) visit_assign_expression(visitor *AssignExpression) interfa
   return assigned
 }
 
-func (i *Interpreter) visit_block_statement(visitor *BlockStatement) {
+func (i *Interpreter) visit_block_statement(visitor *BlockStatement) error {
   env := NewEnv(i.env)
   prev := i.env
   i.env = env
@@ -125,6 +155,7 @@ func (i *Interpreter) visit_block_statement(visitor *BlockStatement) {
     i.execute_statement(statement)
   }
   i.env = prev
+  return nil
 }
 
 func (i *Interpreter) execute_block(statement *BlockStatement, env *Env){
@@ -136,13 +167,15 @@ func (i *Interpreter) execute_block(statement *BlockStatement, env *Env){
   i.env = prev
 }
 
-func (i *Interpreter) visit_debug_statement(visitor *DebugStatement){
+func (i *Interpreter) visit_debug_statement(visitor *DebugStatement) error {
   evaluated_expr := i.evaluate(visitor.expr)
   fmt.Println(evaluated_expr)
+  return nil
 }
 
-func (i *Interpreter) visit_var_statement(visitor *VarStatement){
+func (i *Interpreter) visit_var_statement(visitor *VarStatement) error {
   i.env.define(visitor.ident.Lexeme.(string), i.evaluate(visitor.value))
+  return nil
 }
 
 func (i *Interpreter) visit_logical_expression(visitor *LogicalExpression) interface{}{
@@ -157,8 +190,9 @@ func (i *Interpreter) visit_logical_expression(visitor *LogicalExpression) inter
   panic("Unreachable Code")
 }
 
-func (i *Interpreter) visit_expression_statement(visitor *ExpressionStatement){
+func (i *Interpreter) visit_expression_statement(visitor *ExpressionStatement) error {
   i.evaluate(visitor.expr)
+  return nil
 }
 
 func (i *Interpreter) evaluate(expr Expression) interface{} {

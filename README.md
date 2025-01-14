@@ -32,11 +32,9 @@ the current implementation.
 
 ## Setup
 
+#### Download the compiled [release](https://github.com/MoMus2000/Boa/releases/tag/0.1)
 
 ```bash
-# Run setup
-./setup.sh (make sure to provide relevant permissions)
-
 # Load source code
 boa path_to_file
 

@@ -39,15 +39,27 @@ code is open for you to see the kind of data that I collect.
 
 #### Download the compiled [release](https://github.com/MoMus2000/Boa/releases/tag/0.1)
 
+- For Linux: `boa-linux-amd64`
+- For macOS: `boa-darwin`
+- For Windows: `boa-windows`
+
+### Launch the Interpreter
+
+- To start the interpreter, run the following command in your terminal:
+
 ```bash
-# Load source code
-boa path_to_file
+./boa-linux-amd64    # for Linux
+./boa-linux-arm64    # for Linux
+./boa-darwin-amd64   # for macOS
+./boa-windows-amd64  # for Windows
+```
 
-# Launch interpreter
-boa
-
-# Run tests
-./tests.sh
+### Execute Source File
+```bash
+./boa-linux-amd64    path_to_source.boa # for Linux
+./boa-linux-arm64    path_to_source.boa # for Linux
+./boa-darwin-amd64   path_to_source.boa # for macOS
+./boa-windows-amd64  path_to_source.boa # for Windows
 ```
 
 ## Sample Boa Code
@@ -78,6 +90,9 @@ for (var b = 1; a < 10000; b = temp + b;) {
 ```
 
 ## Standard lib
+
+Stdlib is a work in progress and the current samples work only with the python
+implementation of Boa.
 
 ### Maps
 ```lua

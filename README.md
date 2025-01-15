@@ -17,9 +17,9 @@ I ran the fibonacci function (recursive) no memoization for n = 35 for both my
 implementations and compared the output to CPython.
 
 
-|  CPython | Boa (Go) | Boa (Py) |
-|----------|----------|----------|
-| 1.17 (s) | 18 (s)   | 215 (s)  |
+|  CPython | Boa (Go) | Boa (Py) | Boa (PyPy) |
+|----------|----------|----------|----------- |
+| 1.17 (s) | 18 (s)   | 215 (s)  | 120 (s)    |
 
 
 The Go Implementation for Boa is 15X slower than Python, whereas the Python implementation

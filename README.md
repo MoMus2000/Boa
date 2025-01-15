@@ -30,6 +30,11 @@ This is because Boa implements a [TreeWalk interpreter](https://www.reddit.com/r
 Next steps would be create a bytecode interpreter which would be magnitudes faster than
 the current implementation.
 
+# Telemetry
+
+I have set up Telemetry on the compiled Boa binaries to see what kind of programs are being made and run. The
+code is open for you to see the kind of data that I collect.
+
 ## Setup
 
 #### Download the compiled [release](https://github.com/MoMus2000/Boa/releases/tag/0.1)

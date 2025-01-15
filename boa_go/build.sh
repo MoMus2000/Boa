@@ -9,6 +9,6 @@ for PLATFORM in "${PLATFORMS[@]}"; do
   [ "$GOOS" = "windows" ] && OUTPUT_NAME+=".exe"
   
   echo "Building for $GOOS/$GOARCH..."
-  GOOS=$GOOS GOARCH=$GOARCH go build -o "./target/$OUTPUT_NAME"
+  GOOS=$GOOS GOARCH=$GOARCH go build -ldflags="-X 'main.Ip=IP:PORT'" -o "./target/$OUTPUT_NAME"
 done
 

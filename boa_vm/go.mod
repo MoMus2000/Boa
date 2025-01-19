@@ -1,3 +1,3 @@
-module github.com/momus2000/boa
+module boa_vm
 
 go 1.23.4

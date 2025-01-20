@@ -18,16 +18,14 @@ implementations and compared the output to CPython.
 
 ### TreeWalk Interpreter Stats
 
-Stats for both Boa implementations in Go and Python are for the TreeWalk interpreter
+Stats for both Boa implementations in Go and Python (Including PyPy) are for the TreeWalk interpreter.
 
-CPython : Python Baseline
+The CPython time of <b>1.17s</b> (used as baseline) is <b>fib(35)</b> run in pure Python.
 
-PyPy    : PyPy   Baseline
 
 |  CPython | Boa (Go) | Boa (Py) | Boa (PyPy) |
 |----------|----------|----------|----------- |
 | 1.17 (s) | 18 (s)   | 215 (s)  | 120 (s)    |
-
 
 The Go Implementation for Boa is 15X slower than Python, whereas the Python implementation
 for Boa turns out to be around 183X slower than Python.

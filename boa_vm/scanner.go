@@ -134,6 +134,10 @@ func (s *Scanner) scanToken() Token {
   return s.tokenError("Unexpected Character")
 }
 
+func (s *Scanner) number() Token{
+  return s.makeToken(NUMBER)
+}
+
 func (s *Scanner) makeStringToken() Token {
   for s.peek() != '"' && !s.isAtEnd() {
     if s.peek() == '\n' { s.line ++ }
@@ -141,7 +145,7 @@ func (s *Scanner) makeStringToken() Token {
   }
   if s.isAtEnd() { return s.tokenError("Unterminated String") }
   s.advance()
-  return s.makeToken(TOKEN_STRING)
+  return s.makeToken(STRING)
 }
 
 func (s *Scanner) match(lexeme rune) bool {
@@ -162,7 +166,7 @@ func (s *Scanner) tokenError(msg string) Token {
     runes : []rune(msg),
     length : len(msg),
     line   : s.line,
-    tokenType: TOKEN_ERROR,
+    tokenType: ERROR,
   }
 }
 

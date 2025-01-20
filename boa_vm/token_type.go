@@ -61,8 +61,8 @@ const (
   IN
   RANGE
 
-  TOKEN_ERROR
-  TOKEN_STRING
+  ERROR
+
   EOF
 )
 
@@ -73,7 +73,7 @@ var tokenNames = [...]string{
 	"GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL", "IDENTIFIER", "STRING", 
 	"NUMBER", "AND", "CLASS", "ELSE", "FALSE", "FUN", "FOR", "IF", "NIL", 
 	"OR", "DEBUG", "RETURN", "SUPER", "THIS", "TRUE", "VAR", "WHILE", 
-	"IMPORT", "IN", "RANGE", "TOKEN_ERROR", "TOKEN_STRING","EOF", 
+	"IMPORT", "IN", "RANGE", "ERROR", "EOF", 
 }
 
 // String method to print enum name

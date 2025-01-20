@@ -16,7 +16,7 @@ func compile(source []byte){
       fmt.Printf("   | ")
     }
     fmt.Printf(" %s %.*s\n", token.tokenType, token.length, string(token.runes[:token.length]))
-    if token.tokenType == EOF || token.tokenType == TOKEN_ERROR{
+    if token.tokenType == EOF || token.tokenType == ERROR{
       break
     }
   }

@@ -1,0 +1,24 @@
+package main
+
+import (
+  "fmt"
+)
+
+func compile(source []byte){
+  scanner := NewScanner(source)
+  line := -1
+  for {
+    token := scanner.scanToken()
+    if token.line != line {
+      fmt.Printf("%4d", token.line)
+      line  = token.line
+    } else{
+      fmt.Printf("   | ")
+    }
+    fmt.Printf("%2d '%.s'\n", token.tokenType, token.length, token.runes); 
+    if token.tokenType == EOF {
+      break
+    }
+  }
+}
+

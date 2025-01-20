@@ -35,10 +35,9 @@ func (v *VM) resetStack() {
 func (v *VM) FreeVM() {
 }
 
-func (v *VM) interpret(c *Chunk) InterpretResult{
-  v.chunk = c
-  v.ip    = 0
-  return v.run()
+func (v *VM) interpret(source []byte) InterpretResult{
+  compile(source)
+  return INTERPRET_OK
 }
 
 func (v *VM) push(vl Value){

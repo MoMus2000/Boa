@@ -4,7 +4,12 @@ type Opcode uint8
 
 const (
   OpConstant Opcode = iota
-  OpReturn   Opcode = iota
+  OpReturn
+  OpNegate
+  OpAdd
+  OpSub
+  OpDiv
+  OpMul
 )
 
 type Chunk struct{

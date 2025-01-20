@@ -21,11 +21,26 @@ func DisassembleInstruction(c *Chunk, offset int) int{
   }
   instruction := c.code[offset]
   switch instruction {
+    case OpNegate: {
+      return SimpleInstruction("OP_NEGATE", offset)
+    }
     case OpReturn : {
       return SimpleInstruction("OP_RETURN", offset)
     }
     case OpConstant : {
       return ConstantInstruction("OP_CONSTANT", c, offset)
+    }
+    case OpAdd : {
+      return SimpleInstruction("OP_ADD", offset)
+    }
+    case OpSub: {
+      return SimpleInstruction("OP_SUB", offset)
+    }
+    case OpMul: {
+      return SimpleInstruction("OP_MUL", offset)
+    }
+    case OpDiv: {
+      return SimpleInstruction("OP_DIV", offset)
     }
     default: {
       fmt.Printf("Unknown OpCode %d\n", instruction)

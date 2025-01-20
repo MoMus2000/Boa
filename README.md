@@ -21,6 +21,7 @@ implementations and compared the output to CPython.
 Stats for both Boa implementations in Go and Python are for the TreeWalk interpreter
 
 CPython : Python Baseline
+
 PyPy    : PyPy   Baseline
 
 |  CPython | Boa (Go) | Boa (Py) | Boa (PyPy) |

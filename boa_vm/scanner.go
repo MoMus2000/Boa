@@ -12,6 +12,26 @@ type Scanner struct {
   src     []rune
 }
 
+var IdentMap = map[string]TokenType {
+    "and"    : AND,
+    "class"  : CLASS,
+    "else"   : ELSE,
+    "false"  : FALSE,
+    "for"    : FOR,
+    "fun"    : FUN,
+    "if"     : IF,
+    "nil"    : NIL,
+    "or"     : OR,
+    "dbg"    : DEBUG,
+    "return" : RETURN,
+    "super"  : SUPER,
+    "this"   : THIS,
+    "true"   : TRUE,
+    "var"    : VAR,
+    "while"  : WHILE,
+    "import" : IMPORT,
+}
+
 type Token struct {
   tokenType   TokenType
   runes       []rune
@@ -81,6 +101,10 @@ func (s *Scanner) isDigit(c rune) bool {
   return unicode.IsDigit(c)
 }
 
+func (s *Scanner) isAlpha(c rune) bool {
+  return unicode.IsLetter(c) || c == '_'
+}
+
 func (s *Scanner) scanToken() Token {
   s.skipWhiteSpace()
   s.start = s.current
@@ -91,6 +115,10 @@ func (s *Scanner) scanToken() Token {
 
   c := s.advance()
 
+
+  if s.isAlpha(c) {
+    return s.makeIdentifierToken()
+  }
   if s.isDigit(c) {
     return s.makeNumberToken()
   }
@@ -141,6 +169,22 @@ func (s *Scanner) scanToken() Token {
   }
 
   return s.tokenError("Unexpected Character")
+}
+
+func (s *Scanner) makeIdentifierToken() Token{
+  for s.isAlpha(s.peek()) || s.isDigit(s.peek()) {
+    s.advance()
+  }
+
+  potential_keyword := string(s.src[s.start: s.current])
+
+  token, exists := IdentMap[potential_keyword]
+
+  if exists{
+    return s.makeToken(token)
+  }
+  
+  return s.makeToken(IDENTIFIER)
 }
 
 func (s *Scanner) makeNumberToken() Token{

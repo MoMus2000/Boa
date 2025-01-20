@@ -7,31 +7,35 @@ const (
   OpReturn   Opcode = iota
 )
 
-type Chunck struct{
+type Chunk struct{
   code []Opcode
   constants ValueArray
+  lines []int
 }
 
-func NewChunck() Chunck{
+func NewChunck() Chunk{
   v := NewValue()
-  return Chunck{
+  return Chunk{
     code : make([]Opcode, 0),
     constants: v,
+    lines: make([]int, 0),
   }
 }
 
-func (c *Chunck) WriteChunck(b Opcode){
+func (c *Chunk) WriteChunk(b Opcode, line int){
   c.code = append(c.code, b)
+  c.lines = append(c.lines, line)
 }
 
-func (c *Chunck) AddConstant(value Value) int{
+func (c *Chunk) AddConstant(value Value) int{
   c.constants.WriteValue(value)
   return len(c.constants.values) - 1
 }
 
-func (c *Chunck) FreeChunk(){
+func (c *Chunk) FreeChunk(){
   c.code = make([]Opcode, 0)
   c.constants.FreeValue()
   c.constants = NewValue()
+  c.lines = make([]int, 0)
 }
 

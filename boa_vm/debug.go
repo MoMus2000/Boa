@@ -4,7 +4,7 @@ import (
   "fmt"
 )
 
-func DisassembleChunk(chunck *Chunck, message string){
+func DisassembleChunk(chunck *Chunk, message string){
   fmt.Printf(" == %s == \n", message)
   offset := 0
   for offset < len(chunck.code){
@@ -12,8 +12,13 @@ func DisassembleChunk(chunck *Chunck, message string){
   }
 }
 
-func DisassembleInstruction(c *Chunck, offset int) int{
+func DisassembleInstruction(c *Chunk, offset int) int{
   fmt.Printf("%04d ", offset)
+  if offset > 0 && c.lines[offset] == c.lines[offset - 1]{
+    fmt.Printf("   | ")
+  }else{
+    fmt.Printf("%04d ", c.lines[offset])
+  }
   instruction := c.code[offset]
   switch instruction {
     case OpReturn : {
@@ -29,7 +34,7 @@ func DisassembleInstruction(c *Chunck, offset int) int{
   }
 }
 
-func ConstantInstruction(ins string, chunk *Chunck, offset int) int {
+func ConstantInstruction(ins string, chunk *Chunk, offset int) int {
   constant := chunk.code[offset + 1]
   fmt.Printf("%-16s %4d", ins, constant)
   printValue(chunk.constants.values[constant])
@@ -38,7 +43,7 @@ func ConstantInstruction(ins string, chunk *Chunck, offset int) int {
 }
 
 func printValue(v Value){
-  fmt.Printf("C: %v\n", v)
+  fmt.Printf(" '%v'\n", v)
 }
 
 func SimpleInstruction(ins string, offset int) int {

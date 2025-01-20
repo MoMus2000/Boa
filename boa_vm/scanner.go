@@ -1,5 +1,9 @@
 package main
 
+import (
+  _"fmt"
+)
+
 type Scanner struct {
   start   int
   current int
@@ -28,8 +32,45 @@ func (s *Scanner) advance() rune {
   return s.src[s.current-1]
 }
 
+func (s *Scanner) skipWhiteSpace() {
+  for {
+    c := s.peek()
+    switch c {
+      case ' ' : {
+        s.advance()
+        break
+      }
+      case '\r': {
+        s.advance()
+        break
+      }
+      case '\t': {
+        s.advance()
+        break
+      }
+      case '\n': {
+        s.line ++
+        s.advance()
+        break
+      }
+      default:
+        return
+    }
+  }
+}
+
+func (s *Scanner) peek() (r rune) {
+  if s.isAtEnd() { return }
+  return s.src[s.current]
+}
+
 func (s *Scanner) scanToken() Token {
+  s.skipWhiteSpace()
   s.start = s.current
+
+  if s.isAtEnd() {
+    return s.makeToken(EOF)
+  }
 
   c := s.advance()
 
@@ -45,13 +86,46 @@ func (s *Scanner) scanToken() Token {
     case '+': return s.makeToken(PLUS)
     case '/': return s.makeToken(SLASH)
     case '*': return s.makeToken(STAR)
-  }
-
-  if s.isAtEnd() {
-    return s.makeToken(EOF)
+    case '!': {
+      if s.match('=') {
+        return s.makeToken(BANG_EQUAL)
+      } else {
+        return s.makeToken(BANG)
+      }
+    }
+    case '=': {
+      if s.match('=') {
+        return s.makeToken(EQUAL_EQUAL)
+      } else {
+        return s.makeToken(EQUAL)
+      }
+    }
+    case '<': {
+      if s.match('=') {
+        return s.makeToken(LESS_EQUAL)
+      } else {
+        return s.makeToken(LESS)
+      }
+    }
+    case '>': {
+      if s.match('=') {
+        return s.makeToken(GREATER_EQUAL)
+      } else {
+        return s.makeToken(GREATER)
+      }
+    }
   }
 
   return s.tokenError("Unexpected Character")
+}
+
+func (s *Scanner) match(lexeme rune) bool {
+  if s.isAtEnd(){return false}
+  if s.src[s.current] != lexeme {
+    return false
+  }
+  s.current ++
+  return true
 }
 
 func (s *Scanner) isAtEnd() bool {

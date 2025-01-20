@@ -53,10 +53,22 @@ func (s *Scanner) skipWhiteSpace() {
         s.advance()
         break
       }
+      case '/': {
+        if s.peekNext() == '/' {
+          for s.peek() != '\n' && !s.isAtEnd() { s.advance() }
+        } else {
+          return
+        }
+      }
       default:
         return
     }
   }
+}
+
+func (s *Scanner) peekNext() rune {
+  if s.isAtEnd() { return '\u0000' }
+  return s.src[s.current+1]
 }
 
 func (s *Scanner) peek() (r rune) {
@@ -114,9 +126,22 @@ func (s *Scanner) scanToken() Token {
         return s.makeToken(GREATER)
       }
     }
+    case '"': {
+      return s.makeStringToken()
+    }
   }
 
   return s.tokenError("Unexpected Character")
+}
+
+func (s *Scanner) makeStringToken() Token {
+  for s.peek() != '"' && !s.isAtEnd() {
+    if s.peek() == '\n' { s.line ++ }
+    s.advance()
+  }
+  if s.isAtEnd() { return s.tokenError("Unterminated String") }
+  s.advance()
+  return s.makeToken(TOKEN_STRING)
 }
 
 func (s *Scanner) match(lexeme rune) bool {

@@ -2,6 +2,7 @@ package main
 
 import (
   _"fmt"
+  "unicode"
 )
 
 type Scanner struct {
@@ -76,6 +77,10 @@ func (s *Scanner) peek() (r rune) {
   return s.src[s.current]
 }
 
+func (s *Scanner) isDigit(c rune) bool {
+  return unicode.IsDigit(c)
+}
+
 func (s *Scanner) scanToken() Token {
   s.skipWhiteSpace()
   s.start = s.current
@@ -85,6 +90,10 @@ func (s *Scanner) scanToken() Token {
   }
 
   c := s.advance()
+
+  if s.isDigit(c) {
+    return s.makeNumberToken()
+  }
 
   switch c {
     case '(': return s.makeToken(LEFT_PAREN)
@@ -134,7 +143,12 @@ func (s *Scanner) scanToken() Token {
   return s.tokenError("Unexpected Character")
 }
 
-func (s *Scanner) number() Token{
+func (s *Scanner) makeNumberToken() Token{
+  for s.isDigit(s.peek()) { s.advance() }
+  if s.peek() == '.' && s.isDigit(s.peekNext()) {
+    s.advance()
+    for s.isDigit(s.peek()) { s.advance() }
+  }
   return s.makeToken(NUMBER)
 }
 

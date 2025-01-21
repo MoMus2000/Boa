@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 
 type Parser struct {
@@ -31,13 +34,27 @@ func (c *Compiler) compile(source []byte, chunk *Chunk) bool{
   compilingChunk = chunk
   c.advance()
   c.expression()
-  c.consume(EOF, "Expected EOF")
+  // c.consume(EOF, "Expected EOF")
   c.endCompiler()
   return !c.parser.hadError
 }
 
 func (c *Compiler) endCompiler() {
   c.emitReturn()
+}
+
+func (c *Compiler) number() {
+  num, err := strconv.ParseFloat(string(c.parser.current.runes), 32)
+  if err != nil  {
+    err := err.Error()
+    c.errorAtCurrent(err)
+  }
+  c.emitBytes(OpConstant, c.makeConstant(Value(num)))
+}
+
+func (c *Compiler) makeConstant(constant Value) Opcode {
+  index := currentChunk().AddConstant(constant)
+  return Opcode(index)
 }
 
 func(c *Compiler) emitReturn() {
@@ -54,7 +71,7 @@ func currentChunk() *Chunk {
 }
 
 func (c *Compiler) expression() {
-
+  c.number()
 }
 
 func (c *Compiler) advance() {

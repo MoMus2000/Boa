@@ -21,10 +21,13 @@ type VM struct {
   ip       int
   stackTop Value
   stack    []Value
+  compiler Compiler
 }
 
 func NewVM() VM {
-  return VM{}
+  return VM{
+    compiler : NewCompiler(),
+  }
 }
 
 func (v *VM) resetStack() {
@@ -37,16 +40,15 @@ func (v *VM) FreeVM() {
 
 func (v *VM) interpret(source []byte) InterpretResult{
   chunk := NewChunck()
-  compiler := NewCompiler()
-  if ! compiler.compile(source, &chunk) {
+  if ! v.compiler.compile(source, &chunk) {
     return INTERPRET_COMPILE_ERROR
   }
 
   v.chunk = &chunk
   v.ip    = 0
 
-  // v.run()
-  // chunk.FreeChunk()
+  v.run()
+  chunk.FreeChunk()
 
   return INTERPRET_OK
 }

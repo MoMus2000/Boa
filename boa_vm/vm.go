@@ -1,7 +1,7 @@
 package main
 
 import (
-  "fmt"
+	"fmt"
 )
 
 type InterpretResult int;
@@ -36,7 +36,18 @@ func (v *VM) FreeVM() {
 }
 
 func (v *VM) interpret(source []byte) InterpretResult{
-  compile(source)
+  chunk := NewChunck()
+  compiler := NewCompiler()
+  if ! compiler.compile(source, &chunk) {
+    return INTERPRET_COMPILE_ERROR
+  }
+
+  v.chunk = &chunk
+  v.ip    = 0
+
+  // v.run()
+  // chunk.FreeChunk()
+
   return INTERPRET_OK
 }
 

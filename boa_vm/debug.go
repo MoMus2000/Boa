@@ -1,7 +1,8 @@
 package main
 
 import (
-  "fmt"
+	"fmt"
+	"os"
 )
 
 func DisassembleChunk(chunck *Chunk, message string){
@@ -10,6 +11,22 @@ func DisassembleChunk(chunck *Chunk, message string){
   for offset < len(chunck.code){
     offset = DisassembleInstruction(chunck, offset)
   }
+}
+
+func DumpByteCode(c *Chunk){
+  file, err := os.Create("./bytecode/main.boac")
+	if err != nil {
+		fmt.Println("Error creating file:", err)
+		return
+	}
+	defer file.Close()
+
+	// Write the struct to the file
+	_, err = fmt.Fprintf(file, "%+v\n", c)
+	if err != nil {
+		fmt.Println("Error writing to file:", err)
+		return
+	}
 }
 
 func DisassembleInstruction(c *Chunk, offset int) int{

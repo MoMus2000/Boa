@@ -44,6 +44,7 @@ func (v *VM) interpret(source []byte) InterpretResult{
     return INTERPRET_COMPILE_ERROR
   }
   v.chunk = &chunk
+  // DumpByteCode(v.chunk)
   v.ip    = 0
   result := v.run()
   chunk.FreeChunk()

@@ -43,14 +43,11 @@ func (v *VM) interpret(source []byte) InterpretResult{
   if ! v.compiler.compile(source, &chunk) {
     return INTERPRET_COMPILE_ERROR
   }
-
   v.chunk = &chunk
   v.ip    = 0
-
-  v.run()
+  result := v.run()
   chunk.FreeChunk()
-
-  return INTERPRET_OK
+  return result
 }
 
 func (v *VM) push(vl Value){

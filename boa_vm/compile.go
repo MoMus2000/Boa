@@ -5,6 +5,44 @@ import (
 	"strconv"
 )
 
+type Precidence uint;
+
+const DEBUG_PRINT_CODE = 0
+
+const (
+  PREC_NONE Precidence = iota
+  PREC_ASSIGNMENT      // =
+  PREC_OR              // or
+  PREC_AND             // and
+  PREC_EQUALITY        // == !=
+  PREC_COMPARISON      // < > <= >=
+  PREC_TERM            // + -
+  PREC_FACTOR          // * /
+  PREC_UNARY           // ! -
+  PREC_CALL            // . ()
+  PREC_PRIMARY
+)
+
+func (c *Compiler) parsePrecidence(precidence Precidence){
+  c.advance()
+  prefixRule := c.getRule(c.parser.previous.tokenType).prefix
+  if prefixRule == nil {
+    c.error("Expected expression")
+    return
+  }
+  prefixRule()
+  for precidence <= c.getRule(c.parser.current.tokenType).precidence {
+    c.advance()
+    infixRule := c.getRule(c.parser.previous.tokenType).infix
+    infixRule()
+  }
+}
+
+type ParseRule struct {
+  prefix func()
+  infix  func()
+  precidence Precidence
+}
 
 type Parser struct {
   current   Token
@@ -16,6 +54,7 @@ type Parser struct {
 type Compiler struct {
   scanner *Scanner
   parser  *Parser
+  parseRules map[TokenType]ParseRule
 }
 
 func NewCompiler() Compiler {
@@ -24,27 +63,78 @@ func NewCompiler() Compiler {
 
 var compilingChunk *Chunk
 
+func (c *Compiler) buildParseRules() map[TokenType]ParseRule {
+   return map[TokenType]ParseRule{
+    LEFT_PAREN:     {c.grouping, nil,           PREC_NONE},
+    RIGHT_PAREN   : {nil,        nil,           PREC_NONE},
+    LEFT_BRACE    : {nil,        nil,           PREC_NONE}, 
+    RIGHT_BRACE   : {nil,        nil,           PREC_NONE},
+    COMMA         : {nil,        nil,           PREC_NONE},
+    DOT           : {nil,        nil,           PREC_NONE},
+    MINUS         : {c.unary,    c.binary,      PREC_TERM},
+    PLUS          : {nil,        c.binary,      PREC_TERM},
+    SEMICOLON     : {nil,        nil,           PREC_NONE},
+    SLASH         : {nil,        c.binary,      PREC_FACTOR},
+    STAR          : {nil,        c.binary,      PREC_FACTOR},
+    BANG          : {nil,        nil,           PREC_NONE},
+    BANG_EQUAL    : {nil,        nil,           PREC_NONE},
+    EQUAL         : {nil,        nil,           PREC_NONE},
+    EQUAL_EQUAL   : {nil,        nil,           PREC_NONE},
+    GREATER       : {nil,        nil,           PREC_NONE},
+    GREATER_EQUAL : {nil,        nil,           PREC_NONE},
+    LESS          : {nil,        nil,           PREC_NONE},
+    LESS_EQUAL    : {nil,        nil,           PREC_NONE},
+    IDENTIFIER    : {nil,        nil,           PREC_NONE},
+    STRING        : {nil,        nil,           PREC_NONE},
+    NUMBER        : {c.number,   nil,           PREC_NONE},
+    AND           : {nil,        nil,           PREC_NONE},
+    CLASS         : {nil,        nil,           PREC_NONE},
+    ELSE          : {nil,        nil,           PREC_NONE},
+    FALSE         : {nil,        nil,           PREC_NONE},
+    FOR           : {nil,        nil,           PREC_NONE},
+    FUN           : {nil,        nil,           PREC_NONE},
+    IF            : {nil,        nil,           PREC_NONE},
+    NIL           : {nil,        nil,           PREC_NONE},
+    OR            : {nil,        nil,           PREC_NONE},
+    PRINT         : {nil,        nil,           PREC_NONE},
+    RETURN        : {nil,        nil,           PREC_NONE},
+    SUPER         : {nil,        nil,           PREC_NONE},
+    THIS          : {nil,        nil,           PREC_NONE},
+    TRUE          : {nil,        nil,           PREC_NONE},
+    VAR           : {nil,        nil,           PREC_NONE},
+    WHILE         : {nil,        nil,           PREC_NONE},
+    ERROR         : {nil,        nil,           PREC_NONE},
+    EOF           : {nil,        nil,           PREC_NONE},
+  }
+}
+
 func (c *Compiler) compile(source []byte, chunk *Chunk) bool{
-  parser    := Parser{}
-  scanner   := NewScanner(source)
+  parser       := Parser{}
+  scanner      := NewScanner(source)
+  c.parseRules  = c.buildParseRules()
   c.scanner = &scanner
   c.parser  = &parser
   c.parser.hadError  = false
   c.parser.panicMode = false
   compilingChunk = chunk
   c.advance()
-  c.expression()
-  // c.consume(EOF, "Expected EOF")
+  for c.parser.current.tokenType != EOF {
+    c.expression()
+  }
+  c.consume(EOF, fmt.Sprintf("Expected EOF after expression, but got : (%s %s)", c.parser.current.tokenType, string(c.parser.current.runes)))
   c.endCompiler()
   return !c.parser.hadError
 }
 
 func (c *Compiler) endCompiler() {
+  if !c.parser.hadError && DEBUG_PRINT_CODE == 1{
+    DisassembleChunk(currentChunk(), "code")
+  }
   c.emitReturn()
 }
 
 func (c *Compiler) number() {
-  num, err := strconv.ParseFloat(string(c.parser.current.runes), 32)
+  num, err := strconv.ParseFloat(string(c.parser.previous.runes), 32)
   if err != nil  {
     err := err.Error()
     c.errorAtCurrent(err)
@@ -52,8 +142,43 @@ func (c *Compiler) number() {
   c.emitBytes(OpConstant, c.makeConstant(Value(num)))
 }
 
+func (c *Compiler) grouping(){
+  c.expression()
+  c.consume(RIGHT_PAREN, fmt.Sprintf("Expected ) after expression, but got : %s", c.parser.current.tokenType))
+}
+
+func (c *Compiler) unary(){
+  operator := c.parser.previous.tokenType
+  //c.expression() // Evaluate the operand first and then apply whatever operator we have to
+  c.parsePrecidence(PREC_UNARY)
+  switch operator {
+    case MINUS: c.emitByteCode(OpNegate); break;
+    default: return
+  }
+}
+
+func (c *Compiler) binary(){
+  operator := c.parser.previous.tokenType
+  rule := c.getRule(operator)
+  c.parsePrecidence(Precidence(rule.precidence+1))
+
+  switch operator{
+    case PLUS: c.emitByteCode(OpAdd); break;
+    case MINUS: c.emitByteCode(OpSub); break;
+    case STAR: c.emitByteCode(OpMul); break;
+    case SLASH: c.emitByteCode(OpDiv); break;
+    default: return
+  }
+}
+
+func (c *Compiler) getRule(token TokenType) *ParseRule {
+  pRule := c.parseRules[token]
+  return &pRule
+}
+
 func (c *Compiler) makeConstant(constant Value) Opcode {
   index := currentChunk().AddConstant(constant)
+  if index > int(^uint(0) >> 1) { c.error("Too many constants in the chunk"); return 0}
   return Opcode(index)
 }
 
@@ -71,7 +196,7 @@ func currentChunk() *Chunk {
 }
 
 func (c *Compiler) expression() {
-  c.number()
+  c.parsePrecidence(PREC_ASSIGNMENT)
 }
 
 func (c *Compiler) advance() {
@@ -89,6 +214,7 @@ func (c *Compiler) advance() {
 func (c *Compiler) consume(tokenType TokenType, message string) {
   if c.parser.current.tokenType == tokenType {
     c.advance()
+    return
   }
   c.errorAtCurrent(message)
 }

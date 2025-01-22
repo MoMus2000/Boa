@@ -1,7 +1,7 @@
 package main
 
 import (
-  "fmt"
+	"fmt"
 )
 
 type TokenType int
@@ -49,7 +49,7 @@ const (
   IF                   
   NIL                  
   OR                   
-  DEBUG
+  PRINT
   RETURN               
   SUPER                
   THIS                 

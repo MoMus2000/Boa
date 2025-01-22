@@ -1,8 +1,8 @@
 package main
 
 import (
-  _"fmt"
-  "unicode"
+	_ "fmt"
+	"unicode"
 )
 
 type Scanner struct {
@@ -22,7 +22,7 @@ var IdentMap = map[string]TokenType {
     "if"     : IF,
     "nil"    : NIL,
     "or"     : OR,
-    "dbg"    : DEBUG,
+    "print"  : PRINT,
     "return" : RETURN,
     "super"  : SUPER,
     "this"   : THIS,

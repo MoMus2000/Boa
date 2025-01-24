@@ -90,17 +90,17 @@ func (c *Compiler) buildParseRules() map[TokenType]ParseRule {
     AND           : {nil,        nil,           PREC_NONE},
     CLASS         : {nil,        nil,           PREC_NONE},
     ELSE          : {nil,        nil,           PREC_NONE},
-    FALSE         : {nil,        nil,           PREC_NONE},
+    FALSE         : {c.literal,  nil,           PREC_NONE},
     FOR           : {nil,        nil,           PREC_NONE},
     FUN           : {nil,        nil,           PREC_NONE},
     IF            : {nil,        nil,           PREC_NONE},
-    NIL           : {nil,        nil,           PREC_NONE},
+    NIL           : {c.literal,  nil,           PREC_NONE},
     OR            : {nil,        nil,           PREC_NONE},
     PRINT         : {nil,        nil,           PREC_NONE},
     RETURN        : {nil,        nil,           PREC_NONE},
     SUPER         : {nil,        nil,           PREC_NONE},
     THIS          : {nil,        nil,           PREC_NONE},
-    TRUE          : {nil,        nil,           PREC_NONE},
+    TRUE          : {c.literal,  nil,           PREC_NONE},
     VAR           : {nil,        nil,           PREC_NONE},
     WHILE         : {nil,        nil,           PREC_NONE},
     ERROR         : {nil,        nil,           PREC_NONE},
@@ -139,7 +139,7 @@ func (c *Compiler) number() {
     err := err.Error()
     c.errorAtCurrent(err)
   }
-  c.emitBytes(OpConstant, c.makeConstant(Value(num)))
+  c.emitBytes(OpConstant, c.makeConstant(NumberVal(float32(num))))
 }
 
 func (c *Compiler) grouping(){
@@ -168,6 +168,17 @@ func (c *Compiler) binary(){
     case STAR: c.emitByteCode(OpMul); break;
     case SLASH: c.emitByteCode(OpDiv); break;
     default: return
+  }
+}
+
+func (c *Compiler) literal(){
+  op := c.parser.previous.tokenType
+  switch op {
+    case TRUE  : c.emitByteCode(OpTrue)
+    case FALSE : c.emitByteCode(OpFalse)
+    case NIL   : c.emitByteCode(OpNil)
+    default:
+      return
   }
 }
 

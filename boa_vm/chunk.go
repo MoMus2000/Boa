@@ -10,6 +10,9 @@ const (
   OpSub
   OpDiv
   OpMul
+  OpNil
+  OpTrue
+  OpFalse
 )
 
 type Chunk struct{

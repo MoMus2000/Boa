@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -31,7 +32,7 @@ func NewVM() VM {
 }
 
 func (v *VM) resetStack() {
-  v.stackTop = Value(0)
+  v.stackTop = NumberVal(0)
   v.stack    = make([]Value, 0)
 }
 
@@ -53,14 +54,14 @@ func (v *VM) interpret(source []byte) InterpretResult{
 
 func (v *VM) push(vl Value){
   v.stack = append(v.stack, vl)
-  v.stackTop ++
+  v.stackTop.number ++
 }
 
-func (v *VM) pop() Value {
+func (v *VM) pop() *Value {
   last := v.stack[len(v.stack)-1]
   v.stack = v.stack[:len(v.stack)-1]
-  v.stackTop --
-  return last
+  v.stackTop.number --
+  return &last
 }
 
 func (v *VM) read_byte() {
@@ -73,7 +74,17 @@ func (v *VM) run () InterpretResult{
       fmt.Printf("Stack Trace: ")
       for i := range len(v.stack) {
         fmt.Printf("[")
-        fmt.Printf("%v",v.stack[i])
+        switch v.stack[i].valType {
+          case VAL_BOOL: {
+            fmt.Printf("'%v'", v.stack[i].AsBoolean())
+          }
+          case VAL_NUMBER: {
+            fmt.Printf("'%v'", v.stack[i].AsNumber())
+          }
+          case VAL_NIL: {
+            fmt.Printf("'%v'", nil)
+          }
+        }
         fmt.Printf("]")
       }
       fmt.Printf("\n")
@@ -84,7 +95,7 @@ func (v *VM) run () InterpretResult{
     switch ins{
       case OpReturn: {
         c := v.pop()
-        fmt.Printf("%v", c)
+        printValue(*c)
         fmt.Printf("\n")
         return INTERPRET_OK
       }
@@ -97,52 +108,73 @@ func (v *VM) run () InterpretResult{
         break
       }
       case OpNegate: {
-        c := v.pop()
-        c = Value(-1) * c
-        v.push(c)
+        if !v.peek(0).IsNumber(){
+          // runtimeError("Operand must be a number")
+          return INTERPRET_RUNTIME_ERROR
+        }
+        c := v.pop().AsNumber()
+        d := NumberVal(NumberVal(-1).number * c)
+        v.push(d)
         break
       }
       case OpAdd : {
-        v.binary_op("+")
+        err := v.binary_op("+"); if err != nil {return INTERPRET_RUNTIME_ERROR }
         break
       }
       case OpMul: {
-        v.binary_op("*")
+        err := v.binary_op("*"); if err != nil {return INTERPRET_RUNTIME_ERROR }
         break
       }
       case OpSub : {
-        v.binary_op("-")
+        err := v.binary_op("-"); if err != nil {return INTERPRET_RUNTIME_ERROR }
         break
       }
       case OpDiv : {
-        v.binary_op("/")
+        err := v.binary_op("/"); if err != nil { return INTERPRET_RUNTIME_ERROR }
         break
+      }
+      case OpFalse : {
+        v.push(BoolVal(false))
+      }
+      case OpTrue: {
+        v.push(BoolVal(true))
+      }
+      case OpNil: {
+        v.push(NilVal())
       }
       default:
     }
   }
 }
 
-func (v *VM) binary_op(op string) {
-  a := v.pop()
-  b := v.pop()
+func (v *VM) peek(distance int) *Value {
+  return &v.stack[len(v.stack)-1-distance]
+}
+
+func (v *VM) binary_op(op string) (error){
+  if !v.peek(0).IsNumber() || !v.peek(1).IsNumber(){
+    return errors.New("Runtime Error")
+  }
+  a := v.pop().AsNumber()
+  b := v.pop().AsNumber()
   switch op{
     case "-": {
-      v.push(b - a)
+      v.push(NumberVal(b - a))
     }
     case "+": {
-      v.push(b + a)
+      v.push(NumberVal(b + a))
     }
     case "*": {
-      v.push(b * a)
+      v.push(NumberVal(b * a))
     }
     case "/": {
-      v.push(b / a)
+      v.push(NumberVal(b / a))
     }
     default: {
-      panic("Undefined Op")
+      return errors.New("Runtime Error")
     }
   }
+  return nil
 }
 
 func (v *VM) read_constant() Value {

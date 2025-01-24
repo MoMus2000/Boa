@@ -59,6 +59,15 @@ func DisassembleInstruction(c *Chunk, offset int) int{
     case OpDiv: {
       return SimpleInstruction("OP_DIV", offset)
     }
+    case OpTrue: {
+      return SimpleInstruction("OP_TRUE", offset)
+    }
+    case OpFalse: {
+      return SimpleInstruction("OP_FALSE", offset)
+    }
+    case OpNil: {
+      return SimpleInstruction("OP_NIL", offset)
+    }
     default: {
       fmt.Printf("Unknown OpCode %d\n", instruction)
       return int(offset + 1)
@@ -75,7 +84,17 @@ func ConstantInstruction(ins string, chunk *Chunk, offset int) int {
 }
 
 func printValue(v Value){
-  fmt.Printf(" '%v'\n", v)
+  switch v.valType {
+    case VAL_BOOL: {
+      fmt.Printf(" '%v'\n", v.AsBoolean())
+    }
+    case VAL_NUMBER: {
+      fmt.Printf(" '%v'\n", v.AsNumber())
+    }
+    case VAL_NIL: {
+      fmt.Printf(" '%v'\n", nil)
+    }
+  }
 }
 
 func SimpleInstruction(ins string, offset int) int {

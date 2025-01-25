@@ -84,6 +84,9 @@ func (v *VM) run () InterpretResult{
           case VAL_NIL: {
             fmt.Printf("'%v'", nil)
           }
+          case VAL_OBJ: {
+            printObject(v.stack[i])
+          }
         }
         fmt.Printf("]")
       }
@@ -164,6 +167,7 @@ func (v *VM) run () InterpretResult{
         break
       }
       default:
+        fmt.Println(ins)
     }
   }
 }

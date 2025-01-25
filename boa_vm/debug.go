@@ -95,6 +95,17 @@ func ConstantInstruction(ins string, chunk *Chunk, offset int) int {
   return offset + 2
 }
 
+func printObject(v Value){
+  switch v.AsObj().ObjType() {
+    case OBJ_STRING : {
+      fmt.Printf("%v", v.asString().chars)
+    }
+    default:
+      fmt.Println("Print for Object not implemented")
+
+  }
+}
+
 func printValue(v Value){
   switch v.valType {
     case VAL_BOOL: {

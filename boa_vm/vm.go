@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"unsafe"
 )
 
 type InterpretResult int;
@@ -121,6 +122,10 @@ func (v *VM) run () InterpretResult{
         break
       }
       case OpAdd : {
+        if v.peek(0).isString() && v.peek(1).isString(){
+          v.concatenate()
+          break
+        }
         err := v.binary_op("+"); if err != nil {return INTERPRET_RUNTIME_ERROR }
         break
       }
@@ -172,6 +177,21 @@ func (v *VM) run () InterpretResult{
   }
 }
 
+func (v *VM) concatenate() {
+  s1 := v.pop().asString().chars
+  s1 = s1[1:len(s1)-1]
+  s2 := v.pop().asString().chars
+  s2 = s2[1:len(s2)-1]
+  s3 := fmt.Sprintf("\"%s\"",s2 + s1)
+  objstr := ObjectString{
+    obj:   Object{objType:OBJ_STRING},
+    chars: s3,
+    length: len(s3),
+  }
+  obj := (*Object)(unsafe.Pointer(&objstr))
+  v.push(ObjVal(obj))
+}
+
 func (v *VM) valuesEqual(v1 *Value, v2 *Value) bool {
   if v1.valType != v2.valType { return false; }
   switch v1.valType {
@@ -183,6 +203,11 @@ func (v *VM) valuesEqual(v1 *Value, v2 *Value) bool {
     }
     case VAL_NIL : {
       return true
+    }
+    case VAL_OBJ: {
+      str1 := v1.asString().chars
+      str2 := v2.asString().chars
+      return str1 == str2
     }
     default:
       return false

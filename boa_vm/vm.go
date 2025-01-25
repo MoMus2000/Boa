@@ -97,17 +97,20 @@ func (v *VM) run () InterpretResult{
     ins := v.chunk.code[v.ip]
     v.read_byte()
     switch ins{
-      case OpReturn: {
+      case OpPrint: {
         c := v.pop()
         printValue(*c)
         fmt.Printf("\n")
+        break
+      }
+      case OpReturn: {
         return INTERPRET_OK
       }
       case OpConstant: {
         c := v.read_constant()
         v.push(c)
-        fmt.Printf("Constant: ")
-        printValue(c)
+        // fmt.Printf("Constant: ")
+        // printValue(c)
         fmt.Printf("\n")
         break
       }

@@ -17,6 +17,7 @@ const (
   OpEqual
   OpLess
   OpGreater
+  OpPrint
 )
 
 type Chunk struct{

@@ -80,6 +80,9 @@ func DisassembleInstruction(c *Chunk, offset int) int{
     case OpLess: {
       return SimpleInstruction("OP_LESS", offset)
     }
+    case OpPrint: {
+      return SimpleInstruction("OP_PRINT", offset)
+    }
     default: {
       fmt.Printf("Unknown OpCode %d\n", instruction)
       return int(offset + 1)
@@ -116,6 +119,9 @@ func printValue(v Value){
     }
     case VAL_NIL: {
       fmt.Printf(" '%v'\n", nil)
+    }
+    case VAL_OBJ: {
+      printObject(v)
     }
   }
 }

@@ -119,12 +119,39 @@ func (c *Compiler) compile(source []byte, chunk *Chunk) bool{
   c.parser.panicMode = false
   compilingChunk = chunk
   c.advance()
-  for c.parser.current.tokenType != EOF {
-    c.expression()
+  for !c.match(EOF){
+    c.declaration()
   }
-  c.consume(EOF, fmt.Sprintf("Expected EOF after expression, but got : (%s %s)", c.parser.current.tokenType, string(c.parser.current.runes)))
   c.endCompiler()
   return !c.parser.hadError
+}
+
+func (c *Compiler) declaration () {
+  c.statement()
+}
+
+func (c *Compiler) statement () {
+  if c.match(PRINT) { 
+    c.printStatement() 
+  } else {
+    c.expression()
+  }
+}
+
+func (c *Compiler) printStatement() {
+  c.expression()
+  c.consume(SEMICOLON, "Expected ;")
+  c.emitByteCode(OpPrint)
+}
+
+func (c *Compiler) match(token TokenType) bool{
+  if !c.check(token) { return false }
+  c.advance()
+  return true
+}
+
+func (c *Compiler) check(token TokenType) bool {
+  return c.parser.current.tokenType == token
 }
 
 func (c *Compiler) endCompiler() {

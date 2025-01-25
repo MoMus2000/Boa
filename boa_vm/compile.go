@@ -79,11 +79,11 @@ func (c *Compiler) buildParseRules() map[TokenType]ParseRule {
     BANG          : {c.unary,    nil,           PREC_NONE},
     BANG_EQUAL    : {nil,        nil,           PREC_NONE},
     EQUAL         : {nil,        nil,           PREC_NONE},
-    EQUAL_EQUAL   : {nil,        nil,           PREC_NONE},
-    GREATER       : {nil,        nil,           PREC_NONE},
-    GREATER_EQUAL : {nil,        nil,           PREC_NONE},
-    LESS          : {nil,        nil,           PREC_NONE},
-    LESS_EQUAL    : {nil,        nil,           PREC_NONE},
+    EQUAL_EQUAL   : {nil,        c.binary,      PREC_COMPARISON},
+    GREATER       : {nil,        c.binary,      PREC_COMPARISON},
+    GREATER_EQUAL : {nil,        c.binary,      PREC_COMPARISON},
+    LESS          : {nil,        c.binary,      PREC_COMPARISON},
+    LESS_EQUAL    : {nil,        c.binary,      PREC_COMPARISON},
     IDENTIFIER    : {nil,        nil,           PREC_NONE},
     STRING        : {nil,        nil,           PREC_NONE},
     NUMBER        : {c.number,   nil,           PREC_NONE},
@@ -168,6 +168,11 @@ func (c *Compiler) binary(){
     case MINUS: c.emitByteCode(OpSub); break;
     case STAR: c.emitByteCode(OpMul); break;
     case SLASH: c.emitByteCode(OpDiv); break;
+    case GREATER: c.emitByteCode(OpGreater); break;
+    case LESS: c.emitByteCode(OpLess); break;
+    case EQUAL_EQUAL: c.emitByteCode(OpEqual); break;
+    case LESS_EQUAL: c.emitBytes(OpGreater, OpNot); break
+    case GREATER_EQUAL: c.emitBytes(OpLess, OpNot); break
     default: return
   }
 }

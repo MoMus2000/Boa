@@ -14,6 +14,9 @@ const (
   OpTrue
   OpFalse
   OpNot
+  OpEqual
+  OpLess
+  OpGreater
 )
 
 type Chunk struct{

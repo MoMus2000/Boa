@@ -151,8 +151,37 @@ func (v *VM) run () InterpretResult{
         v.push(BoolVal(bool_val))
         break
       }
+      case OpGreater: {
+        err := v.binary_op(">"); if err != nil { return INTERPRET_RUNTIME_ERROR }
+        break
+      }
+      case OpLess: {
+        err := v.binary_op("<"); if err != nil { return INTERPRET_RUNTIME_ERROR }
+        break
+      }
+      case OpEqual: {
+        v.push(BoolVal(v.valuesEqual(v.pop(), v.pop())))
+        break
+      }
       default:
     }
+  }
+}
+
+func (v *VM) valuesEqual(v1 *Value, v2 *Value) bool {
+  if v1.valType != v2.valType { return false; }
+  switch v1.valType {
+    case VAL_NUMBER: {
+      return v1.AsNumber() == v2.AsNumber()
+    }
+    case VAL_BOOL: {
+      return v1.AsBoolean() == v2.AsBoolean()
+    }
+    case VAL_NIL : {
+      return true
+    }
+    default:
+      return false
   }
 }
 
@@ -182,6 +211,14 @@ func (v *VM) binary_op(op string) (error){
     }
     case "/": {
       v.push(NumberVal(b / a))
+    }
+    case ">": {
+      fmt.Println("A ", a, "B ", b)
+      v.push(BoolVal(a < b))
+    }
+    case "<": {
+      fmt.Println("A ", a, "B ", b)
+      v.push(BoolVal(a > b))
     }
     default: {
       return errors.New("Runtime Error")

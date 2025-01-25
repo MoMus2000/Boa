@@ -76,7 +76,7 @@ func (c *Compiler) buildParseRules() map[TokenType]ParseRule {
     SEMICOLON     : {nil,        nil,           PREC_NONE},
     SLASH         : {nil,        c.binary,      PREC_FACTOR},
     STAR          : {nil,        c.binary,      PREC_FACTOR},
-    BANG          : {nil,        nil,           PREC_NONE},
+    BANG          : {c.unary,    nil,           PREC_NONE},
     BANG_EQUAL    : {nil,        nil,           PREC_NONE},
     EQUAL         : {nil,        nil,           PREC_NONE},
     EQUAL_EQUAL   : {nil,        nil,           PREC_NONE},
@@ -153,6 +153,7 @@ func (c *Compiler) unary(){
   c.parsePrecidence(PREC_UNARY)
   switch operator {
     case MINUS: c.emitByteCode(OpNegate); break;
+    case BANG : c.emitByteCode(OpNot); break;
     default: return
   }
 }

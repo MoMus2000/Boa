@@ -135,16 +135,29 @@ func (v *VM) run () InterpretResult{
       }
       case OpFalse : {
         v.push(BoolVal(false))
+        break
       }
       case OpTrue: {
         v.push(BoolVal(true))
+        break
       }
       case OpNil: {
         v.push(NilVal())
+        break
+      }
+      case OpNot: {
+        pred := v.pop()
+        bool_val := v.isFalsy(pred)
+        v.push(BoolVal(bool_val))
+        break
       }
       default:
     }
   }
+}
+
+func (v *VM) isFalsy(p *Value) bool {
+  return p.IsNil() || (p.IsBool() && !p.AsBoolean())
 }
 
 func (v *VM) peek(distance int) *Value {

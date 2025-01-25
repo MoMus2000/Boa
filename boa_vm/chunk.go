@@ -13,6 +13,7 @@ const (
   OpNil
   OpTrue
   OpFalse
+  OpNot
 )
 
 type Chunk struct{

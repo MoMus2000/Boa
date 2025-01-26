@@ -189,6 +189,20 @@ func (v *VM) run () InterpretResult{
         v.pop()
         break
       }
+      case OpGetGlobal: {
+        ins := v.chunk.code[v.ip]
+        identName := v.chunk.constants.values[ins].asCString()
+        v.read_byte() // skip ins
+        c := v.table.tableGet(identName)
+        if c != nil {
+          printValue(*c)
+          fmt.Printf("\n")
+          v.push(*c)
+        } else {
+          v.push(NilVal())
+        }
+        break
+      }
       default:
         fmt.Println("UnIdentified OpCode: ", ins)
     }

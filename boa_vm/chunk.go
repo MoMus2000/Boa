@@ -20,6 +20,7 @@ const (
   OpPrint
   OpPop
   OpDefineGlobal
+  OpGetGlobal
 )
 
 type Chunk struct{

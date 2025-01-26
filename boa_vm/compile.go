@@ -85,7 +85,7 @@ func (c *Compiler) buildParseRules() map[TokenType]ParseRule {
     GREATER_EQUAL : {nil,        c.binary,      PREC_COMPARISON},
     LESS          : {nil,        c.binary,      PREC_COMPARISON},
     LESS_EQUAL    : {nil,        c.binary,      PREC_COMPARISON},
-    IDENTIFIER    : {nil,        nil,           PREC_NONE},
+    IDENTIFIER    : {c.parseVar, nil,           PREC_NONE},
     STRING        : {c.str,      nil,           PREC_NONE},
     NUMBER        : {c.number,   nil,           PREC_NONE},
     AND           : {nil,        nil,           PREC_NONE},
@@ -195,6 +195,17 @@ func (c *Compiler) endCompiler() {
     DisassembleChunk(currentChunk(), "code")
   }
   c.emitReturn()
+}
+
+func (c *Compiler) parseVar() {
+  ident := string(c.parser.previous.runes)
+  objectString := ObjectString{
+    obj     : Object{objType: OBJ_STRING},
+    length  : len(ident),
+    chars   : ident,
+  }
+  object := (*Object)(unsafe.Pointer(&objectString))
+  c.emitBytes(OpGetGlobal, c.makeConstant(ObjVal(object)))
 }
 
 func (c *Compiler) number() {

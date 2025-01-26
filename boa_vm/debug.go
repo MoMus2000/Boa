@@ -89,6 +89,9 @@ func DisassembleInstruction(c *Chunk, offset int) int{
     case OpDefineGlobal: {
       return AssignmentInstruction("OP_DEFINE_GLOBAL", c, offset)
     }
+    case OpGetGlobal: {
+      return SimpleInstruction("OP_GET_GLOBAL", offset)
+    }
     default: {
       fmt.Printf("Unknown OpCode %d\n", instruction)
       return int(offset + 1)

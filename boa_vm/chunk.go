@@ -18,6 +18,8 @@ const (
   OpLess
   OpGreater
   OpPrint
+  OpPop
+  OpDefineGlobal
 )
 
 type Chunk struct{

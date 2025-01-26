@@ -83,11 +83,25 @@ func DisassembleInstruction(c *Chunk, offset int) int{
     case OpPrint: {
       return SimpleInstruction("OP_PRINT", offset)
     }
+    case OpPop: {
+      return SimpleInstruction("OP_POP", offset)
+    }
+    case OpDefineGlobal: {
+      return AssignmentInstruction("OP_DEFINE_GLOBAL", c, offset)
+    }
     default: {
       fmt.Printf("Unknown OpCode %d\n", instruction)
       return int(offset + 1)
     }
   }
+}
+
+func AssignmentInstruction(ins string, chunk *Chunk, offset int) int {
+  ident_index := chunk.code[offset + 1]
+  ident:= chunk.constants.values[ident_index].asCString()
+  fmt.Printf("%-16s %s", ins, ident)
+  fmt.Println("")
+  return offset + 1
 }
 
 func ConstantInstruction(ins string, chunk *Chunk, offset int) int {

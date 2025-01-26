@@ -24,11 +24,13 @@ type VM struct {
   stackTop Value
   stack    []Value
   compiler Compiler
+  table    *Table
 }
 
 func NewVM() VM {
   return VM{
     compiler : NewCompiler(),
+    table    : initMap(),
   }
 }
 
@@ -109,8 +111,8 @@ func (v *VM) run () InterpretResult{
       case OpConstant: {
         c := v.read_constant()
         v.push(c)
-        // fmt.Printf("Constant: ")
-        // printValue(c)
+        fmt.Printf("Constant: ")
+        printValue(c)
         fmt.Printf("\n")
         break
       }
@@ -174,8 +176,21 @@ func (v *VM) run () InterpretResult{
         v.push(BoolVal(v.valuesEqual(v.pop(), v.pop())))
         break
       }
+      case OpPop: {
+        v.pop()
+        break
+      }
+      case OpDefineGlobal: {
+        value := v.peek(0)
+        ins := v.chunk.code[v.ip]
+        identName := v.chunk.constants.values[ins].asCString()
+        v.read_byte() // skip ins
+        v.table.tableSet(identName, *value)
+        v.pop()
+        break
+      }
       default:
-        fmt.Println(ins)
+        fmt.Println("UnIdentified OpCode: ", ins)
     }
   }
 }

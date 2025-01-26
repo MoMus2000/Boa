@@ -127,14 +127,44 @@ func (c *Compiler) compile(source []byte, chunk *Chunk) bool{
 }
 
 func (c *Compiler) declaration () {
-  c.statement()
+  if c.match(VAR){
+    c.varStatement()
+  }else{
+    c.statement()
+  }
+}
+
+func (c *Compiler) varStatement(){
+   index := c.varDecl("Expected ident")
+   if c.match(EQUAL){
+     c.expression()
+   } else {
+     c.emitByteCode(OpNil)
+   }
+   c.consume(SEMICOLON, "Expected ;")
+   c.emitBytes(OpDefineGlobal, index)
+}
+
+func (c *Compiler) varDecl(msg string) Opcode {
+   c.consume(IDENTIFIER, msg)
+   ident := string(c.parser.previous.runes)
+   str := ObjectString{
+     obj: Object{objType:OBJ_STRING},
+     length: len(ident),
+     chars : ident,
+   }
+   obj := (*Object)(unsafe.Pointer(&str))
+   index := c.makeConstant(
+     ObjVal(obj),
+   )
+   return index
 }
 
 func (c *Compiler) statement () {
   if c.match(PRINT) { 
     c.printStatement() 
   } else {
-    c.expression()
+    c.expressionStatement()
   }
 }
 
@@ -142,6 +172,12 @@ func (c *Compiler) printStatement() {
   c.expression()
   c.consume(SEMICOLON, "Expected ;")
   c.emitByteCode(OpPrint)
+}
+
+func (c *Compiler) expressionStatement(){
+  c.expression()
+  c.consume(SEMICOLON, "Expected ;")
+  c.emitByteCode(OpPop)
 }
 
 func (c *Compiler) match(token TokenType) bool{

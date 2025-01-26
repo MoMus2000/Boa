@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type Opcode uint8
 
 const (
@@ -21,7 +23,38 @@ const (
   OpPop
   OpDefineGlobal
   OpGetGlobal
+  OpSetGlobal
 )
+
+var opCodeNames = [...]string{
+  "OpConstant",
+  "OpReturn",
+  "OpNegate",
+  "OpAdd",
+  "OpSub",
+  "OpDiv",
+  "OpMul",
+  "OpNil",
+  "OpTrue",
+  "OpFalse",
+  "OpNot",
+  "OpEqual",
+  "OpLess",
+  "OpGreater",
+  "OpPrint",
+  "OpPop",
+  "OpDefineGlobal",  
+  "OpGetGlobal",
+  "OpSetGlobal",
+}
+
+// String method to print enum name
+func (t Opcode) String() string {
+	if t < OpConstant || t > OpSetGlobal {
+		return fmt.Sprintf("Unknown TokenType(%d)", t)
+	}
+	return opCodeNames[t]
+}
 
 type Chunk struct{
   code []Opcode

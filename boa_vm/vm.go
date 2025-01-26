@@ -97,6 +97,8 @@ func (v *VM) run () InterpretResult{
       DisassembleInstruction(v.chunk, v.ip)
     }
     ins := v.chunk.code[v.ip]
+    fmt.Println("Remaining OpCodes: ", v.chunk.code[v.ip:])
+    fmt.Println("Current Instruction: ", ins)
     v.read_byte()
     switch ins{
       case OpPrint: {
@@ -110,9 +112,9 @@ func (v *VM) run () InterpretResult{
       }
       case OpConstant: {
         c := v.read_constant()
-        v.push(c)
+        v.push(*c)
         fmt.Printf("Constant: ")
-        printValue(c)
+        printValue(*c)
         fmt.Printf("\n")
         break
       }
@@ -182,18 +184,14 @@ func (v *VM) run () InterpretResult{
       }
       case OpDefineGlobal: {
         value := v.peek(0)
-        ins := v.chunk.code[v.ip]
-        identName := v.chunk.constants.values[ins].asCString()
-        v.read_byte() // skip ins
-        v.table.tableSet(identName, *value)
+        name := string(v.read_string().chars)
+        v.table.tableSet(name, *value)
         v.pop()
         break
       }
       case OpGetGlobal: {
-        ins := v.chunk.code[v.ip]
-        identName := v.chunk.constants.values[ins].asCString()
-        v.read_byte() // skip ins
-        c := v.table.tableGet(identName)
+        name := string(v.read_string().chars)
+        c := v.table.tableGet(name)
         if c != nil {
           printValue(*c)
           fmt.Printf("\n")
@@ -201,6 +199,14 @@ func (v *VM) run () InterpretResult{
         } else {
           v.push(NilVal())
         }
+        break
+      }
+      case OpSetGlobal: {
+        name := string(v.read_string().chars)
+        ok := v.table.tableGet(name); if ok == nil { return INTERPRET_RUNTIME_ERROR }
+        value := v.peek(0)
+        v.table.tableDelete(name)
+        v.table.tableSet(name, *value)
         break
       }
       default:
@@ -288,10 +294,14 @@ func (v *VM) binary_op(op string) (error){
   return nil
 }
 
-func (v *VM) read_constant() Value {
+func (v *VM) read_constant() *Value {
   index := v.chunk.code[v.ip]
   c := v.chunk.constants.values[index]
   v.read_byte()
-  return c
+  return &c
+}
+
+func (v *VM) read_string() *ObjectString {
+  return v.read_constant().asString()
 }
 

@@ -205,7 +205,12 @@ func (c *Compiler) parseVar() {
     chars   : ident,
   }
   object := (*Object)(unsafe.Pointer(&objectString))
-  c.emitBytes(OpGetGlobal, c.makeConstant(ObjVal(object)))
+  if c.match(EQUAL){
+    c.expression()
+    c.emitBytes(OpSetGlobal, c.makeConstant(ObjVal(object)))
+  } else {
+    c.emitBytes(OpGetGlobal, c.makeConstant(ObjVal(object)))
+  }
 }
 
 func (c *Compiler) number() {

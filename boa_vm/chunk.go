@@ -24,6 +24,9 @@ const (
   OpDefineGlobal
   OpGetGlobal
   OpSetGlobal
+  OpSetLocal
+  OpGetLocal
+  OpMinus1
 )
 
 var opCodeNames = [...]string{

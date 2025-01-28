@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"unsafe"
 )
 
 type Precidence uint;
+
+const COUNT_MAX = math.MaxInt
 
 const DEBUG_PRINT_CODE = 0
 
@@ -31,17 +34,18 @@ func (c *Compiler) parsePrecidence(precidence Precidence){
     c.error("Expected expression")
     return
   }
-  prefixRule()
+  canAssign := precidence <= PREC_ASSIGNMENT
+  prefixRule(canAssign)
   for precidence <= c.getRule(c.parser.current.tokenType).precidence {
     c.advance()
     infixRule := c.getRule(c.parser.previous.tokenType).infix
-    infixRule()
+    infixRule(canAssign)
   }
 }
 
 type ParseRule struct {
-  prefix func()
-  infix  func()
+  prefix func(canAssign bool)
+  infix  func(canAssign bool)
   precidence Precidence
 }
 
@@ -56,6 +60,14 @@ type Compiler struct {
   scanner *Scanner
   parser  *Parser
   parseRules map[TokenType]ParseRule
+  localCount int
+  scopeDepth int
+  locals     []Local
+}
+
+type Local struct {
+  name  Token
+  depth int
 }
 
 func NewCompiler() Compiler {
@@ -115,6 +127,9 @@ func (c *Compiler) compile(source []byte, chunk *Chunk) bool{
   c.parseRules  = c.buildParseRules()
   c.scanner = &scanner
   c.parser  = &parser
+  c.localCount = 0
+  c.scopeDepth = 0
+  c.locals  = make([]Local, 1000)
   c.parser.hadError  = false
   c.parser.panicMode = false
   compilingChunk = chunk
@@ -142,11 +157,16 @@ func (c *Compiler) varStatement(){
      c.emitByteCode(OpNil)
    }
    c.consume(SEMICOLON, "Expected ;")
+   if c.scopeDepth > 0 {
+     return
+   }
    c.emitBytes(OpDefineGlobal, index)
 }
 
 func (c *Compiler) varDecl(msg string) Opcode {
    c.consume(IDENTIFIER, msg)
+   c.declareVariable()
+   if c.scopeDepth > 0 { return 0; }
    ident := string(c.parser.previous.runes)
    str := ObjectString{
      obj: Object{objType:OBJ_STRING},
@@ -160,12 +180,66 @@ func (c *Compiler) varDecl(msg string) Opcode {
    return index
 }
 
+func (c *Compiler) declareVariable() {
+  if c.scopeDepth == 0 { return }
+  name := c.parser.previous
+  i := c.localCount - 1
+  for i >= 0 {
+    local := c.locals[i]
+    if local.depth != -1 && local.depth < c.scopeDepth {
+      break
+    }
+    if c.identifierEquals(local.name, name){
+      panic(fmt.Sprint("Var with ", name, " Already exists"))
+    }
+  }
+  c.addLocal(name)
+}
+
+func (c *Compiler) identifierEquals(t Token, u Token) bool{
+  return string(t.runes) == string(u.runes) && t.tokenType == u.tokenType
+}
+
+func (c *Compiler) addLocal(name Token){
+  if len(c.locals) > COUNT_MAX {
+    panic("Too many vars declared")
+  }
+  l := Local{
+    name  : name,
+    depth : c.scopeDepth,
+  }
+  c.locals = append(c.locals, l)
+}
+
 func (c *Compiler) statement () {
   if c.match(PRINT) { 
     c.printStatement() 
+  } else if c.match(LEFT_BRACE) {
+    c.beginScope()
+    c.block()
+    c.endScope()
   } else {
     c.expressionStatement()
   }
+}
+
+func (c *Compiler) beginScope(){
+  c.scopeDepth ++
+}
+
+func (c *Compiler) endScope(){
+  c.scopeDepth --
+  for c.localCount > 0 && c.locals[c.localCount - 1].depth > c.scopeDepth {
+    c.emitByteCode(OpPop);
+    c.localCount--
+  }
+}
+
+func (c *Compiler) block() {
+  for !c.check(RIGHT_BRACE) && !c.check(EOF){
+    c.declaration()
+  }
+  c.consume(RIGHT_BRACE, "Expected }")
 }
 
 func (c *Compiler) printStatement() {
@@ -197,23 +271,42 @@ func (c *Compiler) endCompiler() {
   c.emitReturn()
 }
 
-func (c *Compiler) parseVar() {
+func (c *Compiler) parseVar(canAssign bool) {
+  var getOp, setOp Opcode;
   ident := string(c.parser.previous.runes)
-  objectString := ObjectString{
-    obj     : Object{objType: OBJ_STRING},
-    length  : len(ident),
-    chars   : ident,
-  }
-  object := (*Object)(unsafe.Pointer(&objectString))
-  if c.match(EQUAL){
-    c.expression()
-    c.emitBytes(OpSetGlobal, c.makeConstant(ObjVal(object)))
+  arg := c.resolveLocal(c.parser.previous)
+  if arg != OpMinus1 {
+    getOp = OpGetLocal
+    setOp = OpSetLocal
   } else {
-    c.emitBytes(OpGetGlobal, c.makeConstant(ObjVal(object)))
+    objectString := ObjectString{
+      obj     : Object{objType: OBJ_STRING},
+      length  : len(ident),
+      chars   : ident,
+    }
+    arg = c.makeConstant(ObjVal((*Object)(unsafe.Pointer(&objectString))))
+    getOp = OpGetGlobal
+    setOp = OpSetGlobal
+  }
+  if canAssign && c.match(EQUAL){
+    c.expression()
+    c.emitBytes(setOp, arg)
+  } else {
+    c.emitBytes(getOp, arg)
   }
 }
 
-func (c *Compiler) number() {
+func (c *Compiler) resolveLocal(name Token) Opcode{
+  for i := c.localCount - 1; i >= 0; i-- {
+    local := c.locals[i];
+    if c.identifierEquals(name, local.name) {
+      return Opcode(i);
+    }
+  }
+  return OpMinus1
+}
+
+func (c *Compiler) number(canAssign bool) {
   num, err := strconv.ParseFloat(string(c.parser.previous.runes), 32)
   if err != nil  {
     err := err.Error()
@@ -222,12 +315,12 @@ func (c *Compiler) number() {
   c.emitBytes(OpConstant, c.makeConstant(NumberVal(float32(num))))
 }
 
-func (c *Compiler) grouping(){
+func (c *Compiler) grouping(canAssign bool){
   c.expression()
   c.consume(RIGHT_PAREN, fmt.Sprintf("Expected ) after expression, but got : %s", c.parser.current.tokenType))
 }
 
-func (c *Compiler) unary(){
+func (c *Compiler) unary(canAssign bool){
   operator := c.parser.previous.tokenType
   //c.expression() // Evaluate the operand first and then apply whatever operator we have to
   c.parsePrecidence(PREC_UNARY)
@@ -238,7 +331,7 @@ func (c *Compiler) unary(){
   }
 }
 
-func (c *Compiler) binary(){
+func (c *Compiler) binary(canAssign bool){
   operator := c.parser.previous.tokenType
   rule := c.getRule(operator)
   c.parsePrecidence(Precidence(rule.precidence+1))
@@ -257,7 +350,7 @@ func (c *Compiler) binary(){
   }
 }
 
-func (c *Compiler) literal(){
+func (c *Compiler) literal(canAssign bool){
   op := c.parser.previous.tokenType
   switch op {
     case TRUE  : c.emitByteCode(OpTrue)
@@ -268,7 +361,7 @@ func (c *Compiler) literal(){
   }
 }
 
-func (c *Compiler) str() {
+func (c *Compiler) str(canAssign bool) {
   str := string(c.parser.previous.runes)
   objectString := ObjectString{
     obj     : Object{objType: OBJ_STRING},

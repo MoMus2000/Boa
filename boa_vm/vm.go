@@ -9,7 +9,7 @@ import (
 type InterpretResult int;
 
 
-const DEBUG_TRACE_EXECUTION = 1;
+const DEBUG_TRACE_EXECUTION = 0;
 const STACK_MAX = 256
 
 const (
@@ -97,8 +97,8 @@ func (v *VM) run () InterpretResult{
       DisassembleInstruction(v.chunk, v.ip)
     }
     ins := v.chunk.code[v.ip]
-    fmt.Println("Remaining OpCodes: ", v.chunk.code[v.ip:])
-    fmt.Println("Current Instruction: ", ins)
+    // fmt.Println("Remaining OpCodes: ", v.chunk.code[v.ip:])
+    // fmt.Println("Current Instruction: ", ins)
     v.read_byte()
     switch ins{
       case OpPrint: {
@@ -113,9 +113,9 @@ func (v *VM) run () InterpretResult{
       case OpConstant: {
         c := v.read_constant()
         v.push(*c)
-        fmt.Printf("Constant: ")
-        printValue(*c)
-        fmt.Printf("\n")
+        // fmt.Printf("Constant: ")
+        // printValue(*c)
+        // fmt.Printf("\n")
         break
       }
       case OpNegate: {
@@ -193,8 +193,8 @@ func (v *VM) run () InterpretResult{
         name := string(v.read_string().chars)
         c := v.table.tableGet(name)
         if c != nil {
-          printValue(*c)
-          fmt.Printf("\n")
+          // printValue(*c)
+          // fmt.Printf("\n")
           v.push(*c)
         } else {
           v.push(NilVal())
@@ -207,6 +207,16 @@ func (v *VM) run () InterpretResult{
         value := v.peek(0)
         v.table.tableDelete(name)
         v.table.tableSet(name, *value)
+        break
+      }
+      case OpGetLocal: {
+        v.read_byte()
+        v.push(v.stack[v.ip])
+        break
+      }
+      case OpSetLocal: {
+        v.read_byte()
+        v.stack[v.ip] = *v.peek(0)
         break
       }
       default:

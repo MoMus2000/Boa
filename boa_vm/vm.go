@@ -97,8 +97,8 @@ func (v *VM) run () InterpretResult{
       DisassembleInstruction(v.chunk, v.ip)
     }
     ins := v.chunk.code[v.ip]
-    // fmt.Println("Remaining OpCodes: ", v.chunk.code[v.ip:])
-    // fmt.Println("Current Instruction: ", ins)
+    fmt.Println("Remaining OpCodes: ", v.chunk.code[v.ip:])
+    fmt.Println("Current Instruction: ", ins)
     v.read_byte()
     switch ins{
       case OpPrint: {
@@ -210,13 +210,15 @@ func (v *VM) run () InterpretResult{
         break
       }
       case OpGetLocal: {
-        v.read_byte()
-        v.push(v.stack[v.ip])
+        index := v.chunk.code[v.ip]
+        v.ip ++
+        v.push(v.stack[index])
         break
       }
       case OpSetLocal: {
-        v.read_byte()
-        v.stack[v.ip] = *v.peek(0)
+        index := v.chunk.code[v.ip]
+        v.ip ++
+        v.stack[index] = *v.peek(0)
         break
       }
       default:

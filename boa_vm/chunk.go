@@ -49,11 +49,14 @@ var opCodeNames = [...]string{
   "OpDefineGlobal",  
   "OpGetGlobal",
   "OpSetGlobal",
+  "OpSetLocal",
+  "OpGetLocal",
+  "OpMinus1",
 }
 
 // String method to print enum name
 func (t Opcode) String() string {
-	if t < OpConstant || t > OpSetGlobal {
+	if t < OpConstant || t > OpMinus1 {
 		return fmt.Sprintf("Unknown TokenType(%d)", t)
 	}
 	return opCodeNames[t]

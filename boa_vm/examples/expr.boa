@@ -1,9 +1,9 @@
-1 + 2
+var ac = 100;
+print ac;
+{
 
-1 - 2
+  ac = "MUSTAFA";
 
-5 * 3
+  print ac;
+}
 
-12 * 12 / 3 * 0
-
-72 / 2 * 1

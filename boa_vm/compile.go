@@ -97,7 +97,7 @@ func (c *Compiler) buildParseRules() map[TokenType]ParseRule {
     GREATER_EQUAL : {nil,        c.binary,      PREC_COMPARISON},
     LESS          : {nil,        c.binary,      PREC_COMPARISON},
     LESS_EQUAL    : {nil,        c.binary,      PREC_COMPARISON},
-    IDENTIFIER    : {c.parseVar, nil,           PREC_NONE},
+    IDENTIFIER    : {c.variable, nil,           PREC_NONE},
     STRING        : {c.str,      nil,           PREC_NONE},
     NUMBER        : {c.number,   nil,           PREC_NONE},
     AND           : {nil,        nil,           PREC_NONE},
@@ -129,7 +129,7 @@ func (c *Compiler) compile(source []byte, chunk *Chunk) bool{
   c.parser  = &parser
   c.localCount = 0
   c.scopeDepth = 0
-  c.locals  = make([]Local, 1000)
+  c.locals  = make([]Local, 0)
   c.parser.hadError  = false
   c.parser.panicMode = false
   compilingChunk = chunk
@@ -143,30 +143,35 @@ func (c *Compiler) compile(source []byte, chunk *Chunk) bool{
 
 func (c *Compiler) declaration () {
   if c.match(VAR){
-    c.varStatement()
+    c.varDeclaration()
   }else{
     c.statement()
   }
 }
 
-func (c *Compiler) varStatement(){
-   index := c.varDecl("Expected ident")
+func (c *Compiler) varDeclaration(){
+   index := c.parseVariable("Expected ident")
    if c.match(EQUAL){
      c.expression()
    } else {
      c.emitByteCode(OpNil)
    }
    c.consume(SEMICOLON, "Expected ;")
-   if c.scopeDepth > 0 {
-     return
-   }
-   c.emitBytes(OpDefineGlobal, index)
+   c.defineVariable(index)
 }
 
-func (c *Compiler) varDecl(msg string) Opcode {
+func (c *Compiler) defineVariable(i Opcode){
+   if c.scopeDepth > 0 {
+    c.locals[c.localCount - 1].depth = c.scopeDepth;
+    return
+   }
+   c.emitBytes(OpDefineGlobal, i)
+}
+
+func (c *Compiler) parseVariable(msg string) Opcode {
    c.consume(IDENTIFIER, msg)
    c.declareVariable()
-   if c.scopeDepth > 0 { return 0; }
+   if c.scopeDepth > 0 { return 0 }
    ident := string(c.parser.previous.runes)
    str := ObjectString{
      obj: Object{objType:OBJ_STRING},
@@ -183,7 +188,7 @@ func (c *Compiler) varDecl(msg string) Opcode {
 func (c *Compiler) declareVariable() {
   if c.scopeDepth == 0 { return }
   name := c.parser.previous
-  i := c.localCount - 1
+  i := c.localCount - 1;
   for i >= 0 {
     local := c.locals[i]
     if local.depth != -1 && local.depth < c.scopeDepth {
@@ -192,6 +197,7 @@ func (c *Compiler) declareVariable() {
     if c.identifierEquals(local.name, name){
       panic(fmt.Sprint("Var with ", name, " Already exists"))
     }
+    i --
   }
   c.addLocal(name)
 }
@@ -201,14 +207,18 @@ func (c *Compiler) identifierEquals(t Token, u Token) bool{
 }
 
 func (c *Compiler) addLocal(name Token){
+  fmt.Println("ADDING LOCAL")
   if len(c.locals) > COUNT_MAX {
     panic("Too many vars declared")
   }
   l := Local{
     name  : name,
-    depth : c.scopeDepth,
+    depth : -1,
   }
   c.locals = append(c.locals, l)
+  c.localCount ++
+  fmt.Println(len(c.locals))
+  fmt.Println("ADDED LOCAL: ", string(name.runes))
 }
 
 func (c *Compiler) statement () {
@@ -271,10 +281,13 @@ func (c *Compiler) endCompiler() {
   c.emitReturn()
 }
 
-func (c *Compiler) parseVar(canAssign bool) {
+func (c *Compiler) variable(canAssign bool) {
   var getOp, setOp Opcode;
   ident := string(c.parser.previous.runes)
+  fmt.Println("Parsing: ", ident)
+  fmt.Println(c.locals)
   arg := c.resolveLocal(c.parser.previous)
+  fmt.Println("ARG GOT BACK: ", arg)
   if arg != OpMinus1 {
     getOp = OpGetLocal
     setOp = OpSetLocal
@@ -288,20 +301,33 @@ func (c *Compiler) parseVar(canAssign bool) {
     getOp = OpGetGlobal
     setOp = OpSetGlobal
   }
+  fmt.Println("ARG :", arg)
+  fmt.Println("CAN ASSIGN: ", canAssign)
+  fmt.Println(c.parser.current.tokenType)
+  fmt.Println(c.parser.previous.tokenType)
   if canAssign && c.match(EQUAL){
+    fmt.Println("PARSING EXPR")
     c.expression()
+    fmt.Println(arg)
     c.emitBytes(setOp, arg)
   } else {
+    fmt.Println("GOING INTO THE GET")
     c.emitBytes(getOp, arg)
   }
 }
 
 func (c *Compiler) resolveLocal(name Token) Opcode{
-  for i := c.localCount - 1; i >= 0; i-- {
+  fmt.Println("RESOLVING LOCAL")
+  fmt.Println(len(c.locals))
+  fmt.Println(c.locals)
+  i := len(c.locals) - 1
+  for i >=0 {
     local := c.locals[i];
+    fmt.Println("LOCAL: ", local)
     if c.identifierEquals(name, local.name) {
       return Opcode(i);
     }
+    i --;
   }
   return OpMinus1
 }

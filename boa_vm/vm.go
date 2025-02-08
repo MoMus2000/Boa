@@ -276,6 +276,13 @@ func (v *VM) run() InterpretResult {
 				}
 				break
 			}
+		case OpJump:
+			{
+				offset := v.read_short()
+				fmt.Println("Jump Offset: ", offset)
+				v.ip += int(offset)
+				break
+			}
 		default:
 			fmt.Println("UnIdentified OpCode: ", ins)
 		}
@@ -383,9 +390,9 @@ func (v *VM) read_constant() *Value {
 
 func (v *VM) read_short() uint16 {
 	v.ip += 2
-	v1 := int16(v.chunk.code[v.ip-1]) << 8
-	v2 := int16(v.chunk.code[v.ip])
-	short := (uint16)(v1 | v2)
+	v1 := uint16(v.chunk.code[v.ip-1])
+	v2 := uint16(v.chunk.code[v.ip]) << 8
+	short := (uint16)(v2 | v1)
 	return short
 }
 

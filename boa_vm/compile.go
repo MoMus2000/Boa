@@ -243,7 +243,13 @@ func (c *Compiler) ifStatement() {
 
 	thenJump := c.emitJump(OpJumpIfFalse)
 	c.statement()
+	elseJump := c.emitJump(OpJump)
 	c.patchJump(thenJump)
+
+	if c.match(ELSE) {
+		c.statement()
+	}
+	c.patchJump(elseJump)
 }
 
 func (c *Compiler) emitJump(jCode Opcode) int {
@@ -259,7 +265,7 @@ func (c *Compiler) patchJump(offset int) {
 		c.error("Too much code to jump over.")
 	}
 	currentChunk().code[offset] = Opcode((jump >> 8) & 0xff)
-	currentChunk().code[offset+1] = Opcode(jump) & 0xff
+	currentChunk().code[offset+1] = Opcode(jump & 0xff)
 }
 
 func (c *Compiler) beginScope() {

@@ -1,9 +1,7 @@
-var ac = 100;
-print ac;
-{
-
-  ac = "MUSTAFA";
-
-  print ac;
+if ( 1 == 2 ) {
+    print "A";
 }
-
+else {
+    print "B";
+}
+print "a";

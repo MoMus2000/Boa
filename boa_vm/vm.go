@@ -391,7 +391,7 @@ func (v *VM) read_constant() *Value {
 func (v *VM) read_short() uint16 {
 	v.ip += 2
 	v1 := uint16(v.chunk.code[v.ip-1])
-	v2 := uint16(v.chunk.code[v.ip]) << 8
+	v2 := uint16(v.chunk.code[v.ip-2]) << 8
 	short := (uint16)(v2 | v1)
 	return short
 }

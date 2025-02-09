@@ -116,19 +116,19 @@ func DisassembleInstruction(c *Chunk, offset int) int {
 		}
 	case OpSetLocal:
 		{
-			return SimpleInstruction("OP_SET_LOCAL", offset)
+			return ByteInstruction("OP_SET_LOCAL", c, offset)
 		}
 	case OpGetLocal:
 		{
-			return SimpleInstruction("OP_GET_LOCAL", offset)
+			return ByteInstruction("OP_GET_LOCAL", c, offset)
 		}
 	case OpJump:
 		{
-			return offset + 3
+			return JumpInstruction("OP_JUMP", 1, offset, c)
 		}
 	case OpJumpIfFalse:
 		{
-			return offset + 3
+			return JumpInstruction("OP_JUMP_IF_FALSE", 1, offset, c)
 		}
 	default:
 		{
@@ -136,6 +136,21 @@ func DisassembleInstruction(c *Chunk, offset int) int {
 			return int(offset + 1)
 		}
 	}
+}
+
+func ByteInstruction(ins string, c *Chunk, offset int) int {
+	constant := c.code[offset+1]
+	fmt.Printf("%-16s %4d", ins, constant)
+	return offset + 2
+}
+
+func JumpInstruction(ins string, sign int, offset int, c *Chunk) int {
+	j1 := uint16(c.code[offset+1]) << 8
+	j2 := uint16(c.code[offset+2])
+	j1 |= j2
+	fmt.Println(j1, j2)
+	fmt.Printf("%-16s %4d -> %d\n", ins, offset, j1)
+	return offset + 3
 }
 
 func AssignmentInstruction(ins string, chunk *Chunk, offset int) int {

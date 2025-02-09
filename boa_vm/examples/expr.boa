@@ -1,1 +1,14 @@
 var a = 69;
+if ( a == 1 ) {
+    print a;
+    if (1 == 1){
+        print a+1;
+    }
+    else{
+        print "BC";
+    }
+}
+else {
+    print "B";
+}
+print a+3;

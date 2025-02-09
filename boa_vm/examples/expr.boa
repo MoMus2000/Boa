@@ -1,7 +1,1 @@
-if ( 1 == 2 ) {
-    print "A";
-}
-else {
-    print "B";
-}
-print "a";
+var a = 69;

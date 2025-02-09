@@ -11,7 +11,7 @@ type Precidence uint
 
 const COUNT_MAX = math.MaxInt
 
-const DEBUG_PRINT_CODE = 0
+const DEBUG_PRINT_CODE = 1
 
 const (
 	PREC_NONE       Precidence = iota

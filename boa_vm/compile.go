@@ -243,9 +243,11 @@ func (c *Compiler) ifStatement() {
 
 	thenJump := c.emitJump(OpJumpIfFalse)
 	c.statement()
+	c.emitByteCode(OpPop)
 	elseJump := c.emitJump(OpJump)
 	c.patchJump(thenJump)
 
+	c.emitByteCode(OpPop)
 	if c.match(ELSE) {
 		c.statement()
 	}

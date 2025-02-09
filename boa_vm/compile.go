@@ -56,13 +56,22 @@ type Parser struct {
 	panicMode bool
 }
 
+type FunctionType uint8
+
+const (
+	TYPE_SCRIPT FunctionType = iota
+	TYPE_FUNC
+)
+
 type Compiler struct {
-	scanner    *Scanner
-	parser     *Parser
-	parseRules map[TokenType]ParseRule
-	localCount int
-	scopeDepth int
-	locals     []Local
+	scanner      *Scanner
+	parser       *Parser
+	parseRules   map[TokenType]ParseRule
+	localCount   int
+	scopeDepth   int
+	locals       []Local
+	functionType FunctionType
+	function     *ObjectFunc
 }
 
 type Local struct {
@@ -121,7 +130,8 @@ func (c *Compiler) buildParseRules() map[TokenType]ParseRule {
 	}
 }
 
-func (c *Compiler) compile(source []byte, chunk *Chunk) bool {
+func (c *Compiler) compile(source []byte) *ObjectFunc {
+	// ----------------------------
 	parser := Parser{}
 	scanner := NewScanner(source)
 	c.parseRules = c.buildParseRules()
@@ -132,21 +142,40 @@ func (c *Compiler) compile(source []byte, chunk *Chunk) bool {
 	c.locals = make([]Local, 0)
 	c.parser.hadError = false
 	c.parser.panicMode = false
-	compilingChunk = chunk
+	c.function = NewFunction()
+	c.functionType = TYPE_SCRIPT
+	// ----------------------------
+	c.localCount++
+	local := Local{}
+	local.depth = 0
+	local.name.runes = []rune("")
+	local.name.length = 0
+	c.locals = append(c.locals, local)
+	// ----------------------------
 	c.advance()
 	for !c.match(EOF) {
 		c.declaration()
 	}
-	c.endCompiler()
-	return !c.parser.hadError
+	error := !c.parser.hadError
+	if error == false {
+		return nil
+	}
+	return c.endCompiler()
 }
 
 func (c *Compiler) declaration() {
+	if c.match(FUN) {
+		c.funDeclaration()
+	}
 	if c.match(VAR) {
 		c.varDeclaration()
 	} else {
 		c.statement()
 	}
+}
+
+func (c *Compiler) funDeclaration() {
+
 }
 
 func (c *Compiler) varDeclaration() {
@@ -239,23 +268,23 @@ func (c *Compiler) statement() {
 }
 
 func (c *Compiler) whileStatement() {
-	// loopStart := len(currentChunk().code)
+	loopStart := len(c.currentChunk().code)
 	c.consume(LEFT_PAREN, "Expected ) Paren")
 	c.expression()
 	c.consume(RIGHT_PAREN, "Expected ( Paren")
 
-	// exitJump := c.emitJump(OpJumpIfFalse)
-	// c.emitByteCode(OpPop)
-	// c.statement()
-	// c.emitLoop(loopStart)
-	// c.patchJump(exitJump)
-	// c.emitByteCode(OpPop)
+	exitJump := c.emitJump(OpJumpIfFalse)
+	c.emitByteCode(OpPop)
+	c.statement()
+	c.emitLoop(loopStart)
+	c.patchJump(exitJump)
+	c.emitByteCode(OpPop)
 }
 
 func (c *Compiler) emitLoop(loopStart int) {
 	c.emitByteCode(OpLoop)
 
-	offset := len(currentChunk().code) - loopStart + 2
+	offset := len(c.currentChunk().code) - loopStart + 2
 
 	if offset > math.MaxUint16 {
 		c.error("Offset is too large.")
@@ -287,16 +316,16 @@ func (c *Compiler) emitJump(jCode Opcode) int {
 	c.emitByteCode(jCode)
 	c.emitByteCode(0xff)
 	c.emitByteCode(0xff)
-	return len(currentChunk().code) - 2
+	return len(c.currentChunk().code) - 2
 }
 
 func (c *Compiler) patchJump(offset int) {
-	jump := len(currentChunk().code) - offset - 2
+	jump := len(c.currentChunk().code) - offset - 2
 	if jump > math.MaxUint16 {
 		c.error("Too much code to jump over.")
 	}
-	currentChunk().code[offset] = Opcode((jump >> 8) & 0xff)
-	currentChunk().code[offset+1] = Opcode(jump & 0xff)
+	c.currentChunk().code[offset] = Opcode((jump >> 8) & 0xff)
+	c.currentChunk().code[offset+1] = Opcode(jump & 0xff)
 }
 
 func (c *Compiler) and_(canAssign bool) {
@@ -358,11 +387,12 @@ func (c *Compiler) check(token TokenType) bool {
 	return c.parser.current.tokenType == token
 }
 
-func (c *Compiler) endCompiler() {
+func (c *Compiler) endCompiler() *ObjectFunc {
 	if !c.parser.hadError && DEBUG_PRINT_CODE == 1 {
-		DisassembleChunk(currentChunk(), "code")
+		DisassembleChunk(c.currentChunk(), "code")
 	}
 	c.emitReturn()
+	return c.function
 }
 
 func (c *Compiler) variable(canAssign bool) {
@@ -501,7 +531,7 @@ func (c *Compiler) getRule(token TokenType) *ParseRule {
 }
 
 func (c *Compiler) makeConstant(constant Value) Opcode {
-	index := currentChunk().AddConstant(constant)
+	index := c.currentChunk().AddConstant(constant)
 	if index > int(^uint(0)>>1) {
 		c.error("Too many constants in the chunk")
 		return 0
@@ -518,8 +548,8 @@ func (c *Compiler) emitBytes(a Opcode, b Opcode) {
 	c.emitByteCode(b)
 }
 
-func currentChunk() *Chunk {
-	return compilingChunk
+func (c *Compiler) currentChunk() *Chunk {
+	return &c.function.chunk
 }
 
 func (c *Compiler) expression() {
@@ -547,7 +577,7 @@ func (c *Compiler) consume(tokenType TokenType, message string) {
 }
 
 func (c *Compiler) emitByteCode(code Opcode) {
-	currentChunk().WriteChunk(code, c.parser.previous.line)
+	c.currentChunk().WriteChunk(code, c.parser.previous.line)
 }
 
 func (c *Compiler) errorAtCurrent(message string) {

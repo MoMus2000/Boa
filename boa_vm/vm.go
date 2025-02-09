@@ -10,6 +10,7 @@ type InterpretResult int
 
 const DEBUG_TRACE_EXECUTION = 0
 const STACK_MAX = 256
+const FRAME_MAX = 64
 
 const (
 	INTERPRET_OK InterpretResult = iota
@@ -18,18 +19,28 @@ const (
 )
 
 type VM struct {
-	chunk    *Chunk
+	stackTop     Value
+	stack        []Value
+	compiler     Compiler
+	table        *Table
+	frameCount   int
+	frames       []CallFrame
+	currentFrame *CallFrame
+}
+
+type CallFrame struct {
+	function *ObjectFunc
 	ip       int
-	stackTop Value
-	stack    []Value
-	compiler Compiler
-	table    *Table
+	slots    []Value
+	code     []Opcode
 }
 
 func NewVM() VM {
 	return VM{
-		compiler: NewCompiler(),
-		table:    initMap(),
+		compiler:   NewCompiler(),
+		table:      initMap(),
+		frames:     make([]CallFrame, FRAME_MAX),
+		frameCount: 0,
 	}
 }
 
@@ -42,15 +53,21 @@ func (v *VM) FreeVM() {
 }
 
 func (v *VM) interpret(source []byte) InterpretResult {
-	chunk := NewChunck()
-	if !v.compiler.compile(source, &chunk) {
+	compiled_code := v.compiler.compile(source)
+	if compiled_code == nil {
 		return INTERPRET_COMPILE_ERROR
 	}
-	v.chunk = &chunk
-	v.ip = 0
-	result := v.run()
-	chunk.FreeChunk()
-	return result
+	obj := (*Object)(unsafe.Pointer(&compiled_code))
+	v.push(ObjVal(obj))
+
+	frame := &v.frames[v.frameCount]
+	v.frameCount++
+	frame.function = compiled_code
+	frame.ip = 0
+	frame.code = compiled_code.chunk.code
+	frame.slots = v.stack
+
+	return v.run()
 }
 
 func (v *VM) push(vl Value) {
@@ -65,15 +82,11 @@ func (v *VM) pop() *Value {
 	return &last
 }
 
-func (v *VM) read_byte() {
-	v.ip++
-}
-
 func (v *VM) run() InterpretResult {
 	for {
-		ins := v.chunk.code[v.ip]
-		// fmt.Println("Remaining OpCodes: ", v.chunk.code[v.ip:])
-		// fmt.Println("Current Instruction: ", ins)
+		currentFrame := &v.frames[v.frameCount-1]
+		v.currentFrame = currentFrame
+		ins := v.currentFrame.function.chunk.code[currentFrame.ip]
 		v.read_byte()
 		switch ins {
 		case OpPrint:
@@ -226,36 +239,36 @@ func (v *VM) run() InterpretResult {
 			}
 		case OpGetLocal:
 			{
-				index := v.chunk.code[v.ip]
-				v.ip++
-				v.push(v.stack[index])
+				slot := v.currentFrame.function.chunk.code[v.currentFrame.ip]
+				v.currentFrame.ip++
+				v.push(v.currentFrame.slots[slot])
 				break
 			}
 		case OpSetLocal:
 			{
-				index := v.chunk.code[v.ip]
-				v.ip++
-				v.stack[index] = *v.peek(0)
+				slot := v.currentFrame.function.chunk.code[v.currentFrame.ip]
+				v.currentFrame.ip++
+				v.currentFrame.slots[slot] = *v.peek(0)
 				break
 			}
 		case OpJumpIfFalse:
 			{
 				offset := v.read_short()
 				if v.isFalsy(v.peek(0)) {
-					v.ip += int(offset)
+					v.currentFrame.ip += int(offset)
 				}
 				break
 			}
 		case OpJump:
 			{
 				offset := v.read_short()
-				v.ip += int(offset)
+				v.currentFrame.ip += int(offset)
 				break
 			}
 		case OpLoop:
 			{
 				offset := v.read_short()
-				v.ip -= int(offset)
+				v.currentFrame.ip -= int(offset)
 				break
 			}
 		default:
@@ -354,17 +367,21 @@ func (v *VM) binary_op(op string) error {
 	return nil
 }
 
+func (v *VM) read_byte() {
+	v.currentFrame.ip++
+}
+
 func (v *VM) read_constant() *Value {
-	index := v.chunk.code[v.ip]
-	c := v.chunk.constants.values[index]
+	index := v.currentFrame.function.chunk.code[v.currentFrame.ip]
+	c := v.currentFrame.function.chunk.constants.values[index]
 	v.read_byte()
 	return &c
 }
 
 func (v *VM) read_short() uint16 {
-	v.ip += 2
-	v1 := uint16(v.chunk.code[v.ip-1])
-	v2 := uint16(v.chunk.code[v.ip-2]) << 8
+	v.currentFrame.ip += 2
+	v1 := uint16(v.currentFrame.function.chunk.code[v.currentFrame.ip-1])
+	v2 := uint16(v.currentFrame.function.chunk.code[v.currentFrame.ip-2]) << 8
 	short := (uint16)(v2 | v1)
 	return short
 }

@@ -11,7 +11,7 @@ type Precidence uint
 
 const COUNT_MAX = math.MaxInt
 
-const DEBUG_PRINT_CODE = 1
+const DEBUG_PRINT_CODE = 0
 
 const (
 	PREC_NONE       Precidence = iota
@@ -231,9 +231,38 @@ func (c *Compiler) statement() {
 		c.endScope()
 	} else if c.match(IF) {
 		c.ifStatement()
+	} else if c.match(WHILE) {
+		c.whileStatement()
 	} else {
 		c.expressionStatement()
 	}
+}
+
+func (c *Compiler) whileStatement() {
+	// loopStart := len(currentChunk().code)
+	c.consume(LEFT_PAREN, "Expected ) Paren")
+	c.expression()
+	c.consume(RIGHT_PAREN, "Expected ( Paren")
+
+	// exitJump := c.emitJump(OpJumpIfFalse)
+	// c.emitByteCode(OpPop)
+	// c.statement()
+	// c.emitLoop(loopStart)
+	// c.patchJump(exitJump)
+	// c.emitByteCode(OpPop)
+}
+
+func (c *Compiler) emitLoop(loopStart int) {
+	c.emitByteCode(OpLoop)
+
+	offset := len(currentChunk().code) - loopStart + 2
+
+	if offset > math.MaxUint16 {
+		c.error("Offset is too large.")
+	}
+
+	c.emitByteCode(Opcode(uint16(offset>>8) & 0xff))
+	c.emitByteCode(Opcode(offset & 0xff))
 }
 
 func (c *Compiler) ifStatement() {

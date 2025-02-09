@@ -47,7 +47,6 @@ func (v *VM) interpret(source []byte) InterpretResult {
 		return INTERPRET_COMPILE_ERROR
 	}
 	v.chunk = &chunk
-	// DumpByteCode(v.chunk)
 	v.ip = 0
 	result := v.run()
 	chunk.FreeChunk()
@@ -72,33 +71,6 @@ func (v *VM) read_byte() {
 
 func (v *VM) run() InterpretResult {
 	for {
-		if DEBUG_TRACE_EXECUTION == 1 {
-			fmt.Printf("Stack Trace: ")
-			for i := range len(v.stack) {
-				fmt.Printf("[")
-				switch v.stack[i].valType {
-				case VAL_BOOL:
-					{
-						fmt.Printf("'%v'", v.stack[i].AsBoolean())
-					}
-				case VAL_NUMBER:
-					{
-						fmt.Printf("'%v'", v.stack[i].AsNumber())
-					}
-				case VAL_NIL:
-					{
-						fmt.Printf("'%v'", nil)
-					}
-				case VAL_OBJ:
-					{
-						printObject(v.stack[i])
-					}
-				}
-				fmt.Printf("]")
-			}
-			fmt.Printf("\n")
-			DisassembleInstruction(v.chunk, v.ip)
-		}
 		ins := v.chunk.code[v.ip]
 		// fmt.Println("Remaining OpCodes: ", v.chunk.code[v.ip:])
 		// fmt.Println("Current Instruction: ", ins)
@@ -280,6 +252,12 @@ func (v *VM) run() InterpretResult {
 				v.ip += int(offset)
 				break
 			}
+		case OpLoop:
+			{
+				offset := v.read_short()
+				v.ip -= int(offset)
+				break
+			}
 		default:
 			fmt.Println("UnIdentified OpCode: ", ins)
 		}
@@ -362,12 +340,10 @@ func (v *VM) binary_op(op string) error {
 		}
 	case ">":
 		{
-			fmt.Println("A ", a, "B ", b)
 			v.push(BoolVal(a < b))
 		}
 	case "<":
 		{
-			fmt.Println("A ", a, "B ", b)
 			v.push(BoolVal(a > b))
 		}
 	default:

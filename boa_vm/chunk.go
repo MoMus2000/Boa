@@ -28,6 +28,7 @@ const (
 	OpGetLocal
 	OpJumpIfFalse
 	OpJump
+	OpLoop
 	OpMinus1
 )
 
@@ -55,6 +56,7 @@ var opCodeNames = [...]string{
 	"OpGetLocal",
 	"OpJumpIfFalse",
 	"OpJump",
+	"OpLoop",
 	"OpMinus1",
 }
 

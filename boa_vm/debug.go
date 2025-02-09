@@ -130,6 +130,10 @@ func DisassembleInstruction(c *Chunk, offset int) int {
 		{
 			return JumpInstruction("OP_JUMP_IF_FALSE", 1, offset, c)
 		}
+	case OpLoop:
+		{
+			return JumpInstruction("OP_LOOP", -1, offset, c)
+		}
 	default:
 		{
 			fmt.Printf("Unknown OpCode %d\n", instruction)
@@ -148,7 +152,6 @@ func JumpInstruction(ins string, sign int, offset int, c *Chunk) int {
 	j1 := uint16(c.code[offset+1]) << 8
 	j2 := uint16(c.code[offset+2])
 	j1 |= j2
-	fmt.Println(j1, j2)
 	fmt.Printf("%-16s %4d -> %d\n", ins, offset, j1)
 	return offset + 3
 }

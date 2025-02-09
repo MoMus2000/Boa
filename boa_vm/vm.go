@@ -269,9 +269,7 @@ func (v *VM) run() InterpretResult {
 		case OpJumpIfFalse:
 			{
 				offset := v.read_short()
-				fmt.Println("Offset: ", offset)
 				if v.isFalsy(v.peek(0)) {
-					fmt.Println("If Statement is False, Jump to offset: ", offset)
 					v.ip += int(offset)
 				}
 				break
@@ -279,7 +277,6 @@ func (v *VM) run() InterpretResult {
 		case OpJump:
 			{
 				offset := v.read_short()
-				fmt.Println("Jump Offset: ", offset)
 				v.ip += int(offset)
 				break
 			}

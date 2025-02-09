@@ -11,7 +11,7 @@ type Precidence uint
 
 const COUNT_MAX = math.MaxInt
 
-const DEBUG_PRINT_CODE = 0
+const DEBUG_PRINT_CODE = 1
 
 const (
 	PREC_NONE       Precidence = iota
@@ -100,7 +100,7 @@ func (c *Compiler) buildParseRules() map[TokenType]ParseRule {
 		IDENTIFIER:    {c.variable, nil, PREC_NONE},
 		STRING:        {c.str, nil, PREC_NONE},
 		NUMBER:        {c.number, nil, PREC_NONE},
-		AND:           {nil, nil, PREC_NONE},
+		AND:           {nil, c.and_, PREC_AND},
 		CLASS:         {nil, nil, PREC_NONE},
 		ELSE:          {nil, nil, PREC_NONE},
 		FALSE:         {c.literal, nil, PREC_NONE},
@@ -108,7 +108,7 @@ func (c *Compiler) buildParseRules() map[TokenType]ParseRule {
 		FUN:           {nil, nil, PREC_NONE},
 		IF:            {nil, nil, PREC_NONE},
 		NIL:           {c.literal, nil, PREC_NONE},
-		OR:            {nil, nil, PREC_NONE},
+		OR:            {nil, c.or_, PREC_OR},
 		PRINT:         {nil, nil, PREC_NONE},
 		RETURN:        {nil, nil, PREC_NONE},
 		SUPER:         {nil, nil, PREC_NONE},
@@ -268,6 +268,22 @@ func (c *Compiler) patchJump(offset int) {
 	}
 	currentChunk().code[offset] = Opcode((jump >> 8) & 0xff)
 	currentChunk().code[offset+1] = Opcode(jump & 0xff)
+}
+
+func (c *Compiler) and_(canAssign bool) {
+	endJump := c.emitJump(OpJumpIfFalse)
+	c.emitByteCode(OpPop)
+	c.parsePrecidence(PREC_AND)
+	c.patchJump(endJump)
+}
+
+func (c *Compiler) or_(canAssign bool) {
+	elseJump := c.emitJump(OpJumpIfFalse)
+	endJump := c.emitJump(OpJump)
+	c.patchJump(elseJump)
+	c.emitByteCode(OpPop)
+	c.parsePrecidence(PREC_OR)
+	c.patchJump(endJump)
 }
 
 func (c *Compiler) beginScope() {

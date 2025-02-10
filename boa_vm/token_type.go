@@ -7,73 +7,73 @@ import (
 type TokenType int
 
 const (
-  LEFT_PAREN TokenType = iota
-  RIGHT_PAREN 
+	LEFT_PAREN TokenType = iota
+	RIGHT_PAREN
 
-  LEFT_BRACE
-  RIGHT_BRACE
+	LEFT_BRACE
+	RIGHT_BRACE
 
-  LEFT_ANGLE_BRACKET   
-  RIGHT_ANGLE_BRACKET  
-                       
-  PIPE                 
-  COLON                
-                       
-  COMMA                
-  DOT                  
-  MINUS                
-  PLUS                 
-  SEMICOLON            
-  SLASH                
-  STAR                 
-                       
-  BANG                 
-  BANG_EQUAL           
-  EQUAL                
-  EQUAL_EQUAL          
-  GREATER              
-  GREATER_EQUAL        
-  LESS                 
-  LESS_EQUAL           
-                       
-  IDENTIFIER           
-  STRING               
-  NUMBER               
-                       
-  AND                  
-  CLASS                
-  ELSE                 
-  FALSE                
-  FUN                  
-  FOR                  
-  IF                   
-  NIL                  
-  OR                   
-  PRINT
-  RETURN               
-  SUPER                
-  THIS                 
-  TRUE                 
-  VAR                  
-  WHILE                
-  IMPORT               
+	LEFT_ANGLE_BRACKET
+	RIGHT_ANGLE_BRACKET
 
-  IN
-  RANGE
+	PIPE
+	COLON
 
-  ERROR
+	COMMA
+	DOT
+	MINUS
+	PLUS
+	SEMICOLON
+	SLASH
+	STAR
 
-  EOF
+	BANG
+	BANG_EQUAL
+	EQUAL
+	EQUAL_EQUAL
+	GREATER
+	GREATER_EQUAL
+	LESS
+	LESS_EQUAL
+
+	IDENTIFIER
+	STRING
+	NUMBER
+
+	AND
+	CLASS
+	ELSE
+	FALSE
+	FUN
+	FOR
+	IF
+	NIL
+	OR
+	PRINT
+	RETURN
+	SUPER
+	THIS
+	TRUE
+	VAR
+	WHILE
+	IMPORT
+
+	IN
+	RANGE
+
+	ERROR
+
+	EOF
 )
 
 var tokenNames = [...]string{
-	"LEFT_PAREN", "RIGHT_PAREN", "LEFT_BRACE", "RIGHT_BRACE", "LEFT_ANGLE_BRACKET", 
-	"RIGHT_ANGLE_BRACKET", "PIPE", "COLON", "COMMA", "DOT", "MINUS", "PLUS", 
-	"SEMICOLON", "SLASH", "STAR", "BANG", "BANG_EQUAL", "EQUAL", "EQUAL_EQUAL", 
-	"GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL", "IDENTIFIER", "STRING", 
-	"NUMBER", "AND", "CLASS", "ELSE", "FALSE", "FUN", "FOR", "IF", "NIL", 
-	"OR", "DEBUG", "RETURN", "SUPER", "THIS", "TRUE", "VAR", "WHILE", 
-	"IMPORT", "IN", "RANGE", "ERROR", "EOF", 
+	"LEFT_PAREN", "RIGHT_PAREN", "LEFT_BRACE", "RIGHT_BRACE", "LEFT_ANGLE_BRACKET",
+	"RIGHT_ANGLE_BRACKET", "PIPE", "COLON", "COMMA", "DOT", "MINUS", "PLUS",
+	"SEMICOLON", "SLASH", "STAR", "BANG", "BANG_EQUAL", "EQUAL", "EQUAL_EQUAL",
+	"GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL", "IDENTIFIER", "STRING",
+	"NUMBER", "AND", "CLASS", "ELSE", "FALSE", "FUN", "FOR", "IF", "NIL",
+	"OR", "PRINT", "RETURN", "SUPER", "THIS", "TRUE", "VAR", "WHILE",
+	"IMPORT", "IN", "RANGE", "ERROR", "EOF",
 }
 
 // String method to print enum name

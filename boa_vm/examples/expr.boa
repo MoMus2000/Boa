@@ -1,7 +1,3 @@
-
-var c = 10;
-
-while (c > 0 ) {
-    c = c - 1;
-    print c;
+fun abc(){
+    var a = 1;
 }

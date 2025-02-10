@@ -64,6 +64,7 @@ const (
 )
 
 type Compiler struct {
+	enclosing    *Compiler
 	scanner      *Scanner
 	parser       *Parser
 	parseRules   map[TokenType]ParseRule
@@ -130,6 +131,29 @@ func (c *Compiler) buildParseRules() map[TokenType]ParseRule {
 	}
 }
 
+func (c *Compiler) initNestedCompiler(compiler *Compiler, funcType FunctionType) {
+	compiler.enclosing = c
+	compiler.function = NewFunction()
+	compiler.functionType = funcType
+	compiler.parser = c.parser
+	c = compiler
+	if funcType != TYPE_SCRIPT {
+		s := string(c.parser.previous.runes)
+		objS := ObjectString{
+			obj:    Object{objType: OBJ_STRING},
+			chars:  s,
+			length: len(s),
+		}
+		c.function.name = &objS
+	}
+	c.localCount++
+	local := Local{}
+	local.depth = 0
+	local.name.runes = []rune("")
+	local.name.length = 0
+	c.locals = append(c.locals, local)
+}
+
 func (c *Compiler) compile(source []byte) *ObjectFunc {
 	// ----------------------------
 	parser := Parser{}
@@ -166,8 +190,7 @@ func (c *Compiler) compile(source []byte) *ObjectFunc {
 func (c *Compiler) declaration() {
 	if c.match(FUN) {
 		c.funDeclaration()
-	}
-	if c.match(VAR) {
+	} else if c.match(VAR) {
 		c.varDeclaration()
 	} else {
 		c.statement()
@@ -175,7 +198,38 @@ func (c *Compiler) declaration() {
 }
 
 func (c *Compiler) funDeclaration() {
+	global := c.parseVariable("Expect function name")
+	c.markInitialized()
+	c.makeFunction(TYPE_FUNC)
+	c.defineVariable(global)
+}
 
+func (c *Compiler) makeFunction(funcType FunctionType) {
+	compiler := NewCompiler()
+	c.initNestedCompiler(&compiler, funcType)
+
+	c.beginScope()
+	c.consume(LEFT_PAREN, "Expected (")
+	if !c.check(RIGHT_PAREN) {
+		for {
+			c.function.arity++
+			if c.function.arity > 255 {
+				c.error("Cant have more than 255 args.")
+			}
+			constant := c.parseVariable("Expect parameter name")
+			c.defineVariable(constant)
+			if !c.match(COMMA) {
+				break
+			}
+		}
+	}
+	c.consume(RIGHT_PAREN, "Expected )")
+	c.consume(LEFT_BRACE, "Expected {")
+	c.block()
+
+	// function := c.endCompiler()
+	// objFunc := (*Object)(unsafe.Pointer(&function))
+	// c.emitBytes(OpConstant, c.makeConstant(ObjVal(objFunc)))
 }
 
 func (c *Compiler) varDeclaration() {
@@ -189,9 +243,16 @@ func (c *Compiler) varDeclaration() {
 	c.defineVariable(index)
 }
 
+func (c *Compiler) markInitialized() {
+	if c.scopeDepth == 0 {
+		return
+	}
+	c.locals[c.localCount-1].depth = c.scopeDepth
+}
+
 func (c *Compiler) defineVariable(i Opcode) {
 	if c.scopeDepth > 0 {
-		c.locals[c.localCount-1].depth = c.scopeDepth
+		c.markInitialized()
 		return
 	}
 	c.emitBytes(OpDefineGlobal, i)
@@ -253,7 +314,9 @@ func (c *Compiler) addLocal(name Token) {
 
 func (c *Compiler) statement() {
 	if c.match(PRINT) {
+		fmt.Println("Print Statement")
 		c.printStatement()
+		fmt.Println("Done with Print Statement")
 	} else if c.match(LEFT_BRACE) {
 		c.beginScope()
 		c.block()
@@ -263,6 +326,7 @@ func (c *Compiler) statement() {
 	} else if c.match(WHILE) {
 		c.whileStatement()
 	} else {
+		fmt.Println("Inside Expression Statement")
 		c.expressionStatement()
 	}
 }
@@ -365,6 +429,7 @@ func (c *Compiler) block() {
 
 func (c *Compiler) printStatement() {
 	c.expression()
+	fmt.Println("PArsed Expression")
 	c.consume(SEMICOLON, "Expected ;")
 	c.emitByteCode(OpPrint)
 }
@@ -392,7 +457,9 @@ func (c *Compiler) endCompiler() *ObjectFunc {
 		DisassembleChunk(c.currentChunk(), "code")
 	}
 	c.emitReturn()
-	return c.function
+	function := c.function
+	c = c.enclosing
+	return function
 }
 
 func (c *Compiler) variable(canAssign bool) {

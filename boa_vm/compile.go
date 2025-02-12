@@ -145,9 +145,7 @@ func initCompiler(compiler *Compiler, funcType FunctionType, current **Compiler)
 			chars:  s,
 			length: len(s),
 		}
-		fmt.Println("1 Func Name: ", s)
 		(*current).function.name = objS
-		fmt.Println("2 Func Name: ", (*current).function.name)
 	}
 	local := Local{}
 	local.depth = 0
@@ -155,7 +153,6 @@ func initCompiler(compiler *Compiler, funcType FunctionType, current **Compiler)
 	local.name.length = 0
 	(*current).locals = append((*current).locals, local)
 	(*current).localCount++
-	fmt.Println("3 Func Name: ", (*current).function.name)
 }
 
 func (c *Compiler) compile(source []byte) *ObjectFunc {
@@ -216,7 +213,6 @@ func (c *Compiler) makeFunction(funcType FunctionType) {
 		locals:     make([]Local, 0),
 	}
 	initCompiler(compiler, funcType, &c)
-	fmt.Println("4 Func Made: ", c.function.name.chars)
 	c.beginScope()
 	c.consume(LEFT_PAREN, "Expected (")
 	if !c.check(RIGHT_PAREN) {

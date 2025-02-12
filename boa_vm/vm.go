@@ -57,15 +57,12 @@ func (v *VM) interpret(source []byte) InterpretResult {
 	if compiled_code == nil {
 		return INTERPRET_COMPILE_ERROR
 	}
-	obj := (*Object)(unsafe.Pointer(&compiled_code))
-	v.push(ObjVal(obj))
+	obj := (*Object)(unsafe.Pointer(compiled_code))
 
-	frame := &v.frames[v.frameCount]
-	v.frameCount++
-	frame.function = compiled_code
-	frame.ip = 0
-	frame.code = compiled_code.chunk.code
-	frame.slots = v.stack
+	va := ObjVal(obj)
+	v.push(va)
+
+	v.call(compiled_code, 0)
 
 	return v.run()
 }
@@ -86,7 +83,10 @@ func (v *VM) run() InterpretResult {
 	for {
 		currentFrame := &v.frames[v.frameCount-1]
 		v.currentFrame = currentFrame
+		// fmt.Println("Slot(s): ", v.currentFrame.slots)
+		// fmt.Println("Opcode:  ", v.currentFrame.code)
 		ins := v.currentFrame.function.chunk.code[currentFrame.ip]
+		// fmt.Println("Current Ins:", ins)
 		v.read_byte()
 		switch ins {
 		case OpPrint:
@@ -98,15 +98,30 @@ func (v *VM) run() InterpretResult {
 			}
 		case OpReturn:
 			{
-				return INTERPRET_OK
+				result := v.pop()
+				v.frameCount--
+
+				if v.frameCount == 0 {
+					v.pop()
+					return INTERPRET_OK
+				}
+
+				v.stack = v.currentFrame.slots
+
+				v.push(*result)
+				v.currentFrame = &v.frames[v.frameCount-1]
+				break
+				// return INTERPRET_OK
 			}
 		case OpConstant:
 			{
 				c := v.read_constant()
 				v.push(*c)
+				// fmt.Println("Push to Stack", printValue(v.peek(0)))
 				// fmt.Printf("Constant: ")
 				// printValue(*c)
 				// fmt.Printf("\n")
+				// fmt.Println("------------")
 				break
 			}
 		case OpNegate:
@@ -271,10 +286,46 @@ func (v *VM) run() InterpretResult {
 				v.currentFrame.ip -= int(offset)
 				break
 			}
+		case OpCall:
+			{
+				argCount := int(v.currentFrame.function.chunk.code[v.currentFrame.ip])
+				v.currentFrame.ip++
+				if !v.callValue(v.peek(argCount), argCount) {
+					return INTERPRET_RUNTIME_ERROR
+				}
+				v.currentFrame = &v.frames[v.frameCount-1]
+				break
+			}
 		default:
 			fmt.Println("UnIdentified OpCode: ", ins)
 		}
 	}
+}
+
+func (v *VM) callValue(val *Value, count int) bool {
+	if val.IsObj() {
+		switch val.obj.objType {
+		case OBJ_FUNC:
+			return v.call(val.asFunc(), count)
+		default:
+			break // Non-callable object type.
+		}
+	}
+	v.compiler.error("Can only call functions and classes.")
+	return false
+}
+
+func (v *VM) call(obj *ObjectFunc, count int) bool {
+	frame := &v.frames[v.frameCount]
+	v.currentFrame = frame
+	v.frameCount++
+	v.currentFrame.function = obj
+	v.currentFrame.ip = 0
+	v.currentFrame.code = obj.chunk.code
+	// fmt.Println("Name Of Func: ", obj.name.chars)
+	// fmt.Println("len(v.stack) = ", len(v.stack), " count = ", count)
+	v.currentFrame.slots = v.stack[len(v.stack)-1-count:]
+	return true
 }
 
 func (v *VM) concatenate() {

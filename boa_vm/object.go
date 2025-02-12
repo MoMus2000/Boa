@@ -24,16 +24,20 @@ type ObjectString struct {
 type ObjectFunc struct {
 	obj   Object
 	arity int
-	name  *ObjectString
+	name  ObjectString
 	chunk Chunk
 }
 
 func NewFunction() *ObjectFunc {
 	objFunc := ObjectFunc{
-		name:  nil,
+		name: ObjectString{
+			obj:    Object{OBJ_STRING},
+			chars:  "<nil>",
+			length: 5,
+		},
 		chunk: NewChunck(),
 		arity: 0,
-		obj:   Object{OBJ_FUNC},
+		obj:   Object{objType: OBJ_FUNC},
 	}
 	return &objFunc
 }

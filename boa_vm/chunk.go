@@ -29,6 +29,7 @@ const (
 	OpJumpIfFalse
 	OpJump
 	OpLoop
+	OpCall
 	OpMinus1
 )
 
@@ -57,6 +58,7 @@ var opCodeNames = [...]string{
 	"OpJumpIfFalse",
 	"OpJump",
 	"OpLoop",
+	"OpCall",
 	"OpMinus1",
 }
 

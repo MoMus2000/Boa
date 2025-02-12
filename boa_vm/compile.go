@@ -88,7 +88,7 @@ var compilingChunk *Chunk
 
 func (c *Compiler) buildParseRules() map[TokenType]ParseRule {
 	return map[TokenType]ParseRule{
-		LEFT_PAREN:    {c.grouping, nil, PREC_NONE},
+		LEFT_PAREN:    {c.grouping, c.call, PREC_CALL},
 		RIGHT_PAREN:   {nil, nil, PREC_NONE},
 		LEFT_BRACE:    {nil, nil, PREC_NONE},
 		RIGHT_BRACE:   {nil, nil, PREC_NONE},
@@ -131,27 +131,31 @@ func (c *Compiler) buildParseRules() map[TokenType]ParseRule {
 	}
 }
 
-func (c *Compiler) initNestedCompiler(compiler *Compiler, funcType FunctionType) {
-	compiler.enclosing = c
+func initCompiler(compiler *Compiler, funcType FunctionType, current **Compiler) {
+	compiler.enclosing = *current
 	compiler.function = NewFunction()
 	compiler.functionType = funcType
-	compiler.parser = c.parser
-	c = compiler
+	compiler.localCount = 0
+	compiler.scopeDepth = 0
+	*current = compiler // Update caller's pointer to compiler
 	if funcType != TYPE_SCRIPT {
-		s := string(c.parser.previous.runes)
+		s := string((*current).parser.previous.runes)
 		objS := ObjectString{
 			obj:    Object{objType: OBJ_STRING},
 			chars:  s,
 			length: len(s),
 		}
-		c.function.name = &objS
+		fmt.Println("1 Func Name: ", s)
+		(*current).function.name = objS
+		fmt.Println("2 Func Name: ", (*current).function.name)
 	}
-	c.localCount++
 	local := Local{}
 	local.depth = 0
 	local.name.runes = []rune("")
 	local.name.length = 0
-	c.locals = append(c.locals, local)
+	(*current).locals = append((*current).locals, local)
+	(*current).localCount++
+	fmt.Println("3 Func Name: ", (*current).function.name)
 }
 
 func (c *Compiler) compile(source []byte) *ObjectFunc {
@@ -161,20 +165,20 @@ func (c *Compiler) compile(source []byte) *ObjectFunc {
 	c.parseRules = c.buildParseRules()
 	c.scanner = &scanner
 	c.parser = &parser
+	c.locals = make([]Local, 0)
+	// ----------------------------
+	// initCompiler(nil, TYPE_SCRIPT, &c)
+	c.function = NewFunction()
+	c.functionType = TYPE_FUNC
+	c.enclosing = c
 	c.localCount = 0
 	c.scopeDepth = 0
-	c.locals = make([]Local, 0)
-	c.parser.hadError = false
-	c.parser.panicMode = false
-	c.function = NewFunction()
-	c.functionType = TYPE_SCRIPT
-	// ----------------------------
-	c.localCount++
 	local := Local{}
 	local.depth = 0
 	local.name.runes = []rune("")
 	local.name.length = 0
-	c.locals = append(c.locals, local)
+	(c).locals = append((c).locals, local)
+	(c).localCount++
 	// ----------------------------
 	c.advance()
 	for !c.match(EOF) {
@@ -184,7 +188,7 @@ func (c *Compiler) compile(source []byte) *ObjectFunc {
 	if error == false {
 		return nil
 	}
-	return c.endCompiler()
+	return endCompiler(&c)
 }
 
 func (c *Compiler) declaration() {
@@ -205,9 +209,14 @@ func (c *Compiler) funDeclaration() {
 }
 
 func (c *Compiler) makeFunction(funcType FunctionType) {
-	compiler := NewCompiler()
-	c.initNestedCompiler(&compiler, funcType)
-
+	compiler := &Compiler{
+		parser:     c.parser,
+		scanner:    c.scanner,
+		parseRules: c.buildParseRules(),
+		locals:     make([]Local, 0),
+	}
+	initCompiler(compiler, funcType, &c)
+	fmt.Println("4 Func Made: ", c.function.name.chars)
 	c.beginScope()
 	c.consume(LEFT_PAREN, "Expected (")
 	if !c.check(RIGHT_PAREN) {
@@ -223,13 +232,34 @@ func (c *Compiler) makeFunction(funcType FunctionType) {
 			}
 		}
 	}
+
 	c.consume(RIGHT_PAREN, "Expected )")
 	c.consume(LEFT_BRACE, "Expected {")
 	c.block()
 
-	// function := c.endCompiler()
-	// objFunc := (*Object)(unsafe.Pointer(&function))
-	// c.emitBytes(OpConstant, c.makeConstant(ObjVal(objFunc)))
+	function := endCompiler(&c)
+	objFunc := (*Object)(unsafe.Pointer(function))
+	c.emitBytes(OpConstant, c.makeConstant(ObjVal(objFunc)))
+}
+
+func (c *Compiler) call(canAssign bool) {
+	argCount := c.argumentList()
+	c.enclosing.emitBytes(OpCall, Opcode(argCount))
+}
+
+func (c *Compiler) argumentList() int {
+	argCount := 0
+	if !c.check(RIGHT_PAREN) {
+		for {
+			c.expression()
+			argCount++
+			if !c.match(COMMA) {
+				break
+			}
+		}
+	}
+	c.consume(RIGHT_PAREN, "Expected )")
+	return argCount
 }
 
 func (c *Compiler) varDeclaration() {
@@ -314,9 +344,7 @@ func (c *Compiler) addLocal(name Token) {
 
 func (c *Compiler) statement() {
 	if c.match(PRINT) {
-		fmt.Println("Print Statement")
 		c.printStatement()
-		fmt.Println("Done with Print Statement")
 	} else if c.match(LEFT_BRACE) {
 		c.beginScope()
 		c.block()
@@ -326,7 +354,6 @@ func (c *Compiler) statement() {
 	} else if c.match(WHILE) {
 		c.whileStatement()
 	} else {
-		fmt.Println("Inside Expression Statement")
 		c.expressionStatement()
 	}
 }
@@ -429,7 +456,6 @@ func (c *Compiler) block() {
 
 func (c *Compiler) printStatement() {
 	c.expression()
-	fmt.Println("PArsed Expression")
 	c.consume(SEMICOLON, "Expected ;")
 	c.emitByteCode(OpPrint)
 }
@@ -452,13 +478,13 @@ func (c *Compiler) check(token TokenType) bool {
 	return c.parser.current.tokenType == token
 }
 
-func (c *Compiler) endCompiler() *ObjectFunc {
-	if !c.parser.hadError && DEBUG_PRINT_CODE == 1 {
-		DisassembleChunk(c.currentChunk(), "code")
+func endCompiler(c **Compiler) *ObjectFunc {
+	if !(*c).parser.hadError && DEBUG_PRINT_CODE == 1 {
+		DisassembleChunk((*c).currentChunk(), "code")
 	}
-	c.emitReturn()
-	function := c.function
-	c = c.enclosing
+	(*c).emitReturn()
+	function := (*c).function
+	*c = (*c).enclosing
 	return function
 }
 
@@ -607,6 +633,7 @@ func (c *Compiler) makeConstant(constant Value) Opcode {
 }
 
 func (c *Compiler) emitReturn() {
+	c.emitByteCode(OpNil)
 	c.emitByteCode(OpReturn)
 }
 

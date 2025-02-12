@@ -1,3 +1,8 @@
 fun abc(){
     var a = 1;
+    var b = 5;
+    print 1 + 8;
+    print "HI";
 }
+
+abc();

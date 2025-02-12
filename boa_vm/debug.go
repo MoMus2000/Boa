@@ -178,7 +178,12 @@ func printObject(v Value) {
 		{
 			fmt.Printf("%v", v.asString().chars)
 		}
+	case OBJ_FUNC:
+		{
+			fmt.Printf("%v", v)
+		}
 	default:
+		fmt.Println("OBJ Type: ", v.obj.objType)
 		fmt.Println("Print for Object not implemented")
 
 	}

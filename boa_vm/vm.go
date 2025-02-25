@@ -31,9 +31,8 @@ type VM struct {
 type CallFrame struct {
 	function   *ObjectFunc
 	ip         int
-	slots      *[]Value
+  slots      []Value
 	code       []Opcode
-  slotPointer int
 }
 
 func NewVM() VM {
@@ -250,14 +249,14 @@ func (v *VM) run() InterpretResult {
         slot := v.currentFrame.code[v.currentFrame.ip]
 				v.currentFrame.ip++
 
-				v.push((*v.currentFrame.slots)[slot])
+				v.push((v.currentFrame.slots)[slot])
 				break
 			}
 		case OpSetLocal:
 			{
 				slot := v.currentFrame.code[v.currentFrame.ip]
 				v.currentFrame.ip++
-				(*v.currentFrame.slots)[slot] = *v.peek(0)
+				(v.currentFrame.slots)[slot] = *v.peek(0)
 				break
 			}
 		case OpJumpIfFalse:
@@ -287,6 +286,7 @@ func (v *VM) run() InterpretResult {
 				if !v.callValue(v.peek(argCount), argCount) {
 					return INTERPRET_RUNTIME_ERROR
 				}
+        v.pop()
 				break
 			}
 		default:
@@ -338,8 +338,7 @@ func (v *VM) call(obj *ObjectFunc, count int) bool {
 	v.currentFrame.function = obj
 	v.currentFrame.ip = 0
 	v.currentFrame.code = obj.chunk.code
-	v.currentFrame.slots = &v.stack
-  v.currentFrame.slotPointer = int(v.stackTop.number) - count - 1
+  v.currentFrame.slots = v.stack
 	return true
 }
 

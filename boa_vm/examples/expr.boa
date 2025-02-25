@@ -1,14 +1,7 @@
-var a = 1;
-
-a = 60;
-
-
-print a;
-
-{
-  print a;
-
-  a = 50;
-
-  print a;
+fun abc(){
+  print "1";
+  print "2";
+  print "3";
 }
+
+abc();

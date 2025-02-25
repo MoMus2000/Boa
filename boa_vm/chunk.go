@@ -97,7 +97,7 @@ func (c *Chunk) printOpCode() {
 
     // Check if the opcode has an operand (requires next index)
     switch opcode {
-    case OpConstant, OpDefineGlobal, OpGetGlobal, OpSetGlobal, OpSetLocal, OpGetLocal, OpGreater, OpLess:
+    case OpConstant, OpDefineGlobal, OpGetGlobal, OpSetGlobal, OpSetLocal, OpGetLocal, OpGreater, OpLess, OpCall:
       if i+1 < len(c.code) {
         entry += fmt.Sprintf(" index: %d", int(c.code[i+1]))
         i++ // Skip the operand index

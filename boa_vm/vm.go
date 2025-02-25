@@ -80,12 +80,11 @@ func (v *VM) pop() *Value {
 }
 
 func (v *VM) run() InterpretResult {
-  v.frames[0].function.chunk.printOpCode()
 	for {
 		currentFrame := &v.frames[v.frameCount-1]
 		v.currentFrame = currentFrame
 		ins := v.currentFrame.function.chunk.code[currentFrame.ip]
-    // fmt.Println("Current Ins: ", ins)
+    fmt.Println("Current Ins: ", ins)
 		v.read_byte()
 		switch ins {
 		case OpPrint:
@@ -97,7 +96,20 @@ func (v *VM) run() InterpretResult {
 			}
 		case OpReturn:
 			{
-				return INTERPRET_OK
+        result := v.pop()
+
+        v.frameCount --
+
+        if v.frameCount == 0 {
+          v.pop()
+          return INTERPRET_OK
+        }
+
+        currentFrame := &v.frames[v.frameCount-1]
+        v.push(*result)
+        v.currentFrame = currentFrame
+
+        break
 			}
 		case OpConstant:
 			{
@@ -299,7 +311,14 @@ func (v *VM) callValue(val *Value, count int) bool {
 }
 
 func (v *VM) call(obj *ObjectFunc, count int) bool {
-  // v.stack = append(v.stack, Value{}) // Push the function reference to slot 0
+  if obj.arity != count {
+    fmt.Println("Args don't match up")
+  }
+
+  fmt.Println("-----FuncOp-----")
+  obj.chunk.printOpCode()
+  fmt.Println("----------------")
+
 	frame := &v.frames[v.frameCount]
 	v.currentFrame = frame
 	v.frameCount++

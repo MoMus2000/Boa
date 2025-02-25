@@ -114,6 +114,7 @@ func (v *VM) run() InterpretResult {
 		case OpConstant:
 			{
 				c := v.read_constant()
+        printValue(*c)
 				v.push(*c) // Push HERE into the stack
 				// fmt.Printf("\n")
 				// fmt.Println("------------")
@@ -317,7 +318,22 @@ func (v *VM) call(obj *ObjectFunc, count int) bool {
 
   fmt.Println("-----FuncOp-----")
   obj.chunk.printOpCode()
-  fmt.Println("----------------")
+  fmt.Println("------------")
+
+  fmt.Println("--Current Stack--")
+  fmt.Printf("-------\n")
+  for _, val := range v.stack{
+    if val.isString(){
+      fmt.Printf("| str  | %v\n", val.asString().chars)
+    } else if val.isFunc(){
+      fmt.Printf("| func | %v\n", val.asFunc().name.chars)
+    } else if val.IsNumber(){
+      fmt.Printf("| Num  |\n")
+    }else{
+      fmt.Printf("| NaN  |\n")
+    }
+  }
+  fmt.Printf("-------\n")
 
 	frame := &v.frames[v.frameCount]
 	v.currentFrame = frame

@@ -4,6 +4,4 @@ fun abc(){
   print "HEllo";
 }
 
-
 abc();
-

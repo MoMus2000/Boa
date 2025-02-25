@@ -180,7 +180,7 @@ func printObject(v Value) {
 		}
 	case OBJ_FUNC:
 		{
-			fmt.Printf("Calling %v\n", v.asFunc().name.chars)
+			fmt.Printf("%v\n", v.asFunc().name.chars)
 		}
 	default:
 		fmt.Println("OBJ Type: ", v.obj.objType)

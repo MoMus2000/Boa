@@ -176,16 +176,15 @@ func printObject(v Value) {
 	switch v.AsObj().ObjType() {
 	case OBJ_STRING:
 		{
-			fmt.Printf("%v", v.asString().chars)
+			fmt.Printf("%v\n", v.asString().chars)
 		}
 	case OBJ_FUNC:
 		{
-			fmt.Printf("%v", v)
+			fmt.Printf("Calling %v\n", v.asFunc().name.chars)
 		}
 	default:
 		fmt.Println("OBJ Type: ", v.obj.objType)
 		fmt.Println("Print for Object not implemented")
-
 	}
 }
 
@@ -193,15 +192,15 @@ func printValue(v Value) {
 	switch v.valType {
 	case VAL_BOOL:
 		{
-			fmt.Printf(" '%v'\n", v.AsBoolean())
+      fmt.Printf("Bool: '%v'\n", v.AsBoolean())
 		}
 	case VAL_NUMBER:
 		{
-			fmt.Printf(" '%v'\n", v.AsNumber())
+      fmt.Printf("Number: '%v'\n", v.AsNumber())
 		}
 	case VAL_NIL:
 		{
-			fmt.Printf(" '%v'\n", nil)
+      fmt.Printf("Nil: '%v'\n", nil)
 		}
 	case VAL_OBJ:
 		{
@@ -214,3 +213,4 @@ func SimpleInstruction(ins string, offset int) int {
 	fmt.Println(ins)
 	return offset + 1
 }
+

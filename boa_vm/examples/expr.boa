@@ -1,8 +1,16 @@
-fun abc(){
-    var a = 1;
-    var b = 5;
-    print 1 + 8;
-    print "HI";
+var b = 5;
+{
+  var a = 1;
+
+  a = 2;
+
+  b = 4;
+
+  print a + 69 + b;
+
+  print a;
+
 }
 
-abc();
+print b;
+

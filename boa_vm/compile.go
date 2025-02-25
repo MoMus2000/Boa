@@ -49,6 +49,11 @@ type ParseRule struct {
 	precidence Precidence
 }
 
+func (c *Compiler) getRule(token TokenType) *ParseRule {
+	pRule := c.parseRules[token]
+	return &pRule
+}
+
 type Parser struct {
 	current   Token
 	previous  Token
@@ -485,17 +490,20 @@ func endCompiler(c **Compiler) *ObjectFunc {
 }
 
 func (c *Compiler) variable(canAssign bool) {
+   c.namedVariable(c.parser.previous, canAssign)
+}
+
+func (c *Compiler) namedVariable(name Token, canAssign bool) {
 	var getOp, setOp Opcode
-	ident := string(c.parser.previous.runes)
-	arg := c.resolveLocal(c.parser.previous)
+	arg := c.resolveLocal(name)
 	if arg != OpMinus1 {
 		getOp = OpGetLocal
 		setOp = OpSetLocal
 	} else {
 		objectString := ObjectString{
 			obj:    Object{objType: OBJ_STRING},
-			length: len(ident),
-			chars:  ident,
+			length: len(name.runes),
+			chars:  string(name.runes),
 		}
 		arg = c.makeConstant(ObjVal((*Object)(unsafe.Pointer(&objectString))))
 		getOp = OpGetGlobal
@@ -612,12 +620,9 @@ func (c *Compiler) str(canAssign bool) {
 	}
 	object := (*Object)(unsafe.Pointer(&objectString))
 	c.emitBytes(OpConstant, c.makeConstant(ObjVal(object)))
+
 }
 
-func (c *Compiler) getRule(token TokenType) *ParseRule {
-	pRule := c.parseRules[token]
-	return &pRule
-}
 
 func (c *Compiler) makeConstant(constant Value) Opcode {
 	index := c.currentChunk().AddConstant(constant)

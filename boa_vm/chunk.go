@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Opcode uint8
 
@@ -84,6 +87,30 @@ func NewChunck() Chunk {
 		lines:     make([]int, 0),
 	}
 }
+
+func (c *Chunk) printOpCode() {
+  var result []string
+
+  for i := 0; i < len(c.code); i++ {
+    opcode := c.code[i]
+    entry := fmt.Sprintf("%v", opcode)
+
+    // Check if the opcode has an operand (requires next index)
+    switch opcode {
+    case OpConstant, OpDefineGlobal, OpGetGlobal, OpSetGlobal, OpSetLocal, OpGetLocal, OpGreater, OpLess:
+      if i+1 < len(c.code) {
+        entry += fmt.Sprintf(" index: %d", int(c.code[i+1]))
+        i++ // Skip the operand index
+      }
+    }
+
+    result = append(result, entry)
+  }
+
+  // Print the entire result array in one line
+  fmt.Println("[", strings.Join(result, ", "), "]")
+}
+
 
 func (c *Chunk) WriteChunk(b Opcode, line int) {
 	c.code = append(c.code, b)

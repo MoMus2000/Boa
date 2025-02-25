@@ -31,7 +31,7 @@ type VM struct {
 type CallFrame struct {
 	function *ObjectFunc
 	ip       int
-	slots    []Value
+	slots    *[]Value
 	code     []Opcode
 }
 
@@ -80,13 +80,12 @@ func (v *VM) pop() *Value {
 }
 
 func (v *VM) run() InterpretResult {
+  v.frames[0].function.chunk.printOpCode()
 	for {
 		currentFrame := &v.frames[v.frameCount-1]
 		v.currentFrame = currentFrame
-		// fmt.Println("Slot(s): ", v.currentFrame.slots)
-		// fmt.Println("Opcode:  ", v.currentFrame.code)
 		ins := v.currentFrame.function.chunk.code[currentFrame.ip]
-		// fmt.Println("Current Ins:", ins)
+    // fmt.Println("Current Ins: ", ins)
 		v.read_byte()
 		switch ins {
 		case OpPrint:
@@ -98,28 +97,12 @@ func (v *VM) run() InterpretResult {
 			}
 		case OpReturn:
 			{
-				result := v.pop()
-				v.frameCount--
-
-				if v.frameCount == 0 {
-					v.pop()
-					return INTERPRET_OK
-				}
-
-				v.stack = v.currentFrame.slots
-
-				v.push(*result)
-				v.currentFrame = &v.frames[v.frameCount-1]
-				break
-				// return INTERPRET_OK
+				return INTERPRET_OK
 			}
 		case OpConstant:
 			{
 				c := v.read_constant()
-				v.push(*c)
-				// fmt.Println("Push to Stack", printValue(v.peek(0)))
-				// fmt.Printf("Constant: ")
-				// printValue(*c)
+				v.push(*c) // Push HERE into the stack
 				// fmt.Printf("\n")
 				// fmt.Println("------------")
 				break
@@ -232,8 +215,7 @@ func (v *VM) run() InterpretResult {
 				name := string(v.read_string().chars)
 				c := v.table.tableGet(name)
 				if c != nil {
-					// printValue(*c)
-					// fmt.Printf("\n")
+					fmt.Printf("\n")
 					v.push(*c)
 				} else {
 					v.push(NilVal())
@@ -254,16 +236,17 @@ func (v *VM) run() InterpretResult {
 			}
 		case OpGetLocal:
 			{
-				slot := v.currentFrame.function.chunk.code[v.currentFrame.ip]
+        slot := v.currentFrame.code[v.currentFrame.ip]
 				v.currentFrame.ip++
-				v.push(v.currentFrame.slots[slot])
+
+				v.push((*v.currentFrame.slots)[slot])
 				break
 			}
 		case OpSetLocal:
 			{
-				slot := v.currentFrame.function.chunk.code[v.currentFrame.ip]
+				slot := v.currentFrame.code[v.currentFrame.ip]
 				v.currentFrame.ip++
-				v.currentFrame.slots[slot] = *v.peek(0)
+				(*v.currentFrame.slots)[slot] = *v.peek(0)
 				break
 			}
 		case OpJumpIfFalse:
@@ -316,15 +299,14 @@ func (v *VM) callValue(val *Value, count int) bool {
 }
 
 func (v *VM) call(obj *ObjectFunc, count int) bool {
+  // v.stack = append(v.stack, Value{}) // Push the function reference to slot 0
 	frame := &v.frames[v.frameCount]
 	v.currentFrame = frame
 	v.frameCount++
 	v.currentFrame.function = obj
 	v.currentFrame.ip = 0
 	v.currentFrame.code = obj.chunk.code
-	// fmt.Println("Name Of Func: ", obj.name.chars)
-	// fmt.Println("len(v.stack) = ", len(v.stack), " count = ", count)
-	v.currentFrame.slots = v.stack[len(v.stack)-1-count:]
+	v.currentFrame.slots = &v.stack
 	return true
 }
 
@@ -440,3 +422,4 @@ func (v *VM) read_short() uint16 {
 func (v *VM) read_string() *ObjectString {
 	return v.read_constant().asString()
 }
+

@@ -1,7 +1,14 @@
-fun abc(){
-  print "HEllo";
-  print "HEllo 111";
-  print "HEllo";
-}
+var a = 1;
 
-abc();
+a = 60;
+
+
+print a;
+
+{
+  print a;
+
+  a = 50;
+
+  print a;
+}

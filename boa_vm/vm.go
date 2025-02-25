@@ -29,10 +29,11 @@ type VM struct {
 }
 
 type CallFrame struct {
-	function *ObjectFunc
-	ip       int
-	slots    *[]Value
-	code     []Opcode
+	function   *ObjectFunc
+	ip         int
+	slots      *[]Value
+	code       []Opcode
+  slotPointer int
 }
 
 func NewVM() VM {
@@ -83,8 +84,7 @@ func (v *VM) run() InterpretResult {
 	for {
 		currentFrame := &v.frames[v.frameCount-1]
 		v.currentFrame = currentFrame
-		ins := v.currentFrame.function.chunk.code[currentFrame.ip]
-    fmt.Println("Current Ins: ", ins)
+		ins := v.currentFrame.code[currentFrame.ip]
 		v.read_byte()
 		switch ins {
 		case OpPrint:
@@ -101,7 +101,6 @@ func (v *VM) run() InterpretResult {
         v.frameCount --
 
         if v.frameCount == 0 {
-          v.pop()
           return INTERPRET_OK
         }
 
@@ -114,7 +113,6 @@ func (v *VM) run() InterpretResult {
 		case OpConstant:
 			{
 				c := v.read_constant()
-        printValue(*c)
 				v.push(*c) // Push HERE into the stack
 				// fmt.Printf("\n")
 				// fmt.Println("------------")
@@ -289,7 +287,6 @@ func (v *VM) run() InterpretResult {
 				if !v.callValue(v.peek(argCount), argCount) {
 					return INTERPRET_RUNTIME_ERROR
 				}
-				v.currentFrame = &v.frames[v.frameCount-1]
 				break
 			}
 		default:
@@ -342,6 +339,7 @@ func (v *VM) call(obj *ObjectFunc, count int) bool {
 	v.currentFrame.ip = 0
 	v.currentFrame.code = obj.chunk.code
 	v.currentFrame.slots = &v.stack
+  v.currentFrame.slotPointer = int(v.stackTop.number) - count - 1
 	return true
 }
 

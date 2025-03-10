@@ -4,4 +4,12 @@ fun abc(){
   print "3";
 }
 
+fun ac(){
+  print "M";
+  print "U";
+  print "S";
+}
+
+
+ac();
 abc();
